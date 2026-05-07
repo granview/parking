@@ -267,19 +267,27 @@
         function showNameModal(parentEl, displayEl) {
             const oldVal = displayEl.innerText;
             mInput.value = oldVal;
-            showModal("enter name/plate:", true, (val) => {
-                displayEl.innerText = val.trim();
+            showModal("氏名/車番を入力してください", true, (val) => {
+                const newVal = val.trim();
+                displayEl.innerText = newVal;
+                
+                if (newVal === "" && oldVal !== "") {
+                    showToast("情報を削除しました");
+                } else if (newVal !== "" && newVal !== oldVal) {
+                    showToast(`「${newVal}」に更新しました`);
+                }
+                
                 saveParkingData();
                 showToast("updated.");
             });
         }
 
         function handleReset() {
-            showModal("reset all data for today?", false, (confirmed) => {
+            showModal("すべてリセットしますか？", false, (confirmed) => {
                 if (confirmed) {
                     resetDisplayOnly();
                     saveParkingData();
-                    showToast("reset done.");
+                    showToast("現在のデータをすべてリセットしました。");
                 }
             });
         }
