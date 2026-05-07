@@ -253,7 +253,7 @@
         function handleDoubleClick(el) {
             clearTimeout(clickTimer); clickTimer = null;
             const num = el.getAttribute('data-num');
-            showModal(`spot ${num}: set to staff?`, false, (confirmed) => {
+           showModal(`番号 ${num}: スタッフ用に変更しますか？`, false, (confirmed) => {
                 if (confirmed) {
                     el.classList.remove('booked');
                     el.classList.add('staff');
