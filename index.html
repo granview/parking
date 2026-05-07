@@ -233,22 +233,24 @@
             mCancel.onclick = () => overlay.style.display = 'none';
         }
 
-        function handleSingleClick(el) {
+       function handleSingleClick(el) {
             if (clickTimer) return;
             clickTimer = setTimeout(() => {
                 const num = el.getAttribute('data-num');
                 const isBusy = el.classList.contains('staff') || el.classList.contains('booked');
-                let nextAction = isBusy ? "empty" : "booked";
-                showModal(`spot ${num}: set to ${nextAction}?`, false, (confirmed) => {
+                let nextAction = isBusy ? "空き" : "予約済";
+                
+                showModal(`番号 ${num}: ${nextAction} に変更しますか？`, false, (confirmed) => {
                     if (confirmed) {
                         el.classList.remove('staff', 'booked');
-                        if (nextAction === "booked") el.classList.add('booked');
+                        if (nextAction === "予約済") el.classList.add('booked');
                         saveParkingData();
                     }
                 });
                 clickTimer = null;
             }, 250);
         }
+
 
         function handleDoubleClick(el) {
             clearTimeout(clickTimer); clickTimer = null;
