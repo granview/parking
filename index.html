@@ -82,7 +82,7 @@
         .main-road { grid-row: 4; grid-column: 1 / span 19; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 11px; letter-spacing: 5px; border-top: 1px dashed #f5f5f5; }
         #spot-21 { grid-row: 5; grid-column: 17; } #spot-20 { grid-row: 5; grid-column: 18; } #spot-19 { grid-row: 5; grid-column: 19; }
 
-        .legend { margin-top: 25px; display: flex; gap: 40px; padding: 15px 40px; background: #fff; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .legend { margin-top: 3px; display: flex; gap: 40px; padding: 15px 40px; background: #fff; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .legend-item { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 300; color: #444; }
         .color-box { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
 
@@ -208,7 +208,7 @@
                 div.className = `parking-spot ${spot.type}`;
                 div.id = `spot-${spot.id}`;
                 div.setAttribute('data-num', spot.id);
-                div.innerHTML = `<div>${spot.id === 4 ? '♿ 4' : spot.id}</div><div class="name-display"></div>`;
+                div.innerHTML = `<div>${spot.id === 4 ? '♿4' : spot.id}</div><div class="name-display"></div>`;
                 
                 const nameDisplay = div.querySelector('.name-display');
                 nameDisplay.onclick = (e) => { e.stopPropagation(); showNameModal(div, nameDisplay); };
