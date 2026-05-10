@@ -1,330 +1,1319 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>駐車場管理システム</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>駐車場管理システム</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 <link rel="icon" type="image/png" href="favicon.png">
 
-    <style>
-        body {
-            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
-            background-color: #f4f6f8; margin: 0; padding: 5px 10px;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
+<style>
 
-        .controls {
-            display: flex; gap: 20px; align-items: center; margin-bottom: 5px;
-            background: #fff; padding: 5px 15px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); width: 98vw; max-width: 1500px; box-sizing: border-box;
-        }
-        input[type="date"] { padding: 5px; border: 1px solid #ddd; border-radius: 4px; outline: none; cursor: pointer; }
-        .btn-reset { 
-            background-color: #e74c3c; color: white; border: none; 
-            padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px;
-        }
+body{
+    font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;    background:#f4f6f8;
+    margin:0;
+    padding:5px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+}
 
-        .main-title { font-size: 28px; font-weight: 300; color: #2c3e50; margin: 5px 0 5px 0; letter-spacing: 8px; text-align: center; }
+.controls{
+    display:flex;
+    gap:20px;
+    align-items:center;
+    margin-bottom:5px;
+    background:#fff;
+    padding:10px 25px;
+    border-radius:8px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.05);
+    width:98vw;
+    max-width:1500px;
+    box-sizing:border-box;
+}
 
-        /* CẬP NHẬT KHUNG TO RA */
-        .parking-lot-map {
-            position: relative; background-color: #fff; border: 2px solid #34495e; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            width: 98vw; 
-            max-width: 1500px; /* Tăng chiều rộng tối đa */
-            padding: 30px; /* Tăng đệm bên trong */
-            box-sizing: border-box;
-        }
-        .grid-container {
-            display: grid; gap: 10px; grid-template-rows: 135px 15px 5px 70px 110px;
-            grid-template-columns: repeat(19, 1fr); width: 100%;
-        }
-        .parking-spot {
-            background-color: #2ecc71; border: 1.5px solid #27ae60; border-radius: 4px; color: #fff;
-            display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-            font-size: 20px; /* Tăng kích thước số thứ tự ô */
-            font-weight: bold; cursor: pointer; transition: all 0.2s;
-            padding: 6px 2px; position: relative; overflow: hidden;
-            user-select: none;
-        }
-        .parking-spot.booked { background-color: #e74c3c !important; border-color: #c0392b !important; }
-        .parking-spot.staff { background-color: #f39c12 !important; border-color: #e67e22 !important; }
-        .parking-spot.handicapped { background-color: #3498db; border-color: #2980b9; }
+input[type="date"]{
+    padding:5px;
+    border:1px solid #ddd;
+    border-radius:4px;
+}
 
-        .name-display {
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-            font-size: 15px; 
-            margin-top: 10px;
-            height: 75%;
-            width: 85%;
-            background: rgba(255, 255, 255, 0.3); 
-            border-radius: 4px;
-            padding: 5px 2px;
-            text-align: center;
-            font-weight: 700; 
-            color: #ffffff; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.4); 
-            box-sizing: border-box;
-        }
+.btn-reset{
+    background:#e74c3c;
+    color:#fff;
+    border:none;
+    padding:8px 15px;
+    border-radius:4px;
+    cursor:pointer;
+}
 
-        .hatched-zone { grid-column: 4; grid-row: 1 / span 3; background-image: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 5px, #eee 5px, #eee 10px); border: 1px solid #eee; }
-        .short-rect { grid-row: 1 / span 3; }
-        #spot-1 { grid-column: 1; } #spot-2 { grid-column: 2; } #spot-3 { grid-column: 3; }
-        #spot-4 { grid-column: 5 / span 1.5; grid-row: 1 / span 3; }
-        .top-row-spot { grid-row: 1; }
-        #spot-5 { grid-column: 6; } #spot-6 { grid-column: 7; } #spot-7 { grid-column: 8; } #spot-8 { grid-column: 9; } #spot-9 { grid-column: 10; }
-        .main-road { grid-row: 4; grid-column: 1 / span 19; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 11px; letter-spacing: 5px; border-top: 1px dashed #f5f5f5; }
-        #spot-21 { grid-row: 5; grid-column: 17; } #spot-20 { grid-row: 5; grid-column: 18; } #spot-19 { grid-row: 5; grid-column: 19; }
+.main-title{
+    font-size:30px;
+    font-weight:300;
+    color:#2c3e50;
+    letter-spacing:8px;
 
-        .legend { margin-top: 3px; display: flex; gap: 40px; padding: 15px 40px; background: #fff; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .legend-item { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 300; color: #444; }
-        .color-box { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
+}
+.top-bar{
+    width:98vw;
+    max-width:1500px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:10px;
+}
 
-        /* POPUP & TOAST */
-        #customModalOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none; justify-content: center;
-            align-items: flex-start; padding-top: 12vh; z-index: 1000;
-        }
-        .modal-box { background: #fff; padding: 25px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .modal-title { font-size: 17px; margin-bottom: 20px; color: #2c3e50; font-weight: bold; line-height: 1.5; }
-        .modal-input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; }
-        .modal-buttons { display: flex; justify-content: center; gap: 10px; }
-        .btn-confirm { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-cancel { background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+.date-controls{
+    width:98vw;
+    max-width:1500px;
 
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: #34495e; color: white; padding: 12px 30px; border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: top 0.5s ease; z-index: 2000;
-        }
-        #toast.show { top: 20px; }
-    </style>
+    display:flex;
+    justify-content:flex-end;
+
+    padding-right:10px;
+    box-sizing:border-box;
+
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    margin-bottom :5px
+
+    
+}
+.date-controls input[type="date"]{
+    padding:3px 6px;
+    font-size:12px;
+    height:20px;
+}
+
+.date-controls button{
+    height:28px;
+    padding:0 8px;
+    border:none;
+    border-radius:4px;
+    color:black;
+    cursor:pointer;
+    font-size:12px;
+   
+}
+
+.parking-lot-map{
+    position:relative;
+    background:#fff;
+    border:2px solid #34495e;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    width:98vw;
+    max-width:1500px;
+    padding:30px;
+    box-sizing:border-box;
+}
+
+.grid-container{
+    display:grid;
+    gap:10px;
+    grid-template-rows:130px 0px 40px 70px 130px;
+    grid-template-columns:repeat(19,1fr);
+    width:100%;
+}
+
+.parking-spot{
+    background:#2ecc71;
+    border:1.5px solid #27ae60;
+    border-radius:4px;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:all .2s;
+    padding:6px 2px;
+    position:relative;
+    overflow:hidden;
+    user-select:none;
+}
+
+.parking-spot.booked{
+    background:#e74c3c !important;
+    border-color:#c0392b !important;
+}
+
+.parking-spot.staff{
+    background:#f39c12 !important;
+    border-color:#e67e22 !important;
+}
+
+.parking-spot.handicapped{
+    background:#3498db;
+    border-color:#2980b9;
+}
+
+.name-display{
+    writing-mode:vertical-rl;
+    text-orientation:upright;
+    font-size:14px;
+    margin-top:10px;
+    height:75%;
+    width:85%;
+    background:rgba(255,255,255,.3);
+    border-radius:4px;
+    padding:5px 2px;
+    text-align:center;
+    font-weight:700;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-shadow:1px 1px 2px rgba(0,0,0,.4);
+    box-sizing:border-box;
+}
+
+.hatched-zone{
+    grid-column:4;
+    grid-row:1 / span 3;
+    background-image:repeating-linear-gradient(
+        45deg,
+        #f9f9f9,
+        #f9f9f9 5px,
+        #eee 5px,
+        #eee 10px
+    );
+    border:1px solid #eee;
+}
+
+.short-rect{
+    grid-row:1 / span 3;
+}
+
+#spot-1{grid-column:1;}
+#spot-2{grid-column:2;}
+#spot-3{grid-column:3;}
+
+#spot-4{
+    grid-column:5 / span 1;
+    grid-row:1 / span 3;
+}
+
+.top-row-spot{
+    grid-row:1;
+}
+
+#spot-5{grid-column:6;}
+#spot-6{grid-column:7;}
+#spot-7{grid-column:8;}
+#spot-8{grid-column:9;}
+#spot-9{grid-column:10;}
+
+.main-road{
+    grid-row:4;
+    grid-column:1 / span 19;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ccc;
+    font-size:11px;
+    letter-spacing:5px;
+}
+
+#spot-21{grid-row:5;grid-column:17;}
+#spot-20{grid-row:5;grid-column:18;}
+#spot-19{grid-row:5;grid-column:19;}
+
+.legend{
+    margin-top:25px;
+    display:flex;
+    gap:40px;
+    padding:15px 40px;
+    background:#fff;
+    border-radius:10px;
+    border:1px solid #eee;
+}
+
+.legend-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.color-box{
+    width:24px;
+    height:24px;
+    border-radius:4px;
+}
+
+#toast{
+    position:fixed;
+    top:-100px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#34495e;
+    color:white;
+    padding:12px 30px;
+    border-radius:50px;
+    transition:top .5s ease;
+    z-index:2000;
+}
+
+#toast.show{
+    top:20px;
+}
+
+/* ================= MODAL ================= */
+
+#guestModal{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:5000;
+}
+
+.modal-box{
+    background:#fff;
+    width:420px;
+    max-width:95%;
+    border-radius:12px;
+    padding:25px;
+    box-sizing:border-box;
+}
+
+.modal-title{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:20px;
+    text-align:center;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:5px;
+    font-size:14px;
+    color:#555;
+}
+
+.form-group input{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    box-sizing:border-box;
+}
+.form-row{
+    display:flex;
+    gap:10px;
+}
+
+.form-row .form-group{
+    margin-bottom:0;
+}
+.room-small{
+    width:110px;
+    flex-shrink:0;
+}
+
+.check-large{
+    flex:1;
+}
+
+.stay-small{
+    width:90px;
+    flex-shrink:0;
+}
+
+.form-group select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    box-sizing:border-box;
+}
+
+textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    box-sizing:border-box;
+    resize:vertical;
+    font-family:inherit;
+}
+
+.modal-buttons{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.modal-buttons button{
+    flex:1;
+    border:none;
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.btn-save{
+    background:#2ecc71;
+    color:white;
+}
+
+.btn-close{
+    background:#95a5a6;
+    color:white;
+}
+
+.btn-delete{
+    background:#e74c3c;
+    color:white;
+}
+
+</style>
 </head>
+
 <body>
 
-    <div id="toast">通知</div>
+<div id="toast">通知</div>
 
-    <div id="customModalOverlay">
-        <div class="modal-box">
-            <div id="modalTitle" class="modal-title"></div>
-            <input type="text" id="modalInput" class="modal-input" style="display: none;">
-            <div class="modal-buttons">
-                <button id="modalConfirmBtn" class="btn-confirm">はい</button>
-                <button id="modalCancelBtn" class="btn-cancel">キャンセル</button>
-            </div>
+<div style="display:flex;align-items:center;gap:8px;">
+
+    
+<div class="main-title">駐車場</div>
+
+</div>
+<div class="date-controls">
+               <button onclick="changeDate(-1)">◀</button>
+
+        <input
+            type="date"
+            id="parkingDate"
+            onchange="handleDateChange()"
+        >
+
+        <button onclick="changeDate(1)">▶</button>
+
+<button onclick="exportToExcel()" class="pdf-btn"
+    style="background:#2980b9 !important;    color: #fff;">
+    EXCEL
+</button>
+<input
+    type="file"
+    id="excelTemplate"
+    accept=".xlsx"
+    style="display:none"
+>
+<button onclick="refreshParkingData()"
+    style="background:#2980b9;color:white;">
+    🔄 更新
+</button>
+    </div>
+
+
+
+<div class="parking-lot-map">
+    <div class="grid-container" id="parkingGrid"></div>
+</div>
+
+<div class="legend">
+    <div class="legend-item">
+        <div class="color-box" style="background:#2ecc71;"></div>
+        空き
+    </div>
+
+    <div class="legend-item">
+        <div class="color-box" style="background:#e74c3c;"></div>
+        予約済
+    </div>
+
+    <div class="legend-item">
+        <div class="color-box" style="background:#f39c12;"></div>
+        スタッフ用&予備
+    </div>
+
+    <div class="legend-item">
+        <div class="color-box" style="background:#3498db;"></div>
+        身障者用
+    </div>
+</div>
+
+<!-- ================= GUEST MODAL ================= -->
+
+<div id="guestModal">
+
+    <div class="modal-box">
+
+        <div class="modal-title" id="guestModalTitle">
+    駐車情報
+</div>
+
+<!-- HÀNG 1 -->
+<div class="form-row">
+
+    <div class="form-group room-small">
+        <label>部屋番号</label>
+        <input type="text" id="roomNumber">
+    </div>
+
+    <div class="form-group">
+        <label>お客様名</label>
+        <input type="text" id="guestName">
+    </div>
+
+</div>
+
+<!-- HÀNG 2 -->
+<div class="form-row">
+
+    <div class="form-group check-large">
+        <label>チェックイン</label>
+        <input
+            type="date"
+            id="checkIn"
+            onchange="calculateStayDays()"
+        >
+    </div>
+
+    <div class="form-group check-large">
+        <label>チェックアウト</label>
+        <input
+            type="date"
+            id="checkOut"
+            onchange="calculateStayDays()"
+        >
+    </div>
+
+    <div class="form-group stay-small">
+        <label>泊数</label>
+
+        <select id="stayDays" onchange="updateCheckOutFromStay()"></select>
+    </div>
+
+</div>
+
+<!-- HÀNG 3 -->
+<div class="form-group">
+    <label>車両番号</label>
+    <input type="text" id="carNumber">
+</div>
+
+<!-- HÀNG 4 -->
+<div class="form-group">
+    <label>メモ</label>
+
+    <textarea
+        id="guestNote"
+        rows="2"
+        placeholder="メモ入力..."
+    ></textarea>
+</div>
+        <div class="modal-buttons">
+            <button class="btn-save" onclick="saveGuestInfo()">
+                保存
+            </button>
+
+            <button class="btn-delete" onclick="deleteGuestInfo()">
+                削除
+            </button>
+
+            <button class="btn-close" onclick="closeGuestModal()">
+                閉じる
+            </button>
+        </div>
+
+    </div>
+
+</div>
+<!-- ================= STAFF MODAL (NEW) ================= -->
+<div id="staffModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); display:none; justify-content:center; align-items:center; z-index:5001;">
+    <div class="modal-box">
+        <div class="modal-title" id="staffModalTitle" style="color: #f39c12;">スタッフ / 予備</div>
+        
+        <div class="form-group">
+            <label>スタッフ名 or 予備</label>
+            <input type="text" id="staffName" placeholder="例: ファム">
+        </div>
+
+        <div class="modal-buttons">
+            <button class="btn-save" style="background:#f39c12;" onclick="saveStaffInfo()">保存</button>
+            <button class="btn-delete" onclick="deleteStaffInfo()">削除</button>
+            <button class="btn-close" onclick="closeStaffModal()">閉じる</button>
         </div>
     </div>
-
-    <div class="controls">
-        <div><label>日付:</label> <input type="date" id="parkingDate" onchange="handleDateChange()"></div>
-        <button class="btn-reset" onclick="handleReset()">全リセット</button>
+</div>
+<!-- ================= DELETE CONFIRM MODAL ================= -->
+<div id="confirmModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); display:none; justify-content:center; align-items:center; z-index:6000;">
+    <div class="modal-box" style="width: 320px; text-align: center;">
+        <div style="font-size: 50px; color: #e74c3c; margin-bottom: 10px;">⚠️</div>
+        <div class="modal-title" style="margin-bottom: 20px;">本当に削除しますか？<br><small></div>
+        <div class="modal-buttons">
+            <button class="btn-delete" onclick="executeDelete()">はい</button>
+            <button class="btn-close" onclick="closeConfirmModal()">いいえ</button>
+        </div>
     </div>
+</div>
 
-    <div class="main-title">駐車場</div>
+<script>
 
-    <div class="parking-lot-map">
-        <div class="grid-container" id="parkingGrid"></div>
-    </div>
+/* ================= FIREBASE ================= */
 
-    <div class="legend">
-        <div class="legend-item"><div class="color-box" style="background: #2ecc71;"></div>空き</div>
-        <div class="legend-item"><div class="color-box" style="background: #e74c3c;"></div>予約済</div>
-        <div class="legend-item"><div class="color-box" style="background: #f39c12;"></div>スタッフ用＆予備</div>
-        <div class="legend-item"><div class="color-box" style="background: #3498db;"></div>身障者用</div>
-    </div>
+const firebaseConfig = {
+  apiKey: "AIzaSyCWV0CdSSDznxXKdlTbJc4-AMrjVr51Hlo",
 
-   <script>
-        // --- 1. CẤU HÌNH FIREBASE (HÃY THAY THẾ BẰNG THÔNG TIN CỦA BẠN) ---
-         const firebaseConfig = {
-    apiKey: "AIzaSyCiOKQOqtvxiEDtm0pEoVTmJs4egQ7w6qA",
-    authDomain: "parking-system-893ac.firebaseapp.com",
-    databaseURL: "https://parking-system-893ac-default-rtdb.firebaseio.com",
-    projectId: "parking-system-893ac",
-    storageBucket: "parking-system-893ac.firebasestorage.app",
-    messagingSenderId: "511465408381",
-    appId: "1:511465408381:web:f35ad369ec6bbc1278ee14",
-    measurementId: "G-RCMPPE9VD4"
-  };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  authDomain: "test-f20cf.firebaseapp.com",
 
-        const spotConfig = [
-            { id: 1, type: 'short-rect' }, { id: 2, type: 'short-rect' }, { id: 3, type: 'short-rect' },
-            { id: 4, type: 'handicapped' }, { id: 5, type: 'top-row-spot' }, { id: 6, type: 'top-row-spot' },
-            { id: 7, type: 'top-row-spot' }, { id: 8, type: 'top-row-spot' }, { id: 9, type: 'top-row-spot' },
-            { id: 10, type: 'short-rect' }, { id: 11, type: 'short-rect' }, { id: 12, type: 'short-rect' },
-            { id: 13, type: 'short-rect' }, { id: 14, type: 'short-rect' }, { id: 15, type: 'short-rect' },
-            { id: 16, type: 'short-rect' }, { id: 17, type: 'short-rect' }, { id: 18, type: 'short-rect' },
-            { id: 21, type: 'normal' }, { id: 20, type: 'normal' }, { id: 19, type: 'normal' }
-        ];
+  databaseURL: "https://test-f20cf-default-rtdb.asia-southeast1.firebasedatabase.app/",
+
+  projectId: "test-f20cf",
+
+  storageBucket: "test-f20cf.firebasestorage.app",
+
+  messagingSenderId: "985197427209",
+
+  appId: "1:985197427209:web:0c6f69a8c9b62cb67bd6d8",
+
+  measurementId: "G-1TG9CNC3Y1"
+};
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+
+/* ================= SPOT CONFIG ================= */
+
+const spotConfig = [
+
+    { id:1, type:'short-rect' },
+    { id:2, type:'short-rect' },
+    { id:3, type:'short-rect' },
+
+    { id:4, type:'handicapped' },
+
+    { id:5, type:'top-row-spot' },
+    { id:6, type:'top-row-spot' },
+    { id:7, type:'top-row-spot' },
+    { id:8, type:'top-row-spot' },
+    { id:9, type:'top-row-spot' },
+
+    { id:10, type:'short-rect' },
+    { id:11, type:'short-rect' },
+    { id:12, type:'short-rect' },
+    { id:13, type:'short-rect' },
+    { id:14, type:'short-rect' },
+    { id:15, type:'short-rect' },
+    { id:16, type:'short-rect' },
+    { id:17, type:'short-rect' },
+    { id:18, type:'short-rect' },
+
+    { id:21, type:'normal' },
+    { id:20, type:'normal' },
+    { id:19, type:'normal' }
+
+];
+
+let currentSpot = null;
+
+/* ================= ONLOAD ================= */
+
+window.onload = function(){
+const staySelect =
+    document.getElementById('stayDays');
+
+for(let i = 1; i <= 30; i++){
+
+    const option =
+        document.createElement('option');
+
+    option.value = i;
+
+    option.textContent = `${i}泊`;
+
+    staySelect.appendChild(option);
+}
+
+    const dInput = document.getElementById('parkingDate');
+
+    // Luôn lấy ngày hôm nay (theo giờ hệ thống)
+   // Luôn lấy ngày hôm nay (theo giờ hệ thống)
+const today = formatDateLocal(new Date());
+
+dInput.value = today;
+
+    // Cập nhật lại localStorage để các hàm khác đồng bộ
+    localStorage.setItem('parking_last_visited_date', today);
+
+    renderMap();
+
+    loadParkingData();
+
+};
+function formatDateLocal(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+
+    return `${y}-${m}-${d}`;
+}	
+
+/* ================= CORE FUNCTIONS ================= */
+function renderMap(){
+    const grid = document.getElementById('parkingGrid');
+    grid.innerHTML = "";
+
+    const hatch = document.createElement('div'); hatch.className = 'hatched-zone'; grid.appendChild(hatch);
+    const road = document.createElement('div'); road.className = 'main-road'; road.innerText = 'entrance'; grid.appendChild(road);
+
+    spotConfig.forEach(spot=>{
+        const div = document.createElement('div');
+    div.className = `parking-spot ${spot.type}`;
+    div.id = `spot-${spot.id}`;
+    div.setAttribute('data-num', spot.id); // Đảm bảo luôn có data-num là số 4
+    
+    // Sửa phần hiển thị để không làm mất số 4 khi ghi đè
+    const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
+    div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div>`;
 
         let clickTimer = null;
+        div.onclick = (e) => {
+            if (clickTimer) {
+                clearTimeout(clickTimer); clickTimer = null;
+                openStaffModal(div);
+            } else {
+                clickTimer = setTimeout(() => {
+                    openGuestModal(div); clickTimer = null;
+                }, 250);
+            }
+        };
+        grid.appendChild(div);
+    });
+}
 
-        window.onload = function() {
-            const dInput = document.getElementById('parkingDate');
-            const lastVisited = localStorage.getItem('parking_last_visited_date');
-            dInput.value = lastVisited || new Date().toISOString().split('T')[0];
-            renderMap();
-            loadParkingData();
+function loadParkingData(){
+
+    const date = document.getElementById('parkingDate').value;
+
+    db.ref('parking/' + date).off();
+
+    db.ref('parking/' + date).on('value', (snapshot) => {
+
+        const data = snapshot.val();
+
+        document.querySelectorAll('.parking-spot').forEach(el => {
+
+            el.classList.remove('booked', 'staff');
+
+            el.querySelector('.name-display').innerText = "";
+
+            el.dataset.info = "";
+
+            if(data && data[el.dataset.num]){
+
+                const spotData = data[el.dataset.num];
+
+                if(spotData.status === 'booked')
+                    el.classList.add('booked');
+
+                else if(spotData.status === 'staff')
+                    el.classList.add('staff');
+
+                if(spotData.info){
+
+                    el.dataset.info = JSON.stringify(spotData.info);
+
+                    el.querySelector('.name-display').innerText =
+                        spotData.info.carNumber || "";
+                }
+            }
+        });
+    });
+}/* ================= next day================= */
+
+function changeDate(offset){
+
+    const dateInput =
+        document.getElementById('parkingDate');
+
+    const current =
+        new Date(dateInput.value);
+
+    current.setDate(current.getDate() + offset);
+
+    const newDate =
+         formatDateLocal(current);
+
+    dateInput.value = newDate;
+
+    handleDateChange();
+
+}
+
+/* ================= TOAST ================= */
+
+function showToast(msg){
+
+    const t = document.getElementById('toast');
+
+    t.innerText = msg;
+
+    t.classList.add('show');
+
+    setTimeout(()=>{
+        t.classList.remove('show');
+    },2000);
+
+}
+
+/* ================= TỰ ĐỘNG TÍNH SỐ ĐÊM ================= */
+// Khi thay đổi Số đêm -> Tự động tính lại ngày Check-out
+function updateCheckOutFromStay() {
+    const checkInVal = document.getElementById('checkIn').value;
+    const stayDays = parseInt(document.getElementById('stayDays').value);
+    const checkOutInput = document.getElementById('checkOut');
+
+    if (checkInVal && stayDays) {
+        const startDate = new Date(checkInVal);
+        // Cộng thêm số ngày
+        startDate.setDate(startDate.getDate() + stayDays);
+        
+        // Cập nhật vào ô Check-out
+        checkOutInput.value = formatDateLocal(startDate);
+    }
+}
+
+// Cập nhật lại hàm calculateStayDays hiện có của bạn để khi chọn ngày thủ công 
+// thì ô "Số đêm" cũng được cập nhật chính xác (Đồng bộ 2 chiều)
+function calculateStayDays() {
+    const checkInVal = document.getElementById('checkIn').value;
+    const checkOutVal = document.getElementById('checkOut').value;
+    const stayDaysSelect = document.getElementById('stayDays');
+
+    if (checkInVal && checkOutVal) {
+        const start = new Date(checkInVal);
+        const end = new Date(checkOutVal);
+        const diffTime = end - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            stayDaysSelect.value = diffDays;
+        } else {
+            stayDaysSelect.value = 1; // Mặc định tối thiểu 1 đêm
+        }
+    }
+}
+/* ================= STAFF MODAL LOGIC ================= */
+function openStaffModal(el) {
+    currentSpot = el;
+    const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
+    document.getElementById('staffName').value = data.carNumber || "";
+    document.getElementById('staffModal').style.display = 'flex';
+}
+
+function closeStaffModal() {
+    document.getElementById('staffModal').style.display = 'none';
+}
+
+async function saveStaffInfo() {
+
+    if(!currentSpot) return;
+
+    const name =
+        document.getElementById('staffName').value || "スタッフ";
+
+    const spotNum =
+        currentSpot.dataset.num;
+
+    const date =
+        document.getElementById('parkingDate').value;
+
+    const info = {
+        roomNumber: "STAFF",
+        carNumber: name,
+        isStaff: true
+    };
+
+    await db.ref(`parking/${date}/${spotNum}`).set({
+        status:'staff',
+        info:info
+    });
+
+    showToast("スタッフ用として保存しました");
+
+    closeStaffModal();
+
+    loadParkingData();
+}
+/* ================= STAFF BOOKING (DOUBLE CLICK) ================= */
+async function handleStaffBooking(el) {
+    const staffName = prompt("スタッフ名を入力してください (Nhập tên nhân viên):", "スタッフ");
+    
+    if (staffName === null) return; // Nếu nhấn Cancel thì thoát
+
+    const spotNum = el.dataset.num;
+    const currentDate = document.getElementById('parkingDate').value;
+
+    const info = {
+        roomNumber: "STAFF",
+        carNumber: staffName,
+        isStaff: true // Đánh dấu là nhân viên
+    };
+
+    // Lưu vào Firebase
+    const snapshot = await db.ref('parking/' + currentDate).once('value');
+    const dayData = snapshot.val() || {};
+
+    dayData[spotNum] = {
+
+    status:'booked',
+    info:info
+
+};
+
+    await db.ref('parking/' + currentDate).set(dayData);
+    
+    showToast("スタッフ用として保存しました");
+    loadParkingData(); // Tải lại để cập nhật màu sắc
+}
+/* ================= OPEN MODAL ================= */
+
+function openGuestModal(el){
+    currentSpot = el;
+    const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
+
+    const todayStr = formatDateLocal(new Date());
+
+    document.getElementById('roomNumber').value = data.roomNumber || "";
+    document.getElementById('guestName').value = data.guestName || "";
+    document.getElementById('carNumber').value = data.carNumber || "";
+    document.getElementById('guestNote').value = data.guestNote || ""; 
+
+    // Quan trọng: Hiển thị đúng Check-in gốc và Số đêm tổng đã lưu
+    document.getElementById('checkIn').value = data.checkIn || todayStr;
+    document.getElementById('stayDays').value = data.stayDays || "1"; 
+    
+    if(data.checkOut) {
+        document.getElementById('checkOut').value = data.checkOut;
+    } else {
+        updateCheckOutFromStay();
+    }
+
+    document.getElementById('guestModalTitle').innerText = `駐車番号 ${el.dataset.num}`;
+    document.getElementById('guestModal').style.display = 'flex';
+}/* ================= CLOSE MODAL ================= */
+
+function closeGuestModal(){
+
+    document.getElementById('guestModal').style.display = 'none';
+
+}
+
+/* ================= SAVE INFO ================= */
+
+async function saveGuestInfo(){
+    if(!currentSpot) return;
+
+    const roomNumber = document.getElementById('roomNumber').value;
+    const guestName = document.getElementById('guestName').value;
+    const stayDays = parseInt(document.getElementById('stayDays').value) || 1;
+    const carNumber = document.getElementById('carNumber').value;
+    const guestNote = document.getElementById('guestNote').value;
+
+    const originalCheckIn = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    // Dùng getAttribute để lấy số 4 chính xác nhất
+    const spotNum = currentSpot.getAttribute('data-num');
+
+    // Vòng lặp lưu dữ liệu cho tất cả các ngày
+    for(let i = 0; i < stayDays; i++){
+        const targetDate = new Date(originalCheckIn);
+        targetDate.setDate(targetDate.getDate() + i);
+        const dateKey = formatDateLocal(targetDate);
+
+        // Luôn lưu TỔNG số đêm (stayDays) vào từng ngày, không dùng remainDays
+        const info = {
+            roomNumber,
+            guestName,
+            checkIn: originalCheckIn,
+            checkOut,
+            stayDays: stayDays, 
+            carNumber,
+            guestNote
         };
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-        }
+        await db.ref(`parking/${dateKey}/${spotNum}`).set({
+            status:'booked',
+            info:info
+        });
+    }
 
-        function handleDateChange() {
-            const newDate = document.getElementById('parkingDate').value;
-            localStorage.setItem('parking_last_visited_date', newDate);
-            resetDisplayOnly();
-            loadParkingData();
-            showToast(`${newDate} data loaded.`);
-        }
+    // Cập nhật hiển thị tức thì trên giao diện
+    currentSpot.dataset.info = JSON.stringify({
+        roomNumber, guestName, checkIn: originalCheckIn, checkOut, stayDays, carNumber, guestNote
+    });
 
-        function resetDisplayOnly() {
-            document.querySelectorAll('.parking-spot').forEach(el => {
-                el.classList.remove('staff', 'booked');
-                const display = el.querySelector('.name-display');
-                if(display) display.innerText = "";
-            });
-        }
+    currentSpot.classList.add('booked');
+    currentSpot.querySelector('.name-display').innerText = carNumber || "";
 
-        function renderMap() {
-            const grid = document.getElementById('parkingGrid');
-            grid.innerHTML = "";
-            const hatch = document.createElement('div'); hatch.className = 'hatched-zone'; grid.appendChild(hatch);
-            const road = document.createElement('div'); road.className = 'main-road'; road.innerText = 'entrance'; grid.appendChild(road);
-
-            spotConfig.forEach(spot => {
-                const div = document.createElement('div');
-                div.className = `parking-spot ${spot.type}`;
-                div.id = `spot-${spot.id}`;
-                div.setAttribute('data-num', spot.id);
-                div.innerHTML = `<div>${spot.id === 4 ? '♿4' : spot.id}</div><div class="name-display"></div>`;
-                
-                const nameDisplay = div.querySelector('.name-display');
-                nameDisplay.onclick = (e) => { e.stopPropagation(); showNameModal(div, nameDisplay); };
-                div.onclick = () => handleSingleClick(div);
-                div.ondblclick = () => handleDoubleClick(div);
-                grid.appendChild(div);
-            });
-        }
-
-        // Modal Logic
-        const overlay = document.getElementById('customModalOverlay');
-        const mTitle = document.getElementById('modalTitle');
-        const mInput = document.getElementById('modalInput');
-        const mConfirm = document.getElementById('modalConfirmBtn');
-        const mCancel = document.getElementById('modalCancelBtn');
-
-        function showModal(title, isInput, onConfirm) {
-            mTitle.innerText = title;
-            mInput.style.display = isInput ? 'block' : 'none';
-            overlay.style.display = 'flex';
-            mConfirm.onclick = () => { onConfirm(isInput ? mInput.value : true); overlay.style.display = 'none'; };
-            mCancel.onclick = () => overlay.style.display = 'none';
-        }
-
-       function handleSingleClick(el) {
-            if (clickTimer) return;
-            clickTimer = setTimeout(() => {
-                const num = el.getAttribute('data-num');
-                const isBusy = el.classList.contains('staff') || el.classList.contains('booked');
-                let nextAction = isBusy ? "空き" : "予約済";
-                
-                showModal(`番号 ${num}: ${nextAction} に変更しますか？`, false, (confirmed) => {
-                    if (confirmed) {
-                        el.classList.remove('staff', 'booked');
-                        if (nextAction === "予約済") el.classList.add('booked');
-                        saveParkingData();
-                    }
-                });
-                clickTimer = null;
-            }, 250);
-        }
+    closeGuestModal();
+    showToast("宿泊データを保存しました");
+    loadParkingData();
+}
+/* ================= DELETE (Dùng chung cho cả Khách và Nhân viên) ================= */
 
 
-        function handleDoubleClick(el) {
-            clearTimeout(clickTimer); clickTimer = null;
-            const num = el.getAttribute('data-num');
-           showModal(`番号 ${num}: スタッフ用に変更しますか？`, false, (confirmed) => {
-                if (confirmed) {
-                    el.classList.remove('booked');
-                    el.classList.add('staff');
-                    saveParkingData();
-                }
-            });
-        }
 
-        function showNameModal(parentEl, displayEl) {
-            const oldVal = displayEl.innerText;
-            mInput.value = oldVal;
-            showModal("氏名/車番を入力してください", true, (val) => {
-                const newVal = val.trim();
-                displayEl.innerText = newVal;
-                
-                if (newVal === "" && oldVal !== "") {
-                    showToast("情報を削除しました");
-                } else if (newVal !== "" && newVal !== oldVal) {
-                    showToast(`「${newVal}」に更新しました`);
-                }
-                
-                saveParkingData();
-                showToast("updated.");
-            });
-        }
+// 1. Khi nhấn nút Xóa ở Guest hoặc Staff Modal, gọi hàm này để hiện Popup xác nhận
+function deleteGuestInfo() {
+    document.getElementById('confirmModal').style.display = 'flex';
+}
 
-        function handleReset() {
-            showModal("すべてリセットしますか？", false, (confirmed) => {
-                if (confirmed) {
-                    resetDisplayOnly();
-                    saveParkingData();
-                    showToast("現在のデータをすべてリセットしました。");
-                }
-            });
-        }
+function deleteStaffInfo() {
+    document.getElementById('confirmModal').style.display = 'flex';
+}
 
-        // --- FIREBASE SAVE & LOAD ---
-        function saveParkingData() {
+// 2. Đóng popup xác nhận
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+// 3. Thực hiện xóa thật sự khi nhấn "Có" trên Popup
+/* ================= EXECUTE DELETE (XÓA TOÀN BỘ CHUỖI NGÀY) ================= */
+/* ================= THAY THẾ BẰNG ĐOẠN NÀY ================= */
+async function executeDelete() {
+    if (!currentSpot) return;
+
+    // Lấy số ô (data-num) để đảm bảo ô số 4 vẫn nhận diện được
+    const spotNum = currentSpot.getAttribute('data-num'); 
+    const dataInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
+
+    try {
+        // Nếu có thông tin check-in/out thì xóa toàn bộ chuỗi ngày
+        if (dataInfo && dataInfo.checkIn && dataInfo.checkOut) {
+            const start = new Date(dataInfo.checkIn);
+            const end = new Date(dataInfo.checkOut);
+            let currentDate = new Date(start);
+            
+            while (currentDate < end) {
+                const dateKey =  formatDateLocal(currentDate);
+                await db.ref(`parking/${dateKey}/${spotNum}`).remove();
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        } else {
+            // Nếu không có info (hoặc là staff), chỉ xóa ngày hiện tại
             const date = document.getElementById('parkingDate').value;
-            const data = {};
-            document.querySelectorAll('.parking-spot').forEach(spot => {
-                const num = spot.getAttribute('data-num');
-                data[num] = {
-                    status: spot.classList.contains('booked') ? 'booked' : (spot.classList.contains('staff') ? 'staff' : 'empty'),
-                    note: spot.querySelector('.name-display').innerText
-                };
-            });
-            // Lưu lên Firebase
-            db.ref('parking/' + date).set(data);
+            await db.ref(`parking/${date}/${spotNum}`).remove();
         }
 
-        function loadParkingData() {
-            const date = document.getElementById('parkingDate').value;
-            db.ref('parking/' + date).once('value', (snapshot) => {
-                const data = snapshot.val();
-                resetDisplayOnly();
-                if (data) {
-                    Object.keys(data).forEach(num => {
-                        const el = document.querySelector(`[data-num="${num}"]`);
-                        if (el) {
-                            if (data[num].status === 'booked') el.classList.add('booked');
-                            if (data[num].status === 'staff') el.classList.add('staff');
-                            el.querySelector('.name-display').innerText = data[num].note || "";
-                        }
-                    });
-                }
-            });
+        // Đóng các modal
+        closeConfirmModal();
+        closeGuestModal();
+        if (window.closeStaffModal) closeStaffModal();
+        
+        showToast("連泊分を含めて削除完了");
+        
+        // Load lại dữ liệu để cập nhật màu sắc
+        loadParkingData();
+
+    } catch (error) {
+        console.error("Delete Error:", error);
+        showToast("削除 lỗi (Thất bại)");
+    }
+}
+/* ================= RESET ================= */
+
+function handleReset(){
+
+    if(!confirm("すべてリセットしますか？")) return;
+
+    document.querySelectorAll('.parking-spot').forEach(el=>{
+
+        el.classList.remove('booked');
+
+        el.dataset.info = "";
+
+        el.querySelector('.name-display').innerText = "";
+
+    });
+
+    saveParkingData();
+
+    showToast("リセット完了");
+
+}
+
+/* ================= DATE CHANGE ================= */
+
+function handleDateChange(){
+
+    const newDate =
+        document.getElementById('parkingDate').value;
+
+    localStorage.setItem(
+        'parking_last_visited_date',
+        newDate
+    );
+
+    loadParkingData();
+
+}
+
+/* ================= SAVE FIREBASE ================= */
+
+function saveParkingData(){
+
+    const date =
+        document.getElementById('parkingDate').value;
+
+    const data = {};
+
+    document.querySelectorAll('.parking-spot').forEach(spot=>{
+
+        const num = spot.dataset.num;
+
+        data[num] = {
+
+           status:
+    spot.classList.contains('booked')
+        ? 'booked'
+        : spot.classList.contains('staff')
+            ? 'staff'
+            : 'empty',
+
+            info: spot.dataset.info
+                ? JSON.parse(spot.dataset.info)
+                : {}
+
+        };
+
+    });
+
+    db.ref('parking/' + date).set(data);
+
+}	
+async function exportToExcel() {
+
+    try {
+
+        const date =
+            document.getElementById('parkingDate').value;
+
+        const snapshot =
+            await db.ref('parking/' + date).once('value');
+
+        const data = snapshot.val();
+
+        if (!data) {
+
+            showToast("データがありません");
+            return;
         }
-    </script>
+
+        // LOAD TEMPLATE
+        const fileInput =
+    document.getElementById('excelTemplate');
+
+fileInput.click();
+
+fileInput.onchange = async function(e){
+
+const file = e.target.files[0];
+
+if(!file){
+
+    showToast("テンプレート未選択");
+
+    return;
+}
+
+const arrayBuffer =
+    await file.arrayBuffer();
+
+        const workbook = new ExcelJS.Workbook();
+
+        await workbook.xlsx.load(arrayBuffer);
+
+        const worksheet =
+            workbook.getWorksheet(1);
+
+        // YEAR MONTH
+       const d = new Date(date);
+
+const formattedDate =
+    `${d.getFullYear()}年 ${d.getMonth()+1}月 ${d.getDate()}日`;
+
+worksheet.getCell("E1").value = date;
+        // START ROW
+        let row = 3;
+
+        const sortedKeys = Object.keys(data)
+            .sort((a,b)=>parseInt(a)-parseInt(b));
+
+        sortedKeys.forEach(num => {
+
+            const item = data[num];
+
+            if(item.status === 'booked' && item.info){
+
+                let totalDays = 0;
+
+                if(item.info.checkIn && item.info.checkOut){
+
+                    const start =
+                        new Date(item.info.checkIn);
+
+                    const end =
+                        new Date(item.info.checkOut);
+
+                    totalDays = Math.ceil(
+                        (end-start)/(1000*60*60*24)
+                    );
+                }
+
+                worksheet.getCell(`A${row}`).value = num;
+
+                worksheet.getCell(`B${row}`).value =
+                    item.info.roomNumber || "";
+
+                worksheet.getCell(`C${row}`).value =
+                    item.info.guestName || "";
+
+                worksheet.getCell(`D${row}`).value =
+                    item.info.carNumber || "";
+               const checkInDate =
+    item.info.checkIn
+    ? item.info.checkIn.substring(5)
+    : "";
+
+const checkOutDate =
+    item.info.checkOut
+    ? item.info.checkOut.substring(5)
+    : "";
+
+worksheet.getCell(`E${row}`).value =
+    checkInDate;
+
+worksheet.getCell(`F${row}`).value =
+    checkOutDate;
+worksheet.getCell(`G${row}`).value =
+    totalDays + "泊";
+for(let col = 1; col <= 7; col++){
+
+    worksheet.getCell(row, col).alignment = {
+
+        vertical: 'middle',
+        horizontal: 'center'
+
+    };
+}
+                row++;
+            }
+        });
+
+        // EXPORT
+        const buffer =
+            await workbook.xlsx.writeBuffer();
+
+        const blob = new Blob(
+            [buffer],
+            {
+                type:
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+        );
+
+        const link =
+            document.createElement("a");
+
+        link.href =
+            window.URL.createObjectURL(blob);
+
+        link.download =
+            `駐車場_${date}.xlsx`;
+
+        link.click();
+
+        showToast("Excel出力完了");
+};
+
+    } catch(error){
+
+        console.error(error);
+
+        showToast(error.message);
+
+        console.error(error);
+    }
+}
+  
+async function refreshParkingData(){
+    showToast("更新中...");
+
+    // 1. Lấy ngày hôm nay theo định dạng YYYY-MM-DD
+    const today = formatDateLocal(new Date());
+
+    // 2. Cập nhật giá trị vào ô input ngày
+    const dateInput = document.getElementById('parkingDate');
+    dateInput.value = today;
+
+    // 3. Lưu lại vào localStorage để đồng bộ
+    localStorage.setItem('parking_last_visited_date', today);
+
+    // 4. Tải lại dữ liệu của ngày hôm nay
+    loadParkingData();
+
+    setTimeout(()=>{
+        showToast("最新データ更新完了");
+    }, 500);
+}
+window.addEventListener('keydown', function(e){
+
+    if(
+        e.key === 'F5' ||
+        (e.ctrlKey && e.key === 'r')
+    ){
+
+        e.preventDefault();
+
+        refreshParkingData();
+    }
+});
+
+// Pull refresh trên mobile / iPad
+let touchStartY = 0;
+
+window.addEventListener('touchstart', function(e){
+
+    touchStartY = e.touches[0].clientY;
+
+});
+
+window.addEventListener('touchend', function(e){
+
+    const touchEndY =
+        e.changedTouches[0].clientY;
+
+    // kéo xuống khoảng 120px
+    if(touchEndY - touchStartY > 120){
+
+        refreshParkingData();
+    }
+
+});
+</script>
 
 </body>
 </html>
