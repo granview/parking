@@ -156,25 +156,31 @@ input[type="date"]{
     border-color:#2980b9;
 }
 
-.name-display{
-    writing-mode:vertical-rl;
-    text-orientation:upright;
-    font-size:14px;
-    margin-top:10px;
-    height:75%;
-    width:85%;
-    background:rgba(255,255,255,.3);
-    border-radius:4px;
-    padding:5px 2px;
-    text-align:center;
-    font-weight:700;
-    color:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-shadow:1px 1px 2px rgba(0,0,0,.4);
-    box-sizing:border-box;
+.name-display {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 13px; /* Giảm nhẹ cỡ chữ để vừa khung hơn */
+    margin-top: 5px;
+    height: 90%;      /* Tăng chiều cao để tận dụng không gian */
+    width: 90%;
+    background: rgba(255,255,255,.2);
+    border-radius: 3px;
+    padding: 2px;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    
+    /* CÁC THUỘC TÍNH GIÚP CHỮ LUÔN NẰM TRONG KHUNG */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;       /* Ẩn phần chữ dư nếu quá dài */
+    white-space: nowrap;    /* BUỘC chữ không được xuống hàng ngang */
+    text-overflow: ellipsis; /* Nếu quá dài sẽ hiện dấu ... thay vì tràn khung */
+    word-break: break-all;
+    box-sizing: border-box;
 }
+
 
 .hatched-zone{
     grid-column:4;
