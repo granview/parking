@@ -545,10 +545,18 @@ textarea{
     <div class="modal-box">
         <div class="modal-title" id="staffModalTitle" style="color: #f39c12;">スタッフ / 予備</div>
         
-        <div class="form-group">
+         <div class="form-group">
             <label>スタッフ名 or 予備</label>
-            <input type="text" id="staffName" placeholder="例: ファム">
+            <input type="text" id="staffName" placeholder="名前を入力" list="staffOptions">
+
+        <datalist id="staffOptions">
+        <option value="スタッフ">
+        <option value="予備">
+        <option value="返却">
+        <option value="押さえ">
+    </datalist>
         </div>
+
 
         <div class="modal-buttons">
             <button class="btn-save" style="background:#f39c12;" onclick="saveStaffInfo()">保存</button>
