@@ -316,93 +316,85 @@ input[type="date"]{
     z-index:5000;
 }
 
-.modal-box{
-    background:#fff;
-    width:420px;
-    max-width:95%;
-    border-radius:12px;
-    padding:25px;
-    box-sizing:border-box;
+/* Khung Modal chính */
+.modal-box {
+    background: #fff;
+    width: 450px;
+    max-width: 90vw; /* Tự co giãn theo màn hình iPad */
+    border-radius: 12px;
+    padding: 30px;
+    box-sizing: border-box;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
 
-.modal-title{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:20px;
-    text-align:center;
+/* Hàng chứa nhiều ô nhập liệu */
+.form-row {
+    display: flex;
+    gap: 15px; /* Tăng khoảng cách giữa các ô */
+    margin-bottom: 15px;
+    align-items: flex-end;
 }
 
-.form-group{
-    margin-bottom:15px;
+/* Từng nhóm nhãn và ô nhập */
+.form-group {
+    flex: 1; /* Chia đều không gian */
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
 }
 
-.form-group label{
-    display:block;
-    margin-bottom:5px;
-    font-size:14px;
-    color:#555;
+.form-group label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+    font-weight: bold;
 }
 
-.form-group input{
-    width:100%;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:6px;
-    box-sizing:border-box;
-}
-.form-row{
-    display:flex;
-    gap:10px;
-}
-
-.form-row .form-group{
-    margin-bottom:0;
-}
-.room-small{
-    width:110px;
-    flex-shrink:0;
+/* Thiết kế lại ô nhập liệu cho iOS mượt hơn */
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #fcfcfc;
+    -webkit-appearance: none; /* Tắt giao diện mặc định của iOS */
+    box-sizing: border-box;
+    color: #333;
 }
 
-.check-large{
-    flex:1;
+/* Cố định tỷ lệ các ô đặc biệt để không bị lệch */
+.room-small {
+    flex: 0 0 100px !important; /* Khóa chiều rộng ô phòng */
 }
 
-.stay-small{
-    width:90px;
-    flex-shrink:0;
+.stay-small {
+    flex: 0 0 90px !important; /* Khóa chiều rộng ô số đêm */
 }
 
-.form-group select{
-    width:100%;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:6px;
-    box-sizing:border-box;
+.check-large {
+    flex: 1;
 }
 
-textarea{
-    width:100%;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:6px;
-    box-sizing:border-box;
-    resize:vertical;
-    font-family:inherit;
+/* Chỉnh riêng cho ô Date trên iPad để không bị hiện icon lạ */
+input[type="date"] {
+    position: relative;
+    min-height: 45px;
 }
 
-.modal-buttons{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
+/* Nút bấm trong Modal */
+.modal-buttons {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
 }
 
-.modal-buttons button{
-    flex:1;
-    border:none;
-    padding:12px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:15px;
+.modal-buttons button {
+    height: 48px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .btn-save{
