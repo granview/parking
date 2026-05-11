@@ -831,8 +831,11 @@ let currentDragElement = null;
 let touchDragData = null;
 
 function handleTouchStart(e) {
-    // Chỉ cho phép kéo nếu ô đó có màu (đã đặt hoặc staff)
+    // Chỉ kéo nếu là ô có dữ liệu
     if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
+
+    // iPad đôi khi cần ngăn chặn sự kiện mặc định ngay từ lúc chạm
+    // e.preventDefault(); // Nếu bật dòng này mà không click được thì hãy tắt đi
 
     currentDragElement = this;
     touchDragData = this.getAttribute('data-num');
@@ -841,14 +844,19 @@ function handleTouchStart(e) {
 
 function handleTouchMove(e) {
     if (!currentDragElement) return;
-    e.preventDefault(); // Quan trọng: Ngăn iPad cuộn trang khi đang kéo ô
+
+    // iPadOS bắt buộc phải có preventDefault trong touchmove để không cuộn trang
+    if (e.cancelable) e.preventDefault(); 
 
     const touch = e.touches[0];
-    // Tìm ô đang nằm dưới ngón tay
+    
+    // Sử dụng tọa độ chuẩn để tìm phần tử bên dưới ngón tay trên màn hình lớn của iPad
     const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Tìm ô bãi xe gần nhất từ điểm chạm
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
 
-    // Hiệu ứng xanh khi lướt qua ô khác
+    // Hiệu ứng di chuyển
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
     if (dropTarget && dropTarget !== currentDragElement) {
         dropTarget.classList.add('drag-over');
@@ -864,20 +872,20 @@ async function handleTouchEnd(e) {
 
     const fromNum = touchDragData;
     
-    // Xóa hiệu ứng
+    // Xóa hiệu ứng ngay lập tức
     currentDragElement.classList.remove('dragging');
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
 
     if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) {
-        // Tạo sự kiện giả lập để dùng chung hàm handleDrop có sẵn của bạn
+        // Chạy logic đổi chỗ
         const fakeEvent = {
             preventDefault: () => {},
             dataTransfer: { getData: () => fromNum }
         };
-        // Gọi hàm xử lý database
         handleDrop.call(dropTarget, fakeEvent);
     }
 
+    // Reset
     currentDragElement = null;
     touchDragData = null;
 }
