@@ -139,6 +139,10 @@ input[type="date"]{
     position:relative;
     overflow:hidden;
     user-select:none;
+    -webkit-user-select: none; /* Tắt chọn chữ trên Safari */
+    user-select: none;
+    -webkit-touch-callout: none; /* Tắt menu nhấn giữ trên iPhone */
+    touch-action: none; /* Ngăn trình duyệt can thiệp vào cử chỉ */
 }
 
 .parking-spot.booked{
@@ -720,6 +724,18 @@ function renderMap(){
         div.addEventListener('dragleave', handleDragLeave);
         div.addEventListener('drop', handleDrop);
         div.addEventListener('dragend', handleDragEnd);
+        // Sự kiện chuột (Máy tính)
+    div.addEventListener('dragstart', handleDragStart);
+    div.addEventListener('dragover', handleDragOver);
+    div.addEventListener('dragleave', handleDragLeave);
+    div.addEventListener('drop', handleDrop);
+    div.addEventListener('dragend', handleDragEnd);
+
+    // THÊM: Sự kiện cảm ứng (iPad/iPhone)
+    div.addEventListener('touchstart', handleTouchStart, {passive: false});
+    div.addEventListener('touchmove', handleTouchMove, {passive: false});
+    div.addEventListener('touchend', handleTouchEnd, {passive: false});
+        
         grid.appendChild(div);
     });
 }
@@ -813,6 +829,72 @@ async function handleDrop(e) {
     }
 }
 
+    // Hỗ trợ kéo thả cho iPad/iPhone (Touch Events)
+let touchDragData = null;
+let currentDragElement = null;
+
+function handleTouchStart(e) {
+    // Chỉ cho phép kéo nếu ô đó có dữ liệu
+    if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
+
+    currentDragElement = this;
+    touchDragData = this.getAttribute('data-num');
+    this.classList.add('dragging');
+    
+    // Ghi lại dữ liệu giống như e.dataTransfer
+    e.target.dataset.dragData = touchDragData;
+}
+
+function handleTouchMove(e) {
+    if (!currentDragElement) return;
+    e.preventDefault(); // Ngăn cuộn trang khi đang kéo
+
+    // Tìm ô đang nằm dưới ngón tay
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
+
+    // Xóa hiệu ứng của các ô khác
+    document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
+
+    // Thêm hiệu ứng cho ô đang di chuyển qua
+    if (dropTarget && dropTarget !== currentDragElement) {
+        dropTarget.classList.add('drag-over');
+    }
+}
+
+async function handleTouchEnd(e) {
+    if (!currentDragElement) return;
+
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
+
+    const fromNum = touchDragData;
+    
+    // Xóa các class hiệu ứng
+    currentDragElement.classList.remove('dragging');
+    document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
+
+    if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) {
+        // Gọi lại logic xử lý Drop giống hệt như trên máy tính
+        // Tạo một object giả lập e.dataTransfer cho hàm handleDrop dùng chung
+        const fakeEvent = {
+            preventDefault: () => {},
+            dataTransfer: { getData: () => fromNum },
+            target: dropTarget,
+            getAttribute: (attr) => dropTarget.getAttribute(attr)
+        };
+        
+        // Gọi hàm handleDrop của bạn (sử dụng .bind để truyền đúng context 'this')
+        handleDrop.call(dropTarget, fakeEvent);
+    }
+
+    // Reset biến tạm
+    currentDragElement = null;
+    touchDragData = null;
+}
+    
 function loadParkingData(){
 
     const date = document.getElementById('parkingDate').value;
