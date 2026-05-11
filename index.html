@@ -697,7 +697,8 @@ function renderMap(){
     div.className = `parking-spot ${spot.type}`;
     div.id = `spot-${spot.id}`;
     div.setAttribute('data-num', spot.id); // Đảm bảo luôn có data-num là số 4
-    
+    // QUAN TRỌNG: Phải có draggable="true" thì mới kéo được
+        div.draggable = true;
     // Sửa phần hiển thị để không làm mất số 4 khi ghi đè
     const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
     div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div>`;
@@ -713,8 +714,103 @@ function renderMap(){
                 }, 250);
             }
         };
+        // SỰ KIỆN KÉO THẢ (DRAG & DROP)
+        div.addEventListener('dragstart', handleDragStart);
+        div.addEventListener('dragover', handleDragOver);
+        div.addEventListener('dragleave', handleDragLeave);
+        div.addEventListener('drop', handleDrop);
+        div.addEventListener('dragend', handleDragEnd);
         grid.appendChild(div);
     });
+}
+
+let draggedSpotNum = null;
+
+// Bắt đầu kéo
+function handleDragStart(e) {
+    // Chỉ cho phép kéo nếu ô đó có dữ liệu (đã đặt hoặc là staff)
+    const isBooked = this.classList.contains('booked');
+    const isStaff = this.classList.contains('staff');
+
+    if (!isBooked && !isStaff) {
+        e.preventDefault();
+        return;
+    }
+
+    draggedSpotNum = this.getAttribute('data-num');
+    this.classList.add('dragging');
+
+    // Thiết lập dữ liệu và hiệu ứng kéo
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedSpotNum);
+}
+
+// Khi ô đang được kéo đè lên ô khác
+function handleDragOver(e) {
+    e.preventDefault(); // Cần thiết để cho phép Drop
+    e.dataTransfer.dropEffect = 'move';
+    this.classList.add('drag-over');
+}
+
+// Khi kéo ra khỏi phạm vi một ô
+function handleDragLeave() {
+    this.classList.remove('drag-over');
+}
+
+// Kết thúc kéo (dù thành công hay không)
+function handleDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.parking-spot').forEach(el => {
+        el.classList.remove('drag-over', 'dragging');
+    });
+}
+
+// Xử lý khi thả chuột (Drop)
+async function handleDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+
+    const fromSpotNum = e.dataTransfer.getData('text/plain');
+    const toSpotNum = this.getAttribute('data-num');
+
+    // Nếu thả cùng một chỗ thì không làm gì
+    if (!fromSpotNum || fromSpotNum === toSpotNum) return;
+
+    const date = document.getElementById('parkingDate').value;
+    const fromRef = db.ref(`parking/${date}/${fromSpotNum}`);
+    const toRef = db.ref(`parking/${date}/${toSpotNum}`);
+
+    try {
+        // 1. Lấy dữ liệu ô gốc
+        const snapshotFrom = await fromRef.once('value');
+        const dataFrom = snapshotFrom.val();
+        if (!dataFrom) return;
+
+        // 2. Kiểm tra ô đích
+        const snapshotTo = await toRef.once('value');
+        const dataTo = snapshotTo.val();
+
+        if (dataTo) {
+            // Nếu ô đích có dữ liệu -> Hỏi để hoán đổi (Swap)
+            const confirmSwap = confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？\n(Ô ${toSpotNum} đã có dữ liệu, bạn muốn đổi chỗ không?)`);
+            if (!confirmSwap) return;
+
+            // Thực hiện đổi chỗ
+            await toRef.set(dataFrom);
+            await fromRef.set(dataTo);
+            showToast(`番号 ${fromSpotNum} と ${toSpotNum} を入れ替えました`);
+        } else {
+            // Nếu ô đích trống -> Di chuyển và xóa ô cũ
+            await toRef.set(dataFrom);
+            await fromRef.remove();
+            showToast(`番号 ${fromSpotNum} から ${toSpotNum} へ移動しました`);
+        }
+
+        // loadParkingData() sẽ tự động cập nhật nhờ sự kiện .on('value') đã thiết lập trước đó
+    } catch (error) {
+        console.error("DragDrop Error:", error);
+        showToast("移動に失敗しました (Lỗi khi di chuyển)");
+    }
 }
 
 function loadParkingData(){
