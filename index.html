@@ -326,12 +326,17 @@ input[type="date"]{
     box-sizing: border-box;
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
-
+.modal-title{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:20px;
+    text-align:center;
+}
 /* Hàng chứa nhiều ô nhập liệu */
 .form-row {
     display: flex;
-    gap: 15px; /* Tăng khoảng cách giữa các ô */
-    margin-bottom: 15px;
+    gap: 10px; /* Tăng khoảng cách giữa các ô */
+    margin-bottom: 10px;
     align-items: flex-end;
 }
 
@@ -384,17 +389,19 @@ input[type="date"] {
     min-height: 45px;
 }
 
-/* Nút bấm trong Modal */
-.modal-buttons {
-    margin-top: 25px;
-    display: flex;
-    gap: 10px;
+.modal-buttons{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
 }
 
-.modal-buttons button {
-    height: 48px;
-    font-weight: bold;
-    letter-spacing: 1px;
+.modal-buttons button{
+    flex:1;
+    border:none;
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
 }
 
 .btn-save{
