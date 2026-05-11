@@ -827,34 +827,29 @@ async function handleDrop(e) {
 }
 
     // Hỗ trợ kéo thả cho iPad/iPhone (Touch Events)
-let touchDragData = null;
 let currentDragElement = null;
+let touchDragData = null;
 
 function handleTouchStart(e) {
-    // Chỉ cho phép kéo nếu ô đó có dữ liệu
+    // Chỉ cho phép kéo nếu ô đó có màu (đã đặt hoặc staff)
     if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
 
     currentDragElement = this;
     touchDragData = this.getAttribute('data-num');
     this.classList.add('dragging');
-    
-    // Ghi lại dữ liệu giống như e.dataTransfer
-    e.target.dataset.dragData = touchDragData;
 }
 
 function handleTouchMove(e) {
     if (!currentDragElement) return;
-    e.preventDefault(); // Ngăn cuộn trang khi đang kéo
+    e.preventDefault(); // Quan trọng: Ngăn iPad cuộn trang khi đang kéo ô
 
-    // Tìm ô đang nằm dưới ngón tay
     const touch = e.touches[0];
+    // Tìm ô đang nằm dưới ngón tay
     const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
 
-    // Xóa hiệu ứng của các ô khác
+    // Hiệu ứng xanh khi lướt qua ô khác
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
-
-    // Thêm hiệu ứng cho ô đang di chuyển qua
     if (dropTarget && dropTarget !== currentDragElement) {
         dropTarget.classList.add('drag-over');
     }
@@ -869,25 +864,20 @@ async function handleTouchEnd(e) {
 
     const fromNum = touchDragData;
     
-    // Xóa các class hiệu ứng
+    // Xóa hiệu ứng
     currentDragElement.classList.remove('dragging');
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
 
     if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) {
-        // Gọi lại logic xử lý Drop giống hệt như trên máy tính
-        // Tạo một object giả lập e.dataTransfer cho hàm handleDrop dùng chung
+        // Tạo sự kiện giả lập để dùng chung hàm handleDrop có sẵn của bạn
         const fakeEvent = {
             preventDefault: () => {},
-            dataTransfer: { getData: () => fromNum },
-            target: dropTarget,
-            getAttribute: (attr) => dropTarget.getAttribute(attr)
+            dataTransfer: { getData: () => fromNum }
         };
-        
-        // Gọi hàm handleDrop của bạn (sử dụng .bind để truyền đúng context 'this')
+        // Gọi hàm xử lý database
         handleDrop.call(dropTarget, fakeEvent);
     }
 
-    // Reset biến tạm
     currentDragElement = null;
     touchDragData = null;
 }
