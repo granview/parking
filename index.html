@@ -124,7 +124,24 @@ input[type="date"]{
     grid-template-columns:repeat(19,1fr);
     width:100%;
 }
+/* Các ô 5, 6, 7, 8, 9 */
+.top-row-spot {
+    grid-row: 1;
+    height: 100%; /* Đảm bảo ô kéo dài hết hàng */
+}
 
+/* Các ô 19, 20, 21 */
+#spot-19, #spot-20, #spot-21 {
+    grid-row: 5;
+    height: 100%;
+}
+
+/* Các ô ngắn (1, 2, 3 và 10-18) vẫn giữ nguyên hoặc bạn có thể chỉnh lại */
+.short-rect {
+    grid-row: 1 / span 3; 
+    /* Lưu ý: Nếu hàng 1 dài ra, các ô này cũng sẽ dài theo. 
+       Nếu muốn chúng ngắn lại, bạn có thể đặt height cố định cho .short-rect */
+}
 .parking-spot{
     background:#2ecc71;
     border:1.5px solid #27ae60;
