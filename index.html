@@ -165,29 +165,33 @@ input[type="date"]{
 .name-display {
     writing-mode: vertical-rl;
     text-orientation: upright;
-    font-size: 13px; /* Giảm nhẹ cỡ chữ để vừa khung hơn */
+    
+    /* Chỉnh cỡ chữ tự động thu nhỏ trên iPad */
+    font-size: clamp(14px, 1.8vh, 14px); 
+    
     margin-top: 5px;
-    height: 90%;      /* Tăng chiều cao để tận dụng không gian */
+    height: 85%;
     width: 90%;
-    background: rgba(255,255,255,.2);
+    background: rgba(255, 255, 255, .2);
     border-radius: 3px;
     padding: 2px;
-    text-align: center;
     font-weight: bold;
     color: #fff;
-    
-    /* CÁC THUỘC TÍNH GIÚP CHỮ LUÔN NẰM TRONG KHUNG */
+
+    /* CẤU HÌNH KHÓA 1 HÀNG DỌC */
     display: flex;
+    flex-direction: column;   /* Ép các ký tự xếp theo cột dọc */
     justify-content: center;
     align-items: center;
-    overflow: hidden;       /* Ẩn phần chữ dư nếu quá dài */
-    white-space: nowrap;    /* BUỘC chữ không được xuống hàng ngang */
-    text-overflow: ellipsis; /* Nếu quá dài sẽ hiện dấu ... thay vì tràn khung */
-    word-break: break-all;
+    
+    white-space: nowrap;      /* TUYỆT ĐỐI không cho xuống hàng */
+    overflow: hidden;         /* Ẩn phần dư nếu tên quá dài */
+    text-overflow: clip;      /* Cắt bỏ phần thừa để không đẩy khung */
+    
     box-sizing: border-box;
-    /* Đảm bảo tên khách không chặn việc kéo ô */
-    pointer-events: none;
+    pointer-events: none;     /* Để không cản trở việc kéo thả trên iPad */
 }
+
 
 
 .hatched-zone{
