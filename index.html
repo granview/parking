@@ -166,34 +166,32 @@ input[type="date"]{
     writing-mode: vertical-rl;
     text-orientation: upright;
     
-    /* Thu nhỏ cỡ chữ một chút để không bị đẩy hàng */
-    font-size: clamp(14px, 1.5vh, 14px); 
+    /* Chỉnh cỡ chữ tự động thu nhỏ trên iPad */
+    font-size: clamp(14px, 1.8vh, 14px); 
     
     margin-top: 5px;
     height: 85%;
-    
-    /* KHÓA CHIỀU RỘNG: iPad sẽ không thể tự chèn thêm hàng thứ 2 */
-    width: 1.2em !important; 
-    max-width: 20px;
-    
+    width: 90%;
     background: rgba(255, 255, 255, .2);
     border-radius: 3px;
-    padding: 2px 0;
+    padding: 2px;
     font-weight: bold;
     color: #fff;
 
-    /* KHÓA LUỒNG HIỂN THỊ */
-    display: block !important; /* Dùng block thay vì flex để tránh iPad tự chia cột */
-    text-align: center;
-    white-space: nowrap !important; /* Lệnh quan trọng nhất */
-    overflow: hidden;
-    text-overflow: clip;
+    /* CẤU HÌNH KHÓA 1 HÀNG DỌC */
+    display: flex;
+    flex-direction: column;   /* Ép các ký tự xếp theo cột dọc */
+    justify-content: center;
+    align-items: center;
+    
+    white-space: nowrap;      /* TUYỆT ĐỐI không cho xuống hàng */
+    overflow: hidden;         /* Ẩn phần dư nếu tên quá dài */
+    text-overflow: clip;      /* Cắt bỏ phần thừa để không đẩy khung */
     
     box-sizing: border-box;
-    pointer-events: none;
-    margin-left: auto;
-    margin-right: auto;
+    pointer-events: none;     /* Để không cản trở việc kéo thả trên iPad */
 }
+
 
 
 .hatched-zone{
