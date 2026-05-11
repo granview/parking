@@ -724,12 +724,7 @@ function renderMap(){
         div.addEventListener('dragleave', handleDragLeave);
         div.addEventListener('drop', handleDrop);
         div.addEventListener('dragend', handleDragEnd);
-        // Sự kiện chuột (Máy tính)
-    div.addEventListener('dragstart', handleDragStart);
-    div.addEventListener('dragover', handleDragOver);
-    div.addEventListener('dragleave', handleDragLeave);
-    div.addEventListener('drop', handleDrop);
-    div.addEventListener('dragend', handleDragEnd);
+    
 
     // THÊM: Sự kiện cảm ứng (iPad/iPhone)
     div.addEventListener('touchstart', handleTouchStart, {passive: false});
