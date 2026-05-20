@@ -819,7 +819,7 @@ async function handleDrop(e) {
 
         if (dataTo) {
             // Nếu ô đích có dữ liệu -> Hỏi để hoán đổi (Swap)
-            const confirmSwap = confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？\n(Ô ${toSpotNum} đã có dữ liệu, bạn muốn đổi chỗ không?)`);
+            const confirmSwap = confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？`);
             if (!confirmSwap) return;
 
             // Thực hiện đổi chỗ
