@@ -10,9 +10,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link class="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="駐車場">
-<link rel="icon" type="image/png" href="favicon.png">
+<link class="icon" type="image/png" href="favicon.png">
 
 <style>
 
@@ -87,8 +87,6 @@ input[type="date"]{
     gap:6px;
     font-size:12px;
     margin-bottom :5px
-
-    
 }
 .date-controls input[type="date"]{
     padding:3px 6px;
@@ -104,7 +102,6 @@ input[type="date"]{
     color:black;
     cursor:pointer;
     font-size:12px;
-   
 }
 
 .parking-lot-map{
@@ -126,23 +123,19 @@ input[type="date"]{
     grid-template-columns:repeat(19,1fr);
     width:100%;
 }
-/* Các ô 5, 6, 7, 8, 9 */
+
 .top-row-spot {
     grid-row: 1;
-    height: 100%; /* Đảm bảo ô kéo dài hết hàng */
+    height: 100%; 
 }
 
-/* Các ô 19, 20, 21 */
 #spot-19, #spot-20, #spot-21 {
     grid-row: 5;
     height: 100%;
 }
 
-/* Các ô ngắn (1, 2, 3 và 10-18) vẫn giữ nguyên hoặc bạn có thể chỉnh lại */
 .short-rect {
     grid-row: 1 / span 3; 
-    /* Lưu ý: Nếu hàng 1 dài ra, các ô này cũng sẽ dài theo. 
-       Nếu muốn chúng ngắn lại, bạn có thể đặt height cố định cho .short-rect */
 }
 .parking-spot{
     background:#2ecc71;
@@ -160,10 +153,10 @@ input[type="date"]{
     position:relative;
     overflow:hidden;
     user-select:none;
-    -webkit-user-select: none; /* Tắt chọn chữ trên Safari */
+    -webkit-user-select: none; 
     user-select: none;
-    -webkit-touch-callout: none; /* Tắt menu nhấn giữ trên iPhone */
-    touch-action: none; /* Ngăn trình duyệt can thiệp vào cử chỉ */
+    -webkit-touch-callout: none; 
+    touch-action: none; 
 }
 
 .parking-spot.booked{
@@ -184,10 +177,7 @@ input[type="date"]{
 .name-display {
     writing-mode: vertical-rl;
     text-orientation: upright;
-    
-    /* Chỉnh cỡ chữ tự động thu nhỏ trên iPad */
     font-size: clamp(14px, 1.8vh, 14px); 
-    
     margin-top: 5px;
     height: 85%;
     width: 90%;
@@ -196,22 +186,16 @@ input[type="date"]{
     padding: 2px;
     font-weight: bold;
     color: #fff;
-
-    /* CẤU HÌNH KHÓA 1 HÀNG DỌC */
     display: flex;
-    flex-direction: column;   /* Ép các ký tự xếp theo cột dọc */
+    flex-direction: column;   
     justify-content: center;
     align-items: center;
-    
-    white-space: nowrap;      /* TUYỆT ĐỐI không cho xuống hàng */
-    overflow: hidden;         /* Ẩn phần dư nếu tên quá dài */
-    text-overflow: clip;      /* Cắt bỏ phần thừa để không đẩy khung */
-    
+    white-space: nowrap;      
+    overflow: hidden;         
+    text-overflow: clip;      
     box-sizing: border-box;
-    pointer-events: none;     /* Để không cản trở việc kéo thả trên iPad */
+    pointer-events: none;     
 }
-
-
 
 .hatched-zone{
     grid-column:4;
@@ -286,6 +270,128 @@ input[type="date"]{
     border-radius:4px;
 }
 
+/* ================= CUSTOMER LIST BOX STYLES ================= */
+.customer-list-container {
+    width: 98vw;
+    max-width: 1500px;
+    margin-top: 25px;
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.list-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #7f8c8d;
+    margin-top: 0;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.customer-4-columns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.column-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.customer-item {
+    display: flex;
+    align-items: center;
+    background: #2ecc71; 
+    border: 1.5px solid #27ae60;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 14px; 
+    font-weight: bold;
+    color: #fff;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    box-sizing: border-box;
+    min-height: 42px;
+}
+
+.customer-item.has-data {
+    cursor: grab;
+}
+
+.customer-item.booked {
+    background: #e74c3c !important;
+    border-color: #c0392b !important;
+}
+
+.customer-item.staff {
+    background: #f39c12 !important;
+    border-color: #e67e22 !important;
+}
+
+.customer-item.handicapped {
+    background: #3498db !important;
+    border-color: #2980b9 !important;
+}
+
+.customer-item.dragging {
+    opacity: 0.4;
+    background: #e0e0e0 !important;
+    border-color: #bbb !important;
+}
+
+.customer-item.drag-over {
+    border: 2px dashed #3498db !important;
+    background: #e8f4f8 !important;
+    color: #333 !important;
+}
+
+.info-box {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    width: 100%;
+}
+
+.left-content {
+    display: flex;
+    gap: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.display-meta {
+    color: rgba(255, 255, 255, 0.75); 
+    font-weight: normal;
+}
+
+.display-name {
+    color: #ffffff;
+}
+
+.right-content {
+    display: flex;
+    align-items: center;
+}
+
+.display-car {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: normal;
+}
+
 #toast{
     position:fixed;
     top:-100px;
@@ -303,8 +409,24 @@ input[type="date"]{
     top:20px;
 }
 
-/* ================= MODAL ================= */
+/* Thanh thông báo Chế độ Offline */
+#offlineNotice {
+    display: none;
+    background: #e74c3c;
+    color: white;
+    width: 100%;
+    text-align: center;
+    padding: 5px 0;
+    font-weight: bold;
+    font-size: 13px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
 
+/* ================= MODAL ================= */
 #guestModal{
     position:fixed;
     top:0;
@@ -318,11 +440,10 @@ input[type="date"]{
     z-index:5000;
 }
 
-/* Khung Modal chính */
 .modal-box {
     background: #fff;
     width: 450px;
-    max-width: 90vw; /* Tự co giãn theo màn hình iPad */
+    max-width: 90vw; 
     border-radius: 12px;
     padding: 30px;
     box-sizing: border-box;
@@ -334,17 +455,15 @@ input[type="date"]{
     margin-bottom:20px;
     text-align:center;
 }
-/* Hàng chứa nhiều ô nhập liệu */
 .form-row {
     display: flex;
-    gap: 10px; /* Tăng khoảng cách giữa các ô */
+    gap: 10px; 
     margin-bottom: 10px;
     align-items: flex-end;
 }
 
-/* Từng nhóm nhãn và ô nhập */
 .form-group {
-    flex: 1; /* Chia đều không gian */
+    flex: 1; 
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
@@ -357,7 +476,6 @@ input[type="date"]{
     font-weight: bold;
 }
 
-/* Thiết kế lại ô nhập liệu cho iOS mượt hơn */
 .form-group input, 
 .form-group select, 
 .form-group textarea {
@@ -367,25 +485,23 @@ input[type="date"]{
     border-radius: 8px;
     font-size: 15px;
     background-color: #fcfcfc;
-    -webkit-appearance: none; /* Tắt giao diện mặc định của iOS */
+    -webkit-appearance: none; 
     box-sizing: border-box;
     color: #333;
 }
 
-/* Cố định tỷ lệ các ô đặc biệt để không bị lệch */
 .room-small {
-    flex: 0 0 100px !important; /* Khóa chiều rộng ô phòng */
+    flex: 0 0 100px !important; 
 }
 
 .stay-small {
-    flex: 0 0 90px !important; /* Khóa chiều rộng ô số đêm */
+    flex: 0 0 90px !important; 
 }
 
 .check-large {
     flex: 1;
 }
 
-/* Chỉnh riêng cho ô Date trên iPad để không bị hiện icon lạ */
 input[type="date"] {
     position: relative;
     min-height: 45px;
@@ -426,42 +542,26 @@ input[type="date"] {
 
 <body>
 
+<div id="offlineNotice">⚠️ オフラインモード: 保存されたバックアップデータを表示しています (Chế độ Ngoại tuyến)</div>
 <div id="toast">通知</div>
 
 <div style="display:flex;align-items:center;gap:8px;">
-
-    
-<div class="main-title">駐車場</div>
-
+    <div class="main-title">駐車場</div>
 </div>
+
 <div class="date-controls">
-               <button onclick="changeDate(-1)">◀</button>
+    <button onclick="changeDate(-1)">◀</button>
+    <input type="date" id="parkingDate" onchange="handleDateChange()">
+    <button onclick="changeDate(1)">▶</button>
 
-        <input
-            type="date"
-            id="parkingDate"
-            onchange="handleDateChange()"
-        >
-
-        <button onclick="changeDate(1)">▶</button>
-
-<button onclick="exportToExcel()" class="pdf-btn"
-    style="background:#2980b9 !important;    color: #fff;">
-    EXCEL
-</button>
-<input
-    type="file"
-    id="excelTemplate"
-    accept=".xlsx"
-    style="display:none"
->
-<button onclick="refreshParkingData()"
-    style="background:#2980b9;color:white;">
-    🔄 更新
-</button>
-    </div>
-
-
+    <button onclick="exportToExcel()" class="pdf-btn" style="background:#2980b9 !important; color: #fff;">
+        EXCEL
+    </button>
+    <input type="file" id="excelTemplate" accept=".xlsx" style="display:none">
+    <button onclick="refreshParkingData()" style="background:#2980b9;color:white;">
+        🔄 更新
+    </button>
+</div>
 
 <div class="parking-lot-map">
     <div class="grid-container" id="parkingGrid"></div>
@@ -472,118 +572,86 @@ input[type="date"] {
         <div class="color-box" style="background:#2ecc71;"></div>
         空き
     </div>
-
     <div class="legend-item">
         <div class="color-box" style="background:#e74c3c;"></div>
         予約済
     </div>
-
     <div class="legend-item">
         <div class="color-box" style="background:#f39c12;"></div>
         スタッフ用&予備
     </div>
-
     <div class="legend-item">
         <div class="color-box" style="background:#3498db;"></div>
         身障者用
     </div>
 </div>
 
-<!-- ================= GUEST MODAL ================= -->
+<div class="customer-list-container">
+    <div class="list-title">顧客リスト</div>
+    <div class="customer-4-columns">
+        <div class="column-group" id="col-group-1"></div>
+        <div class="column-group" id="col-group-2"></div>
+        <div class="column-group" id="col-group-3"></div>
+        <div class="column-group" id="col-group-4"></div>
+    </div>
+</div>
 
 <div id="guestModal">
-
     <div class="modal-box">
-
-        <div class="modal-title" id="guestModalTitle">
-    駐車情報
-</div>
-
-<!-- HÀNG 1 -->
-<div class="form-row">
-
-    <div class="form-group room-small">
-        <label>部屋番号</label>
-        <input type="text" id="roomNumber">
-    </div>
-
-    <div class="form-group">
-        <label>お客様名</label>
-        <input type="text" id="guestName">
-    </div>
-
-</div>
-
-<!-- HÀNG 2 -->
-<!-- HÀNG 2: Check-in, Check-out, Số đêm -->
-<div class="form-row">
-    <div class="form-group check-large">
-        <label>チェックイン</label>
-        <input type="date" id="checkIn" onchange="calculateStayDays()">
-    </div>
-
-    <div class="form-group check-large">
-        <label>チェックアウト</label>
-        <input type="date" id="checkOut" onchange="calculateStayDays()">
-    </div>
-
-    <div class="form-group stay-small">
-        <label>泊数</label>
-        <select id="stayDays" onchange="updateCheckOutFromStay()"></select>
-    </div>
-</div>
-
-<!-- HÀNG 3 -->
-<div class="form-group">
-    <label>車両番号</label>
-    <input type="text" id="carNumber">
-</div>
-
-<!-- HÀNG 4 -->
-<div class="form-group">
-    <label>メモ</label>
-
-    <textarea
-        id="guestNote"
-        rows="2"
-        placeholder="メモ入力..."
-    ></textarea>
-</div>
-        <div class="modal-buttons">
-            <button class="btn-save" onclick="saveGuestInfo()">
-                保存
-            </button>
-
-            <button class="btn-delete" onclick="deleteGuestInfo()">
-                削除
-            </button>
-
-            <button class="btn-close" onclick="closeGuestModal()">
-                閉じる
-            </button>
+        <div class="modal-title" id="guestModalTitle">駐車情報</div>
+        <div class="form-row">
+            <div class="form-group room-small">
+                <label>部屋番号</label>
+                <input type="text" id="roomNumber" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>お客様名</label>
+                <input type="text" id="guestName">
+            </div>
         </div>
-
+        <div class="form-row">
+            <div class="form-group check-large">
+                <label>チェックイン</label>
+                <input type="date" id="checkIn" onchange="calculateStayDays()">
+            </div>
+            <div class="form-group check-large">
+                <label>チェックアウト</label>
+                <input type="date" id="checkOut" onchange="calculateStayDays()">
+            </div>
+            <div class="form-group stay-small">
+                <label>泊数</label>
+                <select id="stayDays" onchange="updateCheckOutFromStay()"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>車両番号</label>
+            <input type="text" id="carNumber" inputmode="numeric">
+        </div>
+        <div class="form-group">
+            <label>メモ</label>
+            <textarea id="guestNote" rows="2" placeholder="メモ入力..."></textarea>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-save" onclick="saveGuestInfo()">保存</button>
+            <button class="btn-delete" onclick="deleteGuestInfo()">削除</button>
+            <button class="btn-close" onclick="closeGuestModal()">閉じる</button>
+        </div>
     </div>
-
 </div>
-<!-- ================= STAFF MODAL (NEW) ================= -->
+
 <div id="staffModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); display:none; justify-content:center; align-items:center; z-index:5001;">
     <div class="modal-box">
         <div class="modal-title" id="staffModalTitle" style="color: #f39c12;">スタッフ / 予備</div>
-        
          <div class="form-group">
             <label>スタッフ名 or 予備</label>
             <input type="text" id="staffName" placeholder="名前を入力" list="staffOptions">
-
-        <datalist id="staffOptions">
-        <option value="スタッフ">
-        <option value="予備">
-        <option value="返却">
-        <option value="押さえ">
-    </datalist>
+            <datalist id="staffOptions">
+                <option value="スタッフ">
+                <option value="予備">
+                <option value="返却">
+                <option value="押さえ">
+            </datalist>
         </div>
-
-
         <div class="modal-buttons">
             <button class="btn-save" style="background:#f39c12;" onclick="saveStaffInfo()">保存</button>
             <button class="btn-delete" onclick="deleteStaffInfo()">削除</button>
@@ -591,7 +659,7 @@ input[type="date"] {
         </div>
     </div>
 </div>
-<!-- ================= DELETE CONFIRM MODAL ================= -->
+
 <div id="confirmModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); display:none; justify-content:center; align-items:center; z-index:6000;">
     <div class="modal-box" style="width: 320px; text-align: center;">
         <div style="font-size: 50px; color: #e74c3c; margin-bottom: 10px;">⚠️</div>
@@ -606,44 +674,30 @@ input[type="date"] {
 <script>
 
 /* ================= FIREBASE ================= */
-
 const firebaseConfig = {
   apiKey: "AIzaSyCWV0CdSSDznxXKdlTbJc4-AMrjVr51Hlo",
-
   authDomain: "test-f20cf.firebaseapp.com",
-
   databaseURL: "https://test-f20cf-default-rtdb.asia-southeast1.firebasedatabase.app/",
-
   projectId: "test-f20cf",
-
   storageBucket: "test-f20cf.firebasestorage.app",
-
   messagingSenderId: "985197427209",
-
   appId: "1:985197427209:web:0c6f69a8c9b62cb67bd6d8",
-
   measurementId: "G-1TG9CNC3Y1"
 };
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 
 /* ================= SPOT CONFIG ================= */
-
 const spotConfig = [
-
     { id:1, type:'short-rect' },
     { id:2, type:'short-rect' },
     { id:3, type:'short-rect' },
-
     { id:4, type:'handicapped' },
-
     { id:5, type:'top-row-spot' },
     { id:6, type:'top-row-spot' },
     { id:7, type:'top-row-spot' },
     { id:8, type:'top-row-spot' },
     { id:9, type:'top-row-spot' },
-
     { id:10, type:'short-rect' },
     { id:11, type:'short-rect' },
     { id:12, type:'short-rect' },
@@ -653,56 +707,69 @@ const spotConfig = [
     { id:16, type:'short-rect' },
     { id:17, type:'short-rect' },
     { id:18, type:'short-rect' },
-
     { id:21, type:'normal' },
     { id:20, type:'normal' },
     { id:19, type:'normal' }
-
 ];
 
 let currentSpot = null;
+let isOffline = false;
 
 /* ================= ONLOAD ================= */
-
 window.onload = function(){
-const staySelect =
-    document.getElementById('stayDays');
-
-for(let i = 1; i <= 30; i++){
-
-    const option =
-        document.createElement('option');
-
-    option.value = i;
-
-    option.textContent = `${i}泊`;
-
-    staySelect.appendChild(option);
-}
+    const staySelect = document.getElementById('stayDays');
+    for(let i = 1; i <= 30; i++){
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i}泊`;
+        staySelect.appendChild(option);
+    }
 
     const dInput = document.getElementById('parkingDate');
-
-    // Luôn lấy ngày hôm nay (theo giờ hệ thống)
-   // Luôn lấy ngày hôm nay (theo giờ hệ thống)
-const today = formatDateLocal(new Date());
-
-dInput.value = today;
-
-    // Cập nhật lại localStorage để các hàm khác đồng bộ
+    const today = formatDateLocal(new Date());
+    dInput.value = today;
     localStorage.setItem('parking_last_visited_date', today);
 
     renderMap();
-
+    build4ColumnsStructure(); 
     loadParkingData();
 
+    setInterval(hourlyBackupTask, 3600000);
+
+    window.addEventListener('online', () => {
+        isOffline = false;
+        document.getElementById('offlineNotice').style.display = 'none';
+        loadParkingData();
+    });
+    window.addEventListener('offline', () => {
+        isOffline = true;
+        document.getElementById('offlineNotice').style.display = 'block';
+        loadParkingData();
+    });
 };
+
 function formatDateLocal(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth()+1).padStart(2,'0');
     const d = String(date.getDate()).padStart(2,'0');
-
     return `${y}-${m}-${d}`;
-}	
+}   
+
+async function hourlyBackupTask() {
+    if (navigator.onLine && !isOffline) {
+        const date = document.getElementById('parkingDate').value;
+        try {
+            const snapshot = await db.ref('parking/' + date).once('value');
+            const data = snapshot.val();
+            if (data) {
+                localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
+                console.log(`[Hệ thống] Đã tự động sao lưu dữ liệu ngày ${date} thành công.`);
+            }
+        } catch (e) {
+            console.log("Không thể tự động sao lưu do lỗi kết nối.");
+        }
+    }
+}
 
 /* ================= CORE FUNCTIONS ================= */
 function renderMap(){
@@ -714,14 +781,12 @@ function renderMap(){
 
     spotConfig.forEach(spot=>{
         const div = document.createElement('div');
-    div.className = `parking-spot ${spot.type}`;
-    div.id = `spot-${spot.id}`;
-    div.setAttribute('data-num', spot.id); // Đảm bảo luôn có data-num là số 4
-    // QUAN TRỌNG: Phải có draggable="true" thì mới kéo được
+        div.className = `parking-spot ${spot.type}`;
+        div.id = `spot-${spot.id}`;
+        div.setAttribute('data-num', spot.id);
         div.draggable = true;
-    // Sửa phần hiển thị để không làm mất số 4 khi ghi đè
-    const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
-    div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div>`;
+        const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
+        div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div>`;
 
         let clickTimer = null;
         div.onclick = (e) => {
@@ -734,65 +799,95 @@ function renderMap(){
                 }, 250);
             }
         };
-        // SỰ KIỆN KÉO THẢ (DRAG & DROP)
+
         div.addEventListener('dragstart', handleDragStart);
         div.addEventListener('dragover', handleDragOver);
         div.addEventListener('dragleave', handleDragLeave);
         div.addEventListener('drop', handleDrop);
         div.addEventListener('dragend', handleDragEnd);
-    
 
-    // THÊM: Sự kiện cảm ứng (iPad/iPhone)
-    div.addEventListener('touchstart', handleTouchStart, {passive: false});
-    div.addEventListener('touchmove', handleTouchMove, {passive: false});
-    div.addEventListener('touchend', handleTouchEnd, {passive: false});
+        div.addEventListener('touchstart', handleTouchStart, {passive: false});
+        div.addEventListener('touchmove', handleTouchMove, {passive: false});
+        div.addEventListener('touchend', handleTouchEnd, {passive: false});
         
         grid.appendChild(div);
     });
 }
 
+function build4ColumnsStructure() {
+    createItemsInColumn(1, 4, 'col-group-1');
+    createItemsInColumn(5, 9, 'col-group-2');
+    createItemsInColumn(10, 15, 'col-group-3');
+    createItemsInColumn(16, 21, 'col-group-4');
+}
+
+function createItemsInColumn(start, end, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    
+    for (let i = start; i <= end; i++) {
+        const item = document.createElement('div');
+        item.className = 'customer-item';
+        item.id = `list-item-${i}`;
+        item.setAttribute('data-stt', i);
+        if(i === 4) item.classList.add('handicapped'); 
+        
+        item.innerHTML = `
+            <div class="info-box">
+                <div class="left-content">
+                    <span class="display-meta">${i}</span>
+                    <span class="display-name">—</span>
+                </div>
+                <div class="right-content"></div>
+            </div>
+        `;
+        
+        item.addEventListener('dragstart', handleListDragStart);
+        item.addEventListener('dragover', handleListDragOver);
+        item.addEventListener('dragleave', handleListDragLeave);
+        item.addEventListener('drop', handleListDrop);
+        item.addEventListener('dragend', handleListDragEnd);
+        
+        item.addEventListener('touchstart', handleListTouchStart, {passive: false});
+        item.addEventListener('touchmove', handleListTouchMove, {passive: false});
+        item.addEventListener('touchend', handleListTouchEnd, {passive: false});
+        
+        container.appendChild(item);
+    }
+}
+
 let draggedSpotNum = null;
 
-// Bắt đầu kéo
 function handleDragStart(e) {
-    // Chỉ cho phép kéo nếu ô đó có dữ liệu (đã đặt hoặc là staff)
     const isBooked = this.classList.contains('booked');
     const isStaff = this.classList.contains('staff');
-
     if (!isBooked && !isStaff) {
         e.preventDefault();
         return;
     }
-
     draggedSpotNum = this.getAttribute('data-num');
     this.classList.add('dragging');
-
-    // Thiết lập dữ liệu và hiệu ứng kéo
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', draggedSpotNum);
 }
 
-// Khi ô đang được kéo đè lên ô khác
 function handleDragOver(e) {
-    e.preventDefault(); // Cần thiết để cho phép Drop
+    e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     this.classList.add('drag-over');
 }
 
-// Khi kéo ra khỏi phạm vi một ô
 function handleDragLeave() {
     this.classList.remove('drag-over');
 }
 
-// Kết thúc kéo (dù thành công hay không)
 function handleDragEnd() {
     this.classList.remove('dragging');
-    document.querySelectorAll('.parking-spot').forEach(el => {
+    document.querySelectorAll('.parking-spot, .customer-item').forEach(el => {
         el.classList.remove('drag-over', 'dragging');
     });
 }
 
-// Xử lý khi thả chuột (Drop)
 async function handleDrop(e) {
     e.preventDefault();
     this.classList.remove('drag-over');
@@ -800,57 +895,45 @@ async function handleDrop(e) {
     const fromSpotNum = e.dataTransfer.getData('text/plain');
     const toSpotNum = this.getAttribute('data-num');
 
-    // Nếu thả cùng một chỗ thì không làm gì
     if (!fromSpotNum || fromSpotNum === toSpotNum) return;
+    await executeMoveLogic(fromSpotNum, toSpotNum);
+}
 
+async function executeMoveLogic(fromSpotNum, toSpotNum) {
     const date = document.getElementById('parkingDate').value;
     const fromRef = db.ref(`parking/${date}/${fromSpotNum}`);
     const toRef = db.ref(`parking/${date}/${toSpotNum}`);
 
     try {
-        // 1. Lấy dữ liệu ô gốc
         const snapshotFrom = await fromRef.once('value');
         const dataFrom = snapshotFrom.val();
         if (!dataFrom) return;
 
-        // 2. Kiểm tra ô đích
         const snapshotTo = await toRef.once('value');
         const dataTo = snapshotTo.val();
 
         if (dataTo) {
-            // Nếu ô đích có dữ liệu -> Hỏi để hoán đổi (Swap)
             const confirmSwap = confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？`);
             if (!confirmSwap) return;
-
-            // Thực hiện đổi chỗ
             await toRef.set(dataFrom);
             await fromRef.set(dataTo);
             showToast(`番号 ${fromSpotNum} と ${toSpotNum} を入れ替えました`);
         } else {
-            // Nếu ô đích trống -> Di chuyển và xóa ô cũ
             await toRef.set(dataFrom);
             await fromRef.remove();
             showToast(`番号 ${fromSpotNum} から ${toSpotNum} へ移動しました`);
         }
-
-        // loadParkingData() sẽ tự động cập nhật nhờ sự kiện .on('value') đã thiết lập trước đó
     } catch (error) {
-        console.error("DragDrop Error:", error);
-        showToast("移動に失敗しました (Lỗi khi di chuyển)");
+        console.error("Move Error:", error);
+        showToast("移動に失敗しました");
     }
 }
 
-    // Hỗ trợ kéo thả cho iPad/iPhone (Touch Events)
 let currentDragElement = null;
 let touchDragData = null;
 
 function handleTouchStart(e) {
-    // Chỉ kéo nếu là ô có dữ liệu
     if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
-
-    // iPad đôi khi cần ngăn chặn sự kiện mặc định ngay từ lúc chạm
-    // e.preventDefault(); // Nếu bật dòng này mà không click được thì hãy tắt đi
-
     currentDragElement = this;
     touchDragData = this.getAttribute('data-num');
     this.classList.add('dragging');
@@ -858,19 +941,12 @@ function handleTouchStart(e) {
 
 function handleTouchMove(e) {
     if (!currentDragElement) return;
-
-    // iPadOS bắt buộc phải có preventDefault trong touchmove để không cuộn trang
     if (e.cancelable) e.preventDefault(); 
 
     const touch = e.touches[0];
-    
-    // Sử dụng tọa độ chuẩn để tìm phần tử bên dưới ngón tay trên màn hình lớn của iPad
     const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-    
-    // Tìm ô bãi xe gần nhất từ điểm chạm
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
 
-    // Hiệu ứng di chuyển
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
     if (dropTarget && dropTarget !== currentDragElement) {
         dropTarget.classList.add('drag-over');
@@ -883,104 +959,255 @@ async function handleTouchEnd(e) {
     const touch = e.changedTouches[0];
     const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
-
     const fromNum = touchDragData;
     
-    // Xóa hiệu ứng ngay lập tức
     currentDragElement.classList.remove('dragging');
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
 
     if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) {
-        // Chạy logic đổi chỗ
-        const fakeEvent = {
-            preventDefault: () => {},
-            dataTransfer: { getData: () => fromNum }
-        };
-        handleDrop.call(dropTarget, fakeEvent);
+        await executeMoveLogic(fromNum, dropTarget.getAttribute('data-num'));
     }
 
-    // Reset
     currentDragElement = null;
     touchDragData = null;
 }
-    
+
+/* ================= EVENT KÉO THẢ CHO DANH SÁCH PHÍA DƯỚI ================= */
+let draggedListSpotNum = null;
+
+function handleListDragStart(e) {
+    if (!this.classList.contains('has-data')) {
+        e.preventDefault();
+        return;
+    }
+    draggedListSpotNum = this.getAttribute('data-spot-num');
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedListSpotNum);
+}
+
+function handleListDragOver(e) {
+    e.preventDefault();
+    if (this.classList.contains('has-data')) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleListDragLeave() {
+    this.classList.remove('drag-over');
+}
+
+function handleListDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over', 'dragging'));
+}
+
+async function handleListDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    const fromSpotNum = e.dataTransfer.getData('text/plain');
+    const toSpotNum = this.getAttribute('data-spot-num');
+
+    if (!fromSpotNum || !toSpotNum || fromSpotNum === toSpotNum) return;
+    await executeMoveLogic(fromSpotNum, toSpotNum);
+}
+
+let currentListDragElement = null;
+let touchListDragData = null;
+
+function handleListTouchStart(e) {
+    if (!this.classList.contains('has-data')) return;
+    currentListDragElement = this;
+    touchListDragData = this.getAttribute('data-spot-num');
+    this.classList.add('dragging');
+}
+
+function handleListTouchMove(e) {
+    if (!currentListDragElement) return;
+    if (e.cancelable) e.preventDefault();
+
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dropTarget = targetEl ? targetEl.closest('.customer-item') : null;
+
+    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over'));
+    if (dropTarget && dropTarget !== currentListDragElement && dropTarget.classList.contains('has-data')) {
+        dropTarget.classList.add('drag-over');
+    }
+}
+
+async function handleListTouchEnd(e) {
+    if (!currentListDragElement) return;
+
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dropTarget = targetEl ? targetEl.closest('.customer-item') : null;
+    const fromNum = touchListDragData;
+
+    currentListDragElement.classList.remove('dragging');
+    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over'));
+
+    if (dropTarget && fromNum && dropTarget.classList.contains('has-data')) {
+        const toNum = dropTarget.getAttribute('data-spot-num');
+        if (fromNum !== toNum) {
+            await executeMoveLogic(fromNum, toNum);
+        }
+    }
+
+    currentListDragElement = null;
+    touchListDragData = null;
+}
+
+/* ================= TẢI DỮ LIỆU VÀ ĐỒNG BỘ CẢ KHUNG MÀU SẮC ================= */
 function loadParkingData(){
-
     const date = document.getElementById('parkingDate').value;
-
     db.ref('parking/' + date).off();
 
-    db.ref('parking/' + date).on('value', (snapshot) => {
-
-        const data = snapshot.val();
-
+    function renderViewWithData(data) {
         document.querySelectorAll('.parking-spot').forEach(el => {
-
             el.classList.remove('booked', 'staff');
-
             el.querySelector('.name-display').innerText = "";
-
             el.dataset.info = "";
-
+            
             if(data && data[el.dataset.num]){
-
                 const spotData = data[el.dataset.num];
-
-                if(spotData.status === 'booked')
-                    el.classList.add('booked');
-
-                else if(spotData.status === 'staff')
-                    el.classList.add('staff');
+                if(spotData.status === 'booked') el.classList.add('booked');
+                else if(spotData.status === 'staff') el.classList.add('staff');
 
                 if(spotData.info){
-
                     el.dataset.info = JSON.stringify(spotData.info);
-
-                    el.querySelector('.name-display').innerText =
-                        spotData.info.carNumber || "";
+                    el.querySelector('.name-display').innerText = spotData.info.carNumber || "";
                 }
             }
         });
+
+        for (let i = 1; i <= 21; i++) {
+            const item = document.getElementById(`list-item-${i}`);
+            if (item) {
+                item.className = 'customer-item';
+                if(i === 4) item.classList.add('handicapped'); 
+                
+                item.removeAttribute('draggable');
+                item.removeAttribute('data-spot-num');
+                item.innerHTML = `
+                    <div class="info-box">
+                        <div class="left-content">
+                            <span class="display-meta">${i}</span>
+                            <span class="display-name">—</span>
+                        </div>
+                        <div class="right-content"></div>
+                    </div>
+                `;
+            }
+        }
+
+        if (data) {
+            Object.keys(data).forEach(spotNumStr => {
+                const spotNum = parseInt(spotNumStr);
+                if (spotNum >= 1 && spotNum <= 21) {
+                    const item = document.getElementById(`list-item-${spotNum}`);
+                    const spotData = data[spotNumStr];
+                    
+                    if (item && spotData && (spotData.status === 'booked' || spotData.status === 'staff')) {
+                        const room = (spotData.info && spotData.info.roomNumber) || "";
+                        
+                        let name = "";
+                        if (spotData.status === 'staff') {
+                            name = (spotData.info && spotData.info.carNumber) || "スタッフ"; 
+                        } else {
+                            name = (spotData.info && spotData.info.guestName) || ""; 
+                        }
+                        
+                        const carNum = (spotData.info && spotData.info.carNumber) || "";
+                        
+                        if (!name && !carNum) return;
+                        if (name.trim() === "" && carNum.trim() === "") return;
+
+                        item.classList.add('has-data');
+                        
+                        if (spotData.status === 'booked') {
+                            item.classList.add('booked');
+                        } else if (spotData.status === 'staff') {
+                            item.classList.add('staff');
+                        }
+                        
+                        item.setAttribute('draggable', 'true');
+                        item.setAttribute('data-spot-num', spotNumStr);
+                        
+                        let roomSegment = "";
+                        if (spotData.status !== 'staff' && room !== "STAFF" && room !== "") {
+                            roomSegment = `R${room} `;
+                        }
+
+                        let carSegment = "";
+                        if (spotData.status === 'booked' && carNum && carNum.trim() !== "") {
+                            if (carNum.trim() !== name.trim()) {
+                                carSegment = `<span class="display-car">${carNum}</span>`;
+                            }
+                        }
+
+                        item.innerHTML = `
+                            <div class="info-box">
+                                <div class="left-content">
+                                    <span class="display-meta">${spotNumStr} ${roomSegment}</span>
+                                    <span class="display-name">${name || "—"}</span>
+                                </div>
+                                <div class="right-content">
+                                    ${carSegment}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+    }
+
+    if (!navigator.onLine || isOffline) {
+        document.getElementById('offlineNotice').style.display = 'block';
+        const backupDataStr = localStorage.getItem('backup_parking_' + date);
+        const backupData = backupDataStr ? JSON.parse(backupDataStr) : null;
+        renderViewWithData(backupData);
+        return;
+    }
+
+    db.ref('parking/' + date).on('value', (snapshot) => {
+        document.getElementById('offlineNotice').style.display = 'none';
+        const data = snapshot.val();
+        
+        if (data) {
+            localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
+        }
+        renderViewWithData(data);
+    }, (error) => {
+        document.getElementById('offlineNotice').style.display = 'block';
+        const backupDataStr = localStorage.getItem('backup_parking_' + date);
+        const backupData = backupDataStr ? JSON.parse(backupDataStr) : null;
+        renderViewWithData(backupData);
     });
-}/* ================= next day================= */
+}
 
+/* ================= CHUYỂN NGÀY ================= */
 function changeDate(offset){
-
-    const dateInput =
-        document.getElementById('parkingDate');
-
-    const current =
-        new Date(dateInput.value);
-
+    const dateInput = document.getElementById('parkingDate');
+    const current = new Date(dateInput.value);
     current.setDate(current.getDate() + offset);
-
-    const newDate =
-         formatDateLocal(current);
-
+    const newDate = formatDateLocal(current);
     dateInput.value = newDate;
-
     handleDateChange();
-
 }
 
 /* ================= TOAST ================= */
-
 function showToast(msg){
-
     const t = document.getElementById('toast');
-
     t.innerText = msg;
-
     t.classList.add('show');
-
     setTimeout(()=>{
         t.classList.remove('show');
     },2000);
-
 }
 
 /* ================= TỰ ĐỘNG TÍNH SỐ ĐÊM ================= */
-// Khi thay đổi Số đêm -> Tự động tính lại ngày Check-out
 function updateCheckOutFromStay() {
     const checkInVal = document.getElementById('checkIn').value;
     const stayDays = parseInt(document.getElementById('stayDays').value);
@@ -988,16 +1215,11 @@ function updateCheckOutFromStay() {
 
     if (checkInVal && stayDays) {
         const startDate = new Date(checkInVal);
-        // Cộng thêm số ngày
         startDate.setDate(startDate.getDate() + stayDays);
-        
-        // Cập nhật vào ô Check-out
         checkOutInput.value = formatDateLocal(startDate);
     }
 }
 
-// Cập nhật lại hàm calculateStayDays hiện có của bạn để khi chọn ngày thủ công 
-// thì ô "Số đêm" cũng được cập nhật chính xác (Đồng bộ 2 chiều)
 function calculateStayDays() {
     const checkInVal = document.getElementById('checkIn').value;
     const checkOutVal = document.getElementById('checkOut').value;
@@ -1012,10 +1234,11 @@ function calculateStayDays() {
         if (diffDays > 0) {
             stayDaysSelect.value = diffDays;
         } else {
-            stayDaysSelect.value = 1; // Mặc định tối thiểu 1 đêm
+            stayDaysSelect.value = 1;
         }
     }
 }
+
 /* ================= STAFF MODAL LOGIC ================= */
 function openStaffModal(el) {
     currentSpot = el;
@@ -1029,17 +1252,10 @@ function closeStaffModal() {
 }
 
 async function saveStaffInfo() {
-
     if(!currentSpot) return;
-
-    const name =
-        document.getElementById('staffName').value || "スタッフ";
-
-    const spotNum =
-        currentSpot.dataset.num;
-
-    const date =
-        document.getElementById('parkingDate').value;
+    const name = document.getElementById('staffName').value || "スタッフ";
+    const spotNum = currentSpot.dataset.num;
+    const date = document.getElementById('parkingDate').value;
 
     const info = {
         roomNumber: "STAFF",
@@ -1047,54 +1263,25 @@ async function saveStaffInfo() {
         isStaff: true
     };
 
+    if(!navigator.onLine || isOffline) {
+        alert("オフライン時はデータを保存できません (Không thể lưu dữ liệu khi đang ngoại tuyến)");
+        return;
+    }
+
     await db.ref(`parking/${date}/${spotNum}`).set({
         status:'staff',
         info:info
     });
 
     showToast("スタッフ用として保存しました");
-
     closeStaffModal();
-
     loadParkingData();
 }
-/* ================= STAFF BOOKING (DOUBLE CLICK) ================= */
-async function handleStaffBooking(el) {
-    const staffName = prompt("スタッフ名を入力してください (Nhập tên nhân viên):", "スタッフ");
-    
-    if (staffName === null) return; // Nếu nhấn Cancel thì thoát
 
-    const spotNum = el.dataset.num;
-    const currentDate = document.getElementById('parkingDate').value;
-
-    const info = {
-        roomNumber: "STAFF",
-        carNumber: staffName,
-        isStaff: true // Đánh dấu là nhân viên
-    };
-
-    // Lưu vào Firebase
-    const snapshot = await db.ref('parking/' + currentDate).once('value');
-    const dayData = snapshot.val() || {};
-
-    dayData[spotNum] = {
-
-    status:'booked',
-    info:info
-
-};
-
-    await db.ref('parking/' + currentDate).set(dayData);
-    
-    showToast("スタッフ用として保存しました");
-    loadParkingData(); // Tải lại để cập nhật màu sắc
-}
-/* ================= OPEN MODAL ================= */
-
+/* ================= OPEN GUEST MODAL ================= */
 function openGuestModal(el){
     currentSpot = el;
     const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
-
     const todayStr = formatDateLocal(new Date());
 
     document.getElementById('roomNumber').value = data.roomNumber || "";
@@ -1102,7 +1289,6 @@ function openGuestModal(el){
     document.getElementById('carNumber').value = data.carNumber || "";
     document.getElementById('guestNote').value = data.guestNote || ""; 
 
-    // Quan trọng: Hiển thị đúng Check-in gốc và Số đêm tổng đã lưu
     document.getElementById('checkIn').value = data.checkIn || todayStr;
     document.getElementById('stayDays').value = data.stayDays || "1"; 
     
@@ -1114,18 +1300,20 @@ function openGuestModal(el){
 
     document.getElementById('guestModalTitle').innerText = `駐車番号 ${el.dataset.num}`;
     document.getElementById('guestModal').style.display = 'flex';
-}/* ================= CLOSE MODAL ================= */
+}
 
 function closeGuestModal(){
-
     document.getElementById('guestModal').style.display = 'none';
-
 }
 
 /* ================= SAVE INFO ================= */
-
 async function saveGuestInfo(){
     if(!currentSpot) return;
+
+    if(!navigator.onLine || isOffline) {
+        alert("オフライン時はデータを保存できません (Không thể lưu dữ liệu khi đang ngoại tuyến)");
+        return;
+    }
 
     const roomNumber = document.getElementById('roomNumber').value;
     const guestName = document.getElementById('guestName').value;
@@ -1135,16 +1323,13 @@ async function saveGuestInfo(){
 
     const originalCheckIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
-    // Dùng getAttribute để lấy số 4 chính xác nhất
     const spotNum = currentSpot.getAttribute('data-num');
 
-    // Vòng lặp lưu dữ liệu cho tất cả các ngày
     for(let i = 0; i < stayDays; i++){
         const targetDate = new Date(originalCheckIn);
         targetDate.setDate(targetDate.getDate() + i);
         const dateKey = formatDateLocal(targetDate);
 
-        // Luôn lưu TỔNG số đêm (stayDays) vào từng ngày, không dùng remainDays
         const info = {
             roomNumber,
             guestName,
@@ -1161,7 +1346,6 @@ async function saveGuestInfo(){
         });
     }
 
-    // Cập nhật hiển thị tức thì trên giao diện
     currentSpot.dataset.info = JSON.stringify({
         roomNumber, guestName, checkIn: originalCheckIn, checkOut, stayDays, carNumber, guestNote
     });
@@ -1173,11 +1357,8 @@ async function saveGuestInfo(){
     showToast("宿泊データを保存しました");
     loadParkingData();
 }
-/* ================= DELETE (Dùng chung cho cả Khách và Nhân viên) ================= */
 
-
-
-// 1. Khi nhấn nút Xóa ở Guest hoặc Staff Modal, gọi hàm này để hiện Popup xác nhận
+/* ================= DELETE PROCEDURES ================= */
 function deleteGuestInfo() {
     document.getElementById('confirmModal').style.display = 'flex';
 }
@@ -1186,23 +1367,22 @@ function deleteStaffInfo() {
     document.getElementById('confirmModal').style.display = 'flex';
 }
 
-// 2. Đóng popup xác nhận
 function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
-// 3. Thực hiện xóa thật sự khi nhấn "Có" trên Popup
-/* ================= EXECUTE DELETE (XÓA TOÀN BỘ CHUỖI NGÀY) ================= */
-/* ================= THAY THẾ BẰNG ĐOẠN NÀY ================= */
 async function executeDelete() {
     if (!currentSpot) return;
 
-    // Lấy số ô (data-num) để đảm bảo ô số 4 vẫn nhận diện được
+    if(!navigator.onLine || isOffline) {
+        alert("オフライン時はデータを削除できません (Không thể xóa dữ liệu khi đang ngoại tuyến)");
+        return;
+    }
+
     const spotNum = currentSpot.getAttribute('data-num'); 
     const dataInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
 
     try {
-        // Nếu có thông tin check-in/out thì xóa toàn bộ chuỗi ngày
         if (dataInfo && dataInfo.checkIn && dataInfo.checkOut) {
             const start = new Date(dataInfo.checkIn);
             const end = new Date(dataInfo.checkOut);
@@ -1214,305 +1394,167 @@ async function executeDelete() {
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         } else {
-            // Nếu không có info (hoặc là staff), chỉ xóa ngày hiện tại
             const date = document.getElementById('parkingDate').value;
             await db.ref(`parking/${date}/${spotNum}`).remove();
         }
 
-        // Đóng các modal
         closeConfirmModal();
         closeGuestModal();
-        if (window.closeStaffModal) closeStaffModal();
+        closeStaffModal();
         
         showToast("連泊分を含めて削除完了");
-        
-        // Load lại dữ liệu để cập nhật màu sắc
         loadParkingData();
-
     } catch (error) {
         console.error("Delete Error:", error);
-        showToast("削除 lỗi (Thất bại)");
+        showToast("削除 lỗi");
     }
 }
+
 /* ================= RESET ================= */
-
 function handleReset(){
-
     if(!confirm("すべてリセットしますか？")) return;
-
     document.querySelectorAll('.parking-spot').forEach(el=>{
-
         el.classList.remove('booked');
-
         el.dataset.info = "";
-
         el.querySelector('.name-display').innerText = "";
-
     });
-
     saveParkingData();
-
     showToast("リセット完了");
-
 }
 
 /* ================= DATE CHANGE ================= */
-
 function handleDateChange(){
-
-    const newDate =
-        document.getElementById('parkingDate').value;
-
-    localStorage.setItem(
-        'parking_last_visited_date',
-        newDate
-    );
-
+    const newDate = document.getElementById('parkingDate').value;
+    localStorage.setItem('parking_last_visited_date', newDate);
     loadParkingData();
-
 }
 
-/* ================= SAVE FIREBASE ================= */
-
+/* ================= SAVE FIREBASE (BACKUP) ================= */
 function saveParkingData(){
-
-    const date =
-        document.getElementById('parkingDate').value;
-
+    const date = document.getElementById('parkingDate').value;
     const data = {};
 
     document.querySelectorAll('.parking-spot').forEach(spot=>{
-
         const num = spot.dataset.num;
-
         data[num] = {
-
-           status:
-    spot.classList.contains('booked')
-        ? 'booked'
-        : spot.classList.contains('staff')
-            ? 'staff'
-            : 'empty',
-
-            info: spot.dataset.info
-                ? JSON.parse(spot.dataset.info)
-                : {}
-
+           status: spot.classList.contains('booked') ? 'booked' : spot.classList.contains('staff') ? 'staff' : 'empty',
+           info: spot.dataset.info ? JSON.parse(spot.dataset.info) : {}
         };
-
     });
-
     db.ref('parking/' + date).set(data);
+}   
 
-}	
+/* ================= EXPORT EXCEL ================= */
 async function exportToExcel() {
-
     try {
+        const date = document.getElementById('parkingDate').value;
+        let data = null;
 
-        const date =
-            document.getElementById('parkingDate').value;
-
-        const snapshot =
-            await db.ref('parking/' + date).once('value');
-
-        const data = snapshot.val();
+        if (!navigator.onLine || isOffline) {
+            const backupDataStr = localStorage.getItem('backup_parking_' + date);
+            data = backupDataStr ? JSON.parse(backupDataStr) : null;
+        } else {
+            const snapshot = await db.ref('parking/' + date).once('value');
+            data = snapshot.val();
+        }
 
         if (!data) {
-
             showToast("データがありません");
             return;
         }
 
-        // LOAD TEMPLATE
-        const fileInput =
-    document.getElementById('excelTemplate');
+        const fileInput = document.getElementById('excelTemplate');
+        fileInput.click();
 
-fileInput.click();
+        fileInput.onchange = async function(e){
+            const file = e.target.files[0];
+            if(!file){
+                showToast("テンプレート未選択");
+                return;
+            }
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(arrayBuffer);
+            const worksheet = workbook.getWorksheet(1);
 
-fileInput.onchange = async function(e){
+            worksheet.getCell("E1").value = date;
+            let row = 3;
 
-const file = e.target.files[0];
+            const sortedKeys = Object.keys(data).sort((a,b)=>parseInt(a)-parseInt(b));
 
-if(!file){
+            sortedKeys.forEach(num => {
+                const item = data[num];
+                if(item.status === 'booked' && item.info){
+                    let totalDays = 0;
+                    if(item.info.checkIn && item.info.checkOut){
+                        const start = new Date(item.info.checkIn);
+                        const end = new Date(item.info.checkOut);
+                        totalDays = Math.ceil((end-start)/(1000*60*60*24));
+                    }
 
-    showToast("テンプレート未選択");
+                    worksheet.getCell(`A${row}`).value = num;
+                    worksheet.getCell(`B${row}`).value = item.info.roomNumber || "";
+                    worksheet.getCell(`C${row}`).value = item.info.guestName || "";
+                    worksheet.getCell(`D${row}`).value = item.info.carNumber || "";
+                    
+                    const checkInDate = item.info.checkIn ? item.info.checkIn.substring(5) : "";
+                    const checkOutDate = item.info.checkOut ? item.info.checkOut.substring(5) : "";
 
-    return;
-}
-
-const arrayBuffer =
-    await file.arrayBuffer();
-
-        const workbook = new ExcelJS.Workbook();
-
-        await workbook.xlsx.load(arrayBuffer);
-
-        const worksheet =
-            workbook.getWorksheet(1);
-
-        // YEAR MONTH
-       const d = new Date(date);
-
-const formattedDate =
-    `${d.getFullYear()}年 ${d.getMonth()+1}月 ${d.getDate()}日`;
-
-worksheet.getCell("E1").value = date;
-        // START ROW
-        let row = 3;
-
-        const sortedKeys = Object.keys(data)
-            .sort((a,b)=>parseInt(a)-parseInt(b));
-
-        sortedKeys.forEach(num => {
-
-            const item = data[num];
-
-            if(item.status === 'booked' && item.info){
-
-                let totalDays = 0;
-
-                if(item.info.checkIn && item.info.checkOut){
-
-                    const start =
-                        new Date(item.info.checkIn);
-
-                    const end =
-                        new Date(item.info.checkOut);
-
-                    totalDays = Math.ceil(
-                        (end-start)/(1000*60*60*24)
-                    );
+                    worksheet.getCell(`E${row}`).value = checkInDate;
+                    worksheet.getCell(`F${row}`).value = checkOutDate;
+                    worksheet.getCell(`G${row}`).value = totalDays + "泊";
+                    
+                    for(let col = 1; col <= 7; col++){
+                        worksheet.getCell(row, col).alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+                    row++;
                 }
+            });
 
-                worksheet.getCell(`A${row}`).value = num;
-
-                worksheet.getCell(`B${row}`).value =
-                    item.info.roomNumber || "";
-
-                worksheet.getCell(`C${row}`).value =
-                    item.info.guestName || "";
-
-                worksheet.getCell(`D${row}`).value =
-                    item.info.carNumber || "";
-               const checkInDate =
-    item.info.checkIn
-    ? item.info.checkIn.substring(5)
-    : "";
-
-const checkOutDate =
-    item.info.checkOut
-    ? item.info.checkOut.substring(5)
-    : "";
-
-worksheet.getCell(`E${row}`).value =
-    checkInDate;
-
-worksheet.getCell(`F${row}`).value =
-    checkOutDate;
-worksheet.getCell(`G${row}`).value =
-    totalDays + "泊";
-for(let col = 1; col <= 7; col++){
-
-    worksheet.getCell(row, col).alignment = {
-
-        vertical: 'middle',
-        horizontal: 'center'
-
-    };
-}
-                row++;
-            }
-        });
-
-        // EXPORT
-        const buffer =
-            await workbook.xlsx.writeBuffer();
-
-        const blob = new Blob(
-            [buffer],
-            {
-                type:
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            }
-        );
-
-        const link =
-            document.createElement("a");
-
-        link.href =
-            window.URL.createObjectURL(blob);
-
-        link.download =
-            `駐車場_${date}.xlsx`;
-
-        link.click();
-
-        showToast("Excel出力完了");
-};
-
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `駐車場_${date}.xlsx`;
+            link.click();
+            showToast("Excel出力完了");
+        };
     } catch(error){
-
         console.error(error);
-
         showToast(error.message);
-
-        console.error(error);
     }
 }
   
+/* ================= REFRESH DATA ================= */
 async function refreshParkingData(){
     showToast("更新中...");
-
-    // 1. Lấy ngày hôm nay theo định dạng YYYY-MM-DD
     const today = formatDateLocal(new Date());
-
-    // 2. Cập nhật giá trị vào ô input ngày
     const dateInput = document.getElementById('parkingDate');
     dateInput.value = today;
-
-    // 3. Lưu lại vào localStorage để đồng bộ
     localStorage.setItem('parking_last_visited_date', today);
-
-    // 4. Tải lại dữ liệu của ngày hôm nay
     loadParkingData();
 
     setTimeout(()=>{
         showToast("最新データ更新完了");
     }, 500);
 }
+
 window.addEventListener('keydown', function(e){
-
-    if(
-        e.key === 'F5' ||
-        (e.ctrlKey && e.key === 'r')
-    ){
-
+    if(e.key === 'F5' || (e.ctrlKey && e.key === 'r')){
         e.preventDefault();
-
         refreshParkingData();
     }
 });
 
-// Pull refresh trên mobile / iPad
 let touchStartY = 0;
-
 window.addEventListener('touchstart', function(e){
-
     touchStartY = e.touches[0].clientY;
-
 });
-
 window.addEventListener('touchend', function(e){
-
-    const touchEndY =
-        e.changedTouches[0].clientY;
-
-    // kéo xuống khoảng 120px
+    const touchEndY = e.changedTouches[0].clientY;
     if(touchEndY - touchStartY > 120){
-
         refreshParkingData();
     }
-
 });
 </script>
 
