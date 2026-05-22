@@ -179,7 +179,7 @@ input[type="date"]{
     text-orientation: upright;
     font-size: clamp(14px, 1.8vh, 14px); 
     margin-top: 5px;
-    height: 85%;
+    height: 70%; /* Thu bớt chiều cao để nhường không gian cho dấu sao to */
     width: 90%;
     background: rgba(255, 255, 255, .2);
     border-radius: 3px;
@@ -195,6 +195,15 @@ input[type="date"]{
     text-overflow: clip;      
     box-sizing: border-box;
     pointer-events: none;     
+}
+
+/* CHỈNH DẤU SAO TRÊN SƠ ĐỒ TO HƠN */
+.note-star {
+    font-size: 24px; /* Tăng từ 14px lên 24px cho to hẳn lên */
+    color: #f1c40f; 
+    position: absolute;
+    bottom: 2px;
+    display: none; 
 }
 
 .hatched-zone{
@@ -371,6 +380,7 @@ input[type="date"]{
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    align-items: center;
 }
 
 .display-meta {
@@ -385,11 +395,19 @@ input[type="date"]{
 .right-content {
     display: flex;
     align-items: center;
+    gap: 6px;
 }
 
 .display-car {
     color: rgba(255, 255, 255, 0.75);
     font-weight: normal;
+}
+
+/* CHỈNH DẤU SAO Ở BẢNG DANH SÁCH DƯỚI TO HƠN */
+.list-note-star {
+    color: #f1c40f;
+    font-size: 20px; /* Tăng từ 14px lên 20px cho rõ nét */
+    line-height: 1;
 }
 
 #toast{
@@ -763,10 +781,9 @@ async function hourlyBackupTask() {
             const data = snapshot.val();
             if (data) {
                 localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
-                console.log(`[Hệ thống] Đã tự động sao lưu dữ liệu ngày ${date} thành công.`);
             }
         } catch (e) {
-            console.log("Không thể tự động sao lưu do lỗi kết nối.");
+            console.log("Auto-backup failed.");
         }
     }
 }
@@ -786,7 +803,7 @@ function renderMap(){
         div.setAttribute('data-num', spot.id);
         div.draggable = true;
         const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
-        div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div>`;
+        div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div><div class="note-star">★</div>`;
 
         let clickTimer = null;
         div.onclick = (e) => {
@@ -1067,6 +1084,7 @@ function loadParkingData(){
         document.querySelectorAll('.parking-spot').forEach(el => {
             el.classList.remove('booked', 'staff');
             el.querySelector('.name-display').innerText = "";
+            el.querySelector('.note-star').style.display = 'none'; 
             el.dataset.info = "";
             
             if(data && data[el.dataset.num]){
@@ -1077,6 +1095,10 @@ function loadParkingData(){
                 if(spotData.info){
                     el.dataset.info = JSON.stringify(spotData.info);
                     el.querySelector('.name-display').innerText = spotData.info.carNumber || "";
+
+                    if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") {
+                        el.querySelector('.note-star').style.display = 'block';
+                    }
                 }
             }
         });
@@ -1110,6 +1132,7 @@ function loadParkingData(){
                     
                     if (item && spotData && (spotData.status === 'booked' || spotData.status === 'staff')) {
                         const room = (spotData.info && spotData.info.roomNumber) || "";
+                        const note = (spotData.info && spotData.info.guestNote) || "";
                         
                         let name = "";
                         if (spotData.status === 'staff') {
@@ -1146,11 +1169,17 @@ function loadParkingData(){
                             }
                         }
 
+                        let listStarSegment = "";
+                        if (note && note.trim() !== "") {
+                            listStarSegment = `<span class="list-note-star">★</span>`;
+                        }
+
                         item.innerHTML = `
                             <div class="info-box">
                                 <div class="left-content">
                                     <span class="display-meta">${spotNumStr} ${roomSegment}</span>
                                     <span class="display-name">${name || "—"}</span>
+                                    ${listStarSegment}
                                 </div>
                                 <div class="right-content">
                                     ${carSegment}
@@ -1264,7 +1293,7 @@ async function saveStaffInfo() {
     };
 
     if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを保存できません (Không thể lưu dữ liệu khi đang ngoại tuyến)");
+        alert("オフライン時はデータを保存できません");
         return;
     }
 
@@ -1311,7 +1340,7 @@ async function saveGuestInfo(){
     if(!currentSpot) return;
 
     if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを保存できません (Không thể lưu dữ liệu khi đang ngoại tuyến)");
+        alert("オフライン時はデータを保存できません");
         return;
     }
 
@@ -1375,7 +1404,7 @@ async function executeDelete() {
     if (!currentSpot) return;
 
     if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを削除できません (Không thể xóa dữ liệu khi đang ngoại tuyến)");
+        alert("オフライン時はデータを削除できません");
         return;
     }
 
