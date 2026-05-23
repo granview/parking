@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>駐車場管理システム</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -15,171 +14,108 @@
 <link class="icon" type="image/png" href="favicon.png">
 
 <style>
-
-body{
-    font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;    background:#f4f6f8;
-    margin:0;
-    padding:5px 10px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:100vh;
+body {
+    font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 5px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-}
-
-.controls{
-    display:flex;
-    gap:20px;
-    align-items:center;
-    margin-bottom:5px;
-    background:#fff;
-    padding:10px 25px;
-    border-radius:8px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.05);
-    width:98vw;
-    max-width:1500px;
-    box-sizing:border-box;
-}
-
-input[type="date"]{
-    padding:5px;
-    border:1px solid #ddd;
-    border-radius:4px;
-}
-
-.btn-reset{
-    background:#e74c3c;
-    color:#fff;
-    border:none;
-    padding:8px 15px;
-    border-radius:4px;
-    cursor:pointer;
-}
-
-.main-title{
-    font-size:30px;
-    font-weight:300;
-    color:#2c3e50;
-    letter-spacing:8px;
-
-}
-.top-bar{
-    width:98vw;
-    max-width:1500px;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:10px;
-}
-
-.date-controls{
-    width:98vw;
-    max-width:1500px;
-
-    display:flex;
-    justify-content:flex-end;
-
-    padding-right:10px;
-    box-sizing:border-box;
-
-    align-items:center;
-    gap:6px;
-    font-size:12px;
-    margin-bottom :5px
-}
-.date-controls input[type="date"]{
-    padding:3px 6px;
-    font-size:12px;
-    height:20px;
-}
-
-.date-controls button{
-    height:28px;
-    padding:0 8px;
-    border:none;
-    border-radius:4px;
-    color:black;
-    cursor:pointer;
-    font-size:12px;
-}
-
-.parking-lot-map{
-    position:relative;
-    background:#fff;
-    border:2px solid #34495e;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.05);
-    width:98vw;
-    max-width:1500px;
-    padding:30px;
-    box-sizing:border-box;
-}
-
-.grid-container{
-    display:grid;
-    gap:10px;
-    grid-template-rows:140px 0px 40px 70px 140px;
-    grid-template-columns:repeat(19,1fr);
-    width:100%;
-}
-
-.top-row-spot {
-    grid-row: 1;
-    height: 100%; 
-}
-
-#spot-19, #spot-20, #spot-21 {
-    grid-row: 5;
-    height: 100%;
-}
-
-.short-rect {
-    grid-row: 1 / span 3; 
-}
-.parking-spot{
-    background:#2ecc71;
-    border:1.5px solid #27ae60;
-    border-radius:4px;
-    color:#fff;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    font-size:20px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:all .2s;
-    padding:6px 2px;
-    position:relative;
-    overflow:hidden;
-    user-select:none;
-    -webkit-user-select: none; 
     user-select: none;
-    -webkit-touch-callout: none; 
+}
+
+.date-controls {
+    width: 98vw;
+    max-width: 1500px;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.date-controls input[type="date"] {
+    padding: 3px 6px;
+    font-size: 12px;
+    height: 20px;
+}
+
+.date-controls button {
+    height: 28px;
+    padding: 0 8px;
+    border: none;
+    border-radius: 4px;
+    color: black;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.main-title {
+    font-size: 30px;
+    font-weight: 300;
+    color: #2c3e50;
+    letter-spacing: 8px;
+}
+
+.parking-lot-map {
+    position: relative;
+    background: #fff;
+    border: 2px solid #34495e;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    width: 98vw;
+    max-width: 1500px;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.grid-container {
+    display: grid;
+    gap: 10px;
+    grid-template-rows: 140px 0px 40px 70px 140px;
+    grid-template-columns: repeat(19, 1fr);
+    width: 100%;
+}
+
+.top-row-spot { grid-row: 1; height: 100%; }
+#spot-19, #spot-20, #spot-21 { grid-row: 5; height: 100%; }
+.short-rect { grid-row: 1 / span 3; }
+
+.parking-spot {
+    background: #2ecc71;
+    border: 1.5px solid #27ae60;
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all .2s;
+    padding: 6px 2px;
+    position: relative;
+    overflow: hidden;
     touch-action: none; 
 }
 
-.parking-spot.booked{
-    background:#e74c3c !important;
-    border-color:#c0392b !important;
-}
-
-.parking-spot.staff{
-    background:#f39c12 !important;
-    border-color:#e67e22 !important;
-}
-
-.parking-spot.handicapped{
-    background:#3498db;
-    border-color:#2980b9;
-}
+.parking-spot.booked { background: #e74c3c !important; border-color: #c0392b !important; }
+.parking-spot.staff { background: #f39c12 !important; border-color: #e67e22 !important; }
+.parking-spot.handicapped { background: #3498db; border-color: #2980b9; }
 
 .name-display {
     writing-mode: vertical-rl;
     text-orientation: upright;
     font-size: clamp(14px, 1.8vh, 14px); 
     margin-top: 5px;
-    height: 70%; /* Thu bớt chiều cao để nhường không gian cho dấu sao to */
+    height: 70%;
     width: 90%;
     background: rgba(255, 255, 255, .2);
     border-radius: 3px;
@@ -197,89 +133,43 @@ input[type="date"]{
     pointer-events: none;     
 }
 
-/* CHỈNH DẤU SAO TRÊN SƠ ĐỒ TO HƠN */
 .note-star {
-    font-size: 24px; /* Tăng từ 14px lên 24px cho to hẳn lên */
+    font-size: 24px;
     color: #f1c40f; 
     position: absolute;
     bottom: 2px;
     display: none; 
 }
 
-.hatched-zone{
-    grid-column:4;
-    grid-row:1 / span 3;
-    background-image:repeating-linear-gradient(
-        45deg,
-        #f9f9f9,
-        #f9f9f9 5px,
-        #eee 5px,
-        #eee 10px
-    );
-    border:1px solid #eee;
+.hatched-zone {
+    grid-column: 4;
+    grid-row: 1 / span 3;
+    background-image: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 5px, #eee 5px, #eee 10px);
+    border: 1px solid #eee;
 }
 
-.short-rect{
-    grid-row:1 / span 3;
+#spot-1 { grid-column: 1; } #spot-2 { grid-column: 2; } #spot-3 { grid-column: 3; }
+#spot-4 { grid-column: 5 / span 1; grid-row: 1 / span 3; }
+#spot-5 { grid-column: 6; } #spot-6 { grid-column: 7; } #spot-7 { grid-column: 8; } #spot-8 { grid-column: 9; } #spot-9 { grid-column: 10; }
+
+.main-road {
+    grid-row: 4; grid-column: 1 / span 19;
+    display: flex; align-items: center; justify-content: center;
+    color: #ccc; font-size: 11px; letter-spacing: 5px;
 }
 
-#spot-1{grid-column:1;}
-#spot-2{grid-column:2;}
-#spot-3{grid-column:3;}
+#spot-21 { grid-row: 5; grid-column: 17; }
+#spot-20 { grid-row: 5; grid-column: 18; }
+#spot-19 { grid-row: 5; grid-column: 19; }
 
-#spot-4{
-    grid-column:5 / span 1;
-    grid-row:1 / span 3;
+.legend {
+    margin-top: 25px; display: flex; gap: 40px; padding: 15px 40px;
+    background: #fff; border-radius: 10px; border: 1px solid #eee;
 }
+.legend-item { display: flex; align-items: center; gap: 12px; }
+.color-box { width: 24px; height: 24px; border-radius: 4px; }
 
-.top-row-spot{
-    grid-row:1;
-}
-
-#spot-5{grid-column:6;}
-#spot-6{grid-column:7;}
-#spot-7{grid-column:8;}
-#spot-8{grid-column:9;}
-#spot-9{grid-column:10;}
-
-.main-road{
-    grid-row:4;
-    grid-column:1 / span 19;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#ccc;
-    font-size:11px;
-    letter-spacing:5px;
-}
-
-#spot-21{grid-row:5;grid-column:17;}
-#spot-20{grid-row:5;grid-column:18;}
-#spot-19{grid-row:5;grid-column:19;}
-
-.legend{
-    margin-top:25px;
-    display:flex;
-    gap:40px;
-    padding:15px 40px;
-    background:#fff;
-    border-radius:10px;
-    border:1px solid #eee;
-}
-
-.legend-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.color-box{
-    width:24px;
-    height:24px;
-    border-radius:4px;
-}
-
-/* ================= CUSTOMER LIST BOX STYLES ================= */
+/* ================= CUSTOMER LIST EXCEL TABLE STYLES ================= */
 .customer-list-container {
     width: 98vw;
     max-width: 1500px;
@@ -291,276 +181,171 @@ input[type="date"]{
     box-sizing: border-box;
 }
 
-.list-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #7f8c8d;
-    margin-top: 0;
+.list-title-center {
+    font-weight: bold; 
+    font-size: 20px; 
+    color: #2c3e50; 
     margin-bottom: 20px;
+    text-align: center;
     letter-spacing: 2px;
-    text-align: center;
 }
 
-.customer-4-columns {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    align-items: start;
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-.column-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.customer-item {
-    display: flex;
-    align-items: center;
-    background: #2ecc71; 
-    border: 1.5px solid #27ae60;
-    border-radius: 4px;
-    padding: 10px 14px;
-    font-size: 14px; 
+/* Banner tiêu đề hàng ngang màu xanh đậm giống ô số 4, chữ màu trắng */
+.excel-table th {
+    background-color: #3498db !important; 
+    color: #ffffff !important;
     font-weight: bold;
-    color: #fff;
-    transition: all 0.2s ease;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-    box-sizing: border-box;
-    min-height: 42px;
+    font-size: 15px;
+    padding: 12px 10px;
+    border: 1px solid #2980b9;
 }
 
-.customer-item.has-data {
-    cursor: grab;
-}
-
-.customer-item.booked {
-    background: #e74c3c !important;
-    border-color: #c0392b !important;
-}
-
-.customer-item.staff {
-    background: #f39c12 !important;
-    border-color: #e67e22 !important;
-}
-
-.customer-item.handicapped {
-    background: #3498db !important;
-    border-color: #2980b9 !important;
-}
-
-.customer-item.dragging {
-    opacity: 0.4;
-    background: #e0e0e0 !important;
-    border-color: #bbb !important;
-}
-
-.customer-item.drag-over {
-    border: 2px dashed #3498db !important;
-    background: #e8f4f8 !important;
-    color: #333 !important;
-}
-
-.info-box {
-    flex-grow: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;
-    width: 100%;
-}
-
-.left-content {
-    display: flex;
-    gap: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    align-items: center;
-}
-
-.display-meta {
-    color: rgba(255, 255, 255, 0.75); 
-    font-weight: normal;
-}
-
-.display-name {
-    color: #ffffff;
-}
-
-.right-content {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.display-car {
-    color: rgba(255, 255, 255, 0.75);
-    font-weight: normal;
-}
-
-/* CHỈNH DẤU SAO Ở BẢNG DANH SÁCH DƯỚI TO HƠN */
-.list-note-star {
-    color: #f1c40f;
-    font-size: 20px; /* Tăng từ 14px lên 20px cho rõ nét */
-    line-height: 1;
-}
-
-#toast{
-    position:fixed;
-    top:-100px;
-    left:50%;
-    transform:translateX(-50%);
-    background:#34495e;
-    color:white;
-    padding:12px 30px;
-    border-radius:50px;
-    transition:top .5s ease;
-    z-index:2000;
-}
-
-#toast.show{
-    top:20px;
-}
-
-/* Thanh thông báo Chế độ Offline */
-#offlineNotice {
-    display: none;
-    background: #e74c3c;
-    color: white;
-    width: 100%;
+/* Khung dữ liệu bên dưới tăng cỡ chữ to lên cho dễ nhìn */
+.excel-table td {
+    border: 1px solid #ddd;
+    padding: 12px 10px;
     text-align: center;
-    padding: 5px 0;
+    font-size: 16px; 
+}
+
+/* Màu nền dòng chẵn trắng / lẻ xám */
+.excel-table tbody tr:nth-child(even) {
+    background-color: #ffffff; 
+}
+.excel-table tbody tr:nth-child(odd) {
+    background-color: #f1f5f9; 
+}
+
+.col-stt {
+    font-weight: bold;
+    color: #475569;
+}
+
+/* Khung phòng định dạng font chữ giống khách hàng */
+.col-room-number {
+    font-weight: normal;
+    color: #333333;
+}
+
+/* Khung tên khách đặt tự giãn rộng nếu tên dài */
+.col-guest-name {
+    width: 180px; 
+    white-space: nowrap; 
+    text-align: left !important;
+    padding-left: 15px !important;
+}
+
+/* Biển số xe chữ to màu xanh dương đậm */
+.col-car-number {
+    font-weight: bold;
+    color: #1d4ed8; 
+    font-size: 18px !important; 
+}
+
+.check-col {
+    width: 45px;
+}
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #e74c3c; 
+}
+
+/* Trạng thái thanh toán dạng vòng tròn */
+.status-circle {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 26px;
+    border-radius: 50%;
+    text-align: center;
     font-weight: bold;
     font-size: 13px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 9999;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    box-sizing: border-box;
+}
+.status-circle.seisan-zai {
+    border: 2px solid #2ecc71;
+    color: #2ecc71;
+    background-color: #eafaf1;
+}
+.status-circle.seisan-mi {
+    border: 2px solid #e74c3c;
+    color: #e74c3c;
+    background-color: #fdedec;
+}
+
+.seisan-toggle-btn {
+    width: 60px;
+    height: 60px;
+    line-height: 56px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 3px solid #2ecc71;
+    color: #2ecc71;
+    background: #eafaf1;
+    user-select: none;
+    margin: 0 auto;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+.seisan-toggle-btn.unpaid {
+    border-color: #e74c3c;
+    color: #e74c3c;
+    background: #fdedec;
+}
+
+#toast {
+    position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+    background: #34495e; color: white; padding: 12px 30px; border-radius: 50px;
+    transition: top .5s ease; z-index: 2000;
+}
+#toast.show { top: 20px; }
+#offlineNotice {
+    display: none; background: #e74c3c; color: white; width: 100%; text-align: center;
+    padding: 5px 0; font-weight: bold; font-size: 13px; position: fixed; top: 0; left: 0; z-index: 9999;
 }
 
 /* ================= MODAL ================= */
-#guestModal{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:5000;
+#guestModal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,.5); display: none; justify-content: center; align-items: center; z-index: 5000;
 }
-
 .modal-box {
-    background: #fff;
-    width: 450px;
-    max-width: 90vw; 
-    border-radius: 12px;
-    padding: 30px;
-    box-sizing: border-box;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    background: #fff; width: 450px; max-width: 90vw; border-radius: 12px; padding: 30px;
+    box-sizing: border-box; box-shadow: 0 15px 40px rgba(0,0,0,0.2);
 }
-.modal-title{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:20px;
-    text-align:center;
+.modal-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+.form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
+.form-group { flex: 1; margin-bottom: 15px; display: flex; flex-direction: column; }
+.form-group label { font-size: 12px; color: #888; margin-bottom: 6px; font-weight: bold; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px;
+    font-size: 15px; background-color: #fcfcfc; box-sizing: border-box; color: #333;
 }
-.form-row {
-    display: flex;
-    gap: 10px; 
-    margin-bottom: 10px;
-    align-items: flex-end;
-}
-
-.form-group {
-    flex: 1; 
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 6px;
-    font-weight: bold;
-}
-
-.form-group input, 
-.form-group select, 
-.form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 15px;
-    background-color: #fcfcfc;
-    -webkit-appearance: none; 
-    box-sizing: border-box;
-    color: #333;
-}
-
-.room-small {
-    flex: 0 0 100px !important; 
-}
-
-.stay-small {
-    flex: 0 0 90px !important; 
-}
-
-.check-large {
-    flex: 1;
-}
-
-input[type="date"] {
-    position: relative;
-    min-height: 45px;
-}
-
-.modal-buttons{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
-}
-
-.modal-buttons button{
-    flex:1;
-    border:none;
-    padding:12px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:15px;
-}
-
-.btn-save{
-    background:#2ecc71;
-    color:white;
-}
-
-.btn-close{
-    background:#95a5a6;
-    color:white;
-}
-
-.btn-delete{
-    background:#e74c3c;
-    color:white;
-}
-
+.room-small { flex: 0 0 100px !important; }
+.stay-small { flex: 0 0 90px !important; }
+.check-large { flex: 1; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+.modal-buttons button { flex: 1; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+.btn-save { background: #2ecc71; color: white; }
+.btn-close { background: #95a5a6; color: white; }
+.btn-delete { background: #e74c3c; color: white; }
 </style>
 </head>
 
 <body>
 
-<div id="offlineNotice">⚠️ オフラインモード: 保存されたバックアップデータを表示しています (Chế độ Ngoại tuyến)</div>
+<div id="offlineNotice">⚠️ オフラインモード: 保存されたバックアップデータを表示しています</div>
 <div id="toast">通知</div>
 
 <div style="display:flex;align-items:center;gap:8px;">
@@ -571,14 +356,10 @@ input[type="date"] {
     <button onclick="changeDate(-1)">◀</button>
     <input type="date" id="parkingDate" onchange="handleDateChange()">
     <button onclick="changeDate(1)">▶</button>
-
-    <button onclick="exportToExcel()" class="pdf-btn" style="background:#2980b9 !important; color: #fff;">
-        EXCEL
-    </button>
+    <button onclick="clearAllRowChecks()" style="background:#e74c3c; color:white; font-weight:bold;">🔳 チェック解除</button>
+    <button onclick="exportToExcel()" style="background:#2980b9 !important; color: #fff;">EXCEL</button>
     <input type="file" id="excelTemplate" accept=".xlsx" style="display:none">
-    <button onclick="refreshParkingData()" style="background:#2980b9;color:white;">
-        🔄 更新
-    </button>
+    <button onclick="refreshParkingData()" style="background:#2980b9;color:white;">🔄 更新</button>
 </div>
 
 <div class="parking-lot-map">
@@ -586,32 +367,31 @@ input[type="date"] {
 </div>
 
 <div class="legend">
-    <div class="legend-item">
-        <div class="color-box" style="background:#2ecc71;"></div>
-        空き
-    </div>
-    <div class="legend-item">
-        <div class="color-box" style="background:#e74c3c;"></div>
-        予約済
-    </div>
-    <div class="legend-item">
-        <div class="color-box" style="background:#f39c12;"></div>
-        スタッフ用&予備
-    </div>
-    <div class="legend-item">
-        <div class="color-box" style="background:#3498db;"></div>
-        身障者用
-    </div>
+    <div class="legend-item"><div class="color-box" style="background:#2ecc71;"></div>空き</div>
+    <div class="legend-item"><div class="color-box" style="background:#e74c3c;"></div>予約済</div>
+    <div class="legend-item"><div class="color-box" style="background:#f39c12;"></div>スタッフ用&予備</div>
+    <div class="legend-item"><div class="color-box" style="background:#3498db;"></div>身障者用</div>
 </div>
 
 <div class="customer-list-container">
-    <div class="list-title">顧客リスト</div>
-    <div class="customer-4-columns">
-        <div class="column-group" id="col-group-1"></div>
-        <div class="column-group" id="col-group-2"></div>
-        <div class="column-group" id="col-group-3"></div>
-        <div class="column-group" id="col-group-4"></div>
-    </div>
+    <div class="list-title-center">駐車場管理表</div>
+    <table class="excel-table">
+        <thead>
+            <tr>
+                <th style="width: 45px; background-color: #2980b9 !important;">確認</th>
+                <th style="width: 60px;">台数</th>
+                <th style="width: 90px;">部屋番号</th>
+                <th class="col-guest-name">お客様名</th>
+                <th style="width: 120px;">車番</th>
+                <th style="width: 110px;">利用開始日</th>
+                <th style="width: 110px;">利用最終日</th>
+                <th style="width: 90px;">利用日数</th>
+                <th style="width: 80px;">精算</th>
+            </tr>
+        </thead>
+        <tbody id="excelTableBody">
+            </tbody>
+    </table>
 </div>
 
 <div id="guestModal">
@@ -641,11 +421,17 @@ input[type="date"] {
                 <select id="stayDays" onchange="updateCheckOutFromStay()"></select>
             </div>
         </div>
-        <div class="form-group">
-            <label>車両番号</label>
-            <input type="text" id="carNumber" inputmode="numeric">
+        <div class="form-row" style="align-items: center;">
+            <div class="form-group" style="margin-bottom:0;">
+                <label>車両番号</label>
+                <input type="text" id="carNumber" inputmode="numeric">
+            </div>
+            <div class="form-group" style="flex: 0 0 100px; text-align: center; margin-bottom:0;">
+                <label style="display:block; text-align:center;">精算状態</label>
+                <div id="seisanToggle" class="seisan-toggle-btn" onclick="toggleSeisanModalStatus()">済</div>
+            </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-top: 15px;">
             <label>メモ</label>
             <textarea id="guestNote" rows="2" placeholder="メモ入力..."></textarea>
         </div>
@@ -664,10 +450,7 @@ input[type="date"] {
             <label>スタッフ名 or 予備</label>
             <input type="text" id="staffName" placeholder="名前を入力" list="staffOptions">
             <datalist id="staffOptions">
-                <option value="スタッフ">
-                <option value="予備">
-                <option value="返却">
-                <option value="押さえ">
+                <option value="スタッフ"><option value="予備"><option value="返却"><option value="押さえ">
             </datalist>
         </div>
         <div class="modal-buttons">
@@ -681,7 +464,7 @@ input[type="date"] {
 <div id="confirmModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); display:none; justify-content:center; align-items:center; z-index:6000;">
     <div class="modal-box" style="width: 320px; text-align: center;">
         <div style="font-size: 50px; color: #e74c3c; margin-bottom: 10px;">⚠️</div>
-        <div class="modal-title" style="margin-bottom: 20px;">本当に削除しますか？<br><small></div>
+        <div class="modal-title" style="margin-bottom: 20px;">本当に削除しますか？</div>
         <div class="modal-buttons">
             <button class="btn-delete" onclick="executeDelete()">はい</button>
             <button class="btn-close" onclick="closeConfirmModal()">いいえ</button>
@@ -690,7 +473,6 @@ input[type="date"] {
 </div>
 
 <script>
-
 /* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCWV0CdSSDznxXKdlTbJc4-AMrjVr51Hlo",
@@ -705,35 +487,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ================= SPOT CONFIG ================= */
 const spotConfig = [
-    { id:1, type:'short-rect' },
-    { id:2, type:'short-rect' },
-    { id:3, type:'short-rect' },
-    { id:4, type:'handicapped' },
-    { id:5, type:'top-row-spot' },
-    { id:6, type:'top-row-spot' },
-    { id:7, type:'top-row-spot' },
-    { id:8, type:'top-row-spot' },
-    { id:9, type:'top-row-spot' },
-    { id:10, type:'short-rect' },
-    { id:11, type:'short-rect' },
-    { id:12, type:'short-rect' },
-    { id:13, type:'short-rect' },
-    { id:14, type:'short-rect' },
-    { id:15, type:'short-rect' },
-    { id:16, type:'short-rect' },
-    { id:17, type:'short-rect' },
-    { id:18, type:'short-rect' },
-    { id:21, type:'normal' },
-    { id:20, type:'normal' },
-    { id:19, type:'normal' }
+    { id:1, type:'short-rect' }, { id:2, type:'short-rect' }, { id:3, type:'short-rect' }, { id:4, type:'handicapped' },
+    { id:5, type:'top-row-spot' }, { id:6, type:'top-row-spot' }, { id:7, type:'top-row-spot' }, { id:8, type:'top-row-spot' }, { id:9, type:'top-row-spot' },
+    { id:10, type:'short-rect' }, { id:11, type:'short-rect' }, { id:12, type:'short-rect' }, { id:13, type:'short-rect' }, { id:14, type:'short-rect' },
+    { id:15, type:'short-rect' }, { id:16, type:'short-rect' }, { id:17, type:'short-rect' }, { id:18, type:'short-rect' },
+    { id:21, type:'normal' }, { id:20, type:'normal' }, { id:19, type:'normal' }
 ];
 
 let currentSpot = null;
 let isOffline = false;
+let modalSeisanStatus = "済"; 
 
-/* ================= ONLOAD ================= */
 window.onload = function(){
     const staySelect = document.getElementById('stayDays');
     for(let i = 1; i <= 30; i++){
@@ -749,21 +514,13 @@ window.onload = function(){
     localStorage.setItem('parking_last_visited_date', today);
 
     renderMap();
-    build4ColumnsStructure(); 
+    buildExcelTableStructure(); 
     loadParkingData();
 
     setInterval(hourlyBackupTask, 3600000);
 
-    window.addEventListener('online', () => {
-        isOffline = false;
-        document.getElementById('offlineNotice').style.display = 'none';
-        loadParkingData();
-    });
-    window.addEventListener('offline', () => {
-        isOffline = true;
-        document.getElementById('offlineNotice').style.display = 'block';
-        loadParkingData();
-    });
+    window.addEventListener('online', () => { isOffline = false; document.getElementById('offlineNotice').style.display = 'none'; loadParkingData(); });
+    window.addEventListener('offline', () => { isOffline = true; document.getElementById('offlineNotice').style.display = 'block'; loadParkingData(); });
 };
 
 function formatDateLocal(date) {
@@ -771,7 +528,7 @@ function formatDateLocal(date) {
     const m = String(date.getMonth()+1).padStart(2,'0');
     const d = String(date.getDate()).padStart(2,'0');
     return `${y}-${m}-${d}`;
-}   
+}    
 
 async function hourlyBackupTask() {
     if (navigator.onLine && !isOffline) {
@@ -779,20 +536,14 @@ async function hourlyBackupTask() {
         try {
             const snapshot = await db.ref('parking/' + date).once('value');
             const data = snapshot.val();
-            if (data) {
-                localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
-            }
-        } catch (e) {
-            console.log("Auto-backup failed.");
-        }
+            if (data) localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
+        } catch (e) { console.log("Auto-backup failed."); }
     }
 }
 
-/* ================= CORE FUNCTIONS ================= */
 function renderMap(){
     const grid = document.getElementById('parkingGrid');
     grid.innerHTML = "";
-
     const hatch = document.createElement('div'); hatch.className = 'hatched-zone'; grid.appendChild(hatch);
     const road = document.createElement('div'); road.className = 'main-road'; road.innerText = 'entrance'; grid.appendChild(road);
 
@@ -822,265 +573,151 @@ function renderMap(){
         div.addEventListener('dragleave', handleDragLeave);
         div.addEventListener('drop', handleDrop);
         div.addEventListener('dragend', handleDragEnd);
-
         div.addEventListener('touchstart', handleTouchStart, {passive: false});
         div.addEventListener('touchmove', handleTouchMove, {passive: false});
         div.addEventListener('touchend', handleTouchEnd, {passive: false});
-        
         grid.appendChild(div);
     });
 }
 
-function build4ColumnsStructure() {
-    createItemsInColumn(1, 4, 'col-group-1');
-    createItemsInColumn(5, 9, 'col-group-2');
-    createItemsInColumn(10, 15, 'col-group-3');
-    createItemsInColumn(16, 21, 'col-group-4');
-}
-
-function createItemsInColumn(start, end, containerId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    
-    for (let i = start; i <= end; i++) {
-        const item = document.createElement('div');
-        item.className = 'customer-item';
-        item.id = `list-item-${i}`;
-        item.setAttribute('data-stt', i);
-        if(i === 4) item.classList.add('handicapped'); 
-        
-        item.innerHTML = `
-            <div class="info-box">
-                <div class="left-content">
-                    <span class="display-meta">${i}</span>
-                    <span class="display-name">—</span>
-                </div>
-                <div class="right-content"></div>
-            </div>
+function buildExcelTableStructure() {
+    const tbody = document.getElementById('excelTableBody');
+    tbody.innerHTML = "";
+    for (let i = 1; i <= 21; i++) {
+        const tr = document.createElement('tr');
+        tr.id = `table-row-${i}`;
+        tr.innerHTML = `
+            <td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${i}"></td>
+            <td class="col-stt">${i === 4 ? '♿ 4' : i}</td>
+            <td class="col-room-number"></td>
+            <td class="col-guest-name"></td>
+            <td class="col-car-number"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         `;
-        
-        item.addEventListener('dragstart', handleListDragStart);
-        item.addEventListener('dragover', handleListDragOver);
-        item.addEventListener('dragleave', handleListDragLeave);
-        item.addEventListener('drop', handleListDrop);
-        item.addEventListener('dragend', handleListDragEnd);
-        
-        item.addEventListener('touchstart', handleListTouchStart, {passive: false});
-        item.addEventListener('touchmove', handleListTouchMove, {passive: false});
-        item.addEventListener('touchend', handleListTouchEnd, {passive: false});
-        
-        container.appendChild(item);
+        tbody.appendChild(tr);
     }
 }
 
-let draggedSpotNum = null;
+function clearAllRowChecks() {
+    document.querySelectorAll('.custom-checkbox').forEach(cb => {
+        cb.checked = false;
+    });
+    showToast("チェックをすべて解除しました");
+}
 
-function handleDragStart(e) {
-    const isBooked = this.classList.contains('booked');
-    const isStaff = this.classList.contains('staff');
-    if (!isBooked && !isStaff) {
-        e.preventDefault();
-        return;
+function toggleSeisanModalStatus() {
+    const btn = document.getElementById('seisanToggle');
+    if (modalSeisanStatus === "済") {
+        modalSeisanStatus = "未";
+        btn.innerText = "未";
+        btn.classList.add('unpaid');
+    } else {
+        modalSeisanStatus = "済";
+        btn.innerText = "済";
+        btn.classList.remove('unpaid');
     }
+}
+
+function calculateDisplayDaysLogic(checkInStr, checkOutStr, targetDateStr) {
+    if (!checkInStr || !checkOutStr) return "";
+    const start = new Date(checkInStr);
+    const end = new Date(checkOutStr);
+    const current = new Date(targetDateStr);
+    
+    const diffTime = end - start;
+    const totalN = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    
+    if (totalN <= 0) return "";
+    if (totalN === 1) return "1N"; 
+    
+    const timeFromStart = current - start;
+    const currentDayIndex = Math.floor(timeFromStart / (1000 * 60 * 60 * 24)); 
+    const dayNum = currentDayIndex + 1;
+    
+    return `${totalN}N-${dayNum}`;
+}
+
+/* ================= DRAG & DROP LOGIC ================= */
+let draggedSpotNum = null;
+function handleDragStart(e) {
+    if (!this.classList.contains('booked') && !this.classList.contains('staff')) { e.preventDefault(); return; }
     draggedSpotNum = this.getAttribute('data-num');
     this.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', draggedSpotNum);
 }
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    this.classList.add('drag-over');
-}
-
-function handleDragLeave() {
-    this.classList.remove('drag-over');
-}
-
+function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; this.classList.add('drag-over'); }
+function handleDragLeave() { this.classList.remove('drag-over'); }
 function handleDragEnd() {
     this.classList.remove('dragging');
-    document.querySelectorAll('.parking-spot, .customer-item').forEach(el => {
-        el.classList.remove('drag-over', 'dragging');
-    });
+    document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over', 'dragging'));
 }
-
 async function handleDrop(e) {
-    e.preventDefault();
-    this.classList.remove('drag-over');
-
+    e.preventDefault(); this.classList.remove('drag-over');
     const fromSpotNum = e.dataTransfer.getData('text/plain');
     const toSpotNum = this.getAttribute('data-num');
-
     if (!fromSpotNum || fromSpotNum === toSpotNum) return;
     await executeMoveLogic(fromSpotNum, toSpotNum);
 }
-
 async function executeMoveLogic(fromSpotNum, toSpotNum) {
     const date = document.getElementById('parkingDate').value;
     const fromRef = db.ref(`parking/${date}/${fromSpotNum}`);
     const toRef = db.ref(`parking/${date}/${toSpotNum}`);
-
     try {
         const snapshotFrom = await fromRef.once('value');
         const dataFrom = snapshotFrom.val();
         if (!dataFrom) return;
-
         const snapshotTo = await toRef.once('value');
         const dataTo = snapshotTo.val();
-
         if (dataTo) {
-            const confirmSwap = confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？`);
-            if (!confirmSwap) return;
-            await toRef.set(dataFrom);
-            await fromRef.set(dataTo);
+            if (!confirm(`番号 ${toSpotNum} には既にデータがあります。入れ替えますか？`)) return;
+            await toRef.set(dataFrom); await fromRef.set(dataTo);
             showToast(`番号 ${fromSpotNum} と ${toSpotNum} を入れ替えました`);
         } else {
-            await toRef.set(dataFrom);
-            await fromRef.remove();
+            await toRef.set(dataFrom); await fromRef.remove();
             showToast(`番号 ${fromSpotNum} から ${toSpotNum} へ移動しました`);
         }
-    } catch (error) {
-        console.error("Move Error:", error);
-        showToast("移動に失敗しました");
-    }
+    } catch (error) { showToast("移動に失敗しました"); }
 }
 
-let currentDragElement = null;
-let touchDragData = null;
-
+/* ================= TOUCH FOR MOBILE ================= */
+let currentDragElement = null; let touchDragData = null;
 function handleTouchStart(e) {
     if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
-    currentDragElement = this;
-    touchDragData = this.getAttribute('data-num');
-    this.classList.add('dragging');
+    currentDragElement = this; touchDragData = this.getAttribute('data-num'); this.classList.add('dragging');
 }
-
 function handleTouchMove(e) {
-    if (!currentDragElement) return;
-    if (e.cancelable) e.preventDefault(); 
-
-    const touch = e.touches[0];
-    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!currentDragElement) return; if (e.cancelable) e.preventDefault(); 
+    const touch = e.touches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
-
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
-    if (dropTarget && dropTarget !== currentDragElement) {
-        dropTarget.classList.add('drag-over');
-    }
+    if (dropTarget && dropTarget !== currentDragElement) dropTarget.classList.add('drag-over');
 }
-
 async function handleTouchEnd(e) {
     if (!currentDragElement) return;
-
-    const touch = e.changedTouches[0];
-    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const touch = e.changedTouches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
     const dropTarget = targetEl ? targetEl.closest('.parking-spot') : null;
     const fromNum = touchDragData;
-    
     currentDragElement.classList.remove('dragging');
     document.querySelectorAll('.parking-spot').forEach(el => el.classList.remove('drag-over'));
-
-    if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) {
-        await executeMoveLogic(fromNum, dropTarget.getAttribute('data-num'));
-    }
-
-    currentDragElement = null;
-    touchDragData = null;
+    if (dropTarget && fromNum && fromNum !== dropTarget.getAttribute('data-num')) await executeMoveLogic(fromNum, dropTarget.getAttribute('data-num'));
+    currentDragElement = null; touchDragData = null;
 }
 
-/* ================= EVENT KÉO THẢ CHO DANH SÁCH PHÍA DƯỚI ================= */
-let draggedListSpotNum = null;
-
-function handleListDragStart(e) {
-    if (!this.classList.contains('has-data')) {
-        e.preventDefault();
-        return;
-    }
-    draggedListSpotNum = this.getAttribute('data-spot-num');
-    this.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', draggedListSpotNum);
-}
-
-function handleListDragOver(e) {
-    e.preventDefault();
-    if (this.classList.contains('has-data')) {
-        this.classList.add('drag-over');
-    }
-}
-
-function handleListDragLeave() {
-    this.classList.remove('drag-over');
-}
-
-function handleListDragEnd() {
-    this.classList.remove('dragging');
-    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over', 'dragging'));
-}
-
-async function handleListDrop(e) {
-    e.preventDefault();
-    this.classList.remove('drag-over');
-    const fromSpotNum = e.dataTransfer.getData('text/plain');
-    const toSpotNum = this.getAttribute('data-spot-num');
-
-    if (!fromSpotNum || !toSpotNum || fromSpotNum === toSpotNum) return;
-    await executeMoveLogic(fromSpotNum, toSpotNum);
-}
-
-let currentListDragElement = null;
-let touchListDragData = null;
-
-function handleListTouchStart(e) {
-    if (!this.classList.contains('has-data')) return;
-    currentListDragElement = this;
-    touchListDragData = this.getAttribute('data-spot-num');
-    this.classList.add('dragging');
-}
-
-function handleListTouchMove(e) {
-    if (!currentListDragElement) return;
-    if (e.cancelable) e.preventDefault();
-
-    const touch = e.touches[0];
-    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-    const dropTarget = targetEl ? targetEl.closest('.customer-item') : null;
-
-    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over'));
-    if (dropTarget && dropTarget !== currentListDragElement && dropTarget.classList.contains('has-data')) {
-        dropTarget.classList.add('drag-over');
-    }
-}
-
-async function handleListTouchEnd(e) {
-    if (!currentListDragElement) return;
-
-    const touch = e.changedTouches[0];
-    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-    const dropTarget = targetEl ? targetEl.closest('.customer-item') : null;
-    const fromNum = touchListDragData;
-
-    currentListDragElement.classList.remove('dragging');
-    document.querySelectorAll('.customer-item').forEach(el => el.classList.remove('drag-over'));
-
-    if (dropTarget && fromNum && dropTarget.classList.contains('has-data')) {
-        const toNum = dropTarget.getAttribute('data-spot-num');
-        if (fromNum !== toNum) {
-            await executeMoveLogic(fromNum, toNum);
-        }
-    }
-
-    currentListDragElement = null;
-    touchListDragData = null;
-}
-
-/* ================= TẢI DỮ LIỆU VÀ ĐỒNG BỘ CẢ KHUNG MÀU SẮC ================= */
 function loadParkingData(){
     const date = document.getElementById('parkingDate').value;
     db.ref('parking/' + date).off();
 
     function renderViewWithData(data) {
+        const checkStates = {};
+        for(let i=1; i<=21; i++) {
+            const cb = document.getElementById(`row-check-${i}`);
+            if(cb) checkStates[i] = cb.checked;
+        }
+
         document.querySelectorAll('.parking-spot').forEach(el => {
             el.classList.remove('booked', 'staff');
             el.querySelector('.name-display').innerText = "";
@@ -1091,34 +728,27 @@ function loadParkingData(){
                 const spotData = data[el.dataset.num];
                 if(spotData.status === 'booked') el.classList.add('booked');
                 else if(spotData.status === 'staff') el.classList.add('staff');
-
                 if(spotData.info){
                     el.dataset.info = JSON.stringify(spotData.info);
                     el.querySelector('.name-display').innerText = spotData.info.carNumber || "";
-
-                    if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") {
-                        el.querySelector('.note-star').style.display = 'block';
-                    }
+                    if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") el.querySelector('.note-star').style.display = 'block';
                 }
             }
         });
 
         for (let i = 1; i <= 21; i++) {
-            const item = document.getElementById(`list-item-${i}`);
-            if (item) {
-                item.className = 'customer-item';
-                if(i === 4) item.classList.add('handicapped'); 
-                
-                item.removeAttribute('draggable');
-                item.removeAttribute('data-spot-num');
-                item.innerHTML = `
-                    <div class="info-box">
-                        <div class="left-content">
-                            <span class="display-meta">${i}</span>
-                            <span class="display-name">—</span>
-                        </div>
-                        <div class="right-content"></div>
-                    </div>
+            const tr = document.getElementById(`table-row-${i}`);
+            if (tr) {
+                tr.innerHTML = `
+                    <td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${i}"></td>
+                    <td class="col-stt">${i === 4 ? '♿ 4' : i}</td>
+                    <td class="col-room-number"></td>
+                    <td class="col-guest-name"></td>
+                    <td class="col-car-number"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 `;
             }
         }
@@ -1127,187 +757,124 @@ function loadParkingData(){
             Object.keys(data).forEach(spotNumStr => {
                 const spotNum = parseInt(spotNumStr);
                 if (spotNum >= 1 && spotNum <= 21) {
-                    const item = document.getElementById(`list-item-${spotNum}`);
+                    const tr = document.getElementById(`table-row-${spotNum}`);
                     const spotData = data[spotNumStr];
                     
-                    if (item && spotData && (spotData.status === 'booked' || spotData.status === 'staff')) {
-                        const room = (spotData.info && spotData.info.roomNumber) || "";
-                        const note = (spotData.info && spotData.info.guestNote) || "";
-                        
-                        let name = "";
-                        if (spotData.status === 'staff') {
-                            name = (spotData.info && spotData.info.carNumber) || "スタッフ"; 
-                        } else {
-                            name = (spotData.info && spotData.info.guestName) || ""; 
-                        }
-                        
-                        const carNum = (spotData.info && spotData.info.carNumber) || "";
-                        
-                        if (!name && !carNum) return;
-                        if (name.trim() === "" && carNum.trim() === "") return;
+                    if (tr && spotData) {
+                        if (spotData.status === 'booked' && spotData.info) {
+                            const room = spotData.info.roomNumber || "";
+                            const note = spotData.info.guestNote || "";
+                            const carNum = spotData.info.carNumber || "";
+                            const checkIn = spotData.info.checkIn || "";
+                            const checkOut = spotData.info.checkOut || "";
+                            const seisan = spotData.info.seisanStatus ? spotData.info.seisanStatus : "済";
+                            const name = spotData.info.guestName || "";
 
-                        item.classList.add('has-data');
-                        
-                        if (spotData.status === 'booked') {
-                            item.classList.add('booked');
-                        } else if (spotData.status === 'staff') {
-                            item.classList.add('staff');
-                        }
-                        
-                        item.setAttribute('draggable', 'true');
-                        item.setAttribute('data-spot-num', spotNumStr);
-                        
-                        let roomSegment = "";
-                        if (spotData.status !== 'staff' && room !== "STAFF" && room !== "") {
-                            roomSegment = `R${room} `;
-                        }
+                            const checkInDisplay = checkIn ? checkIn.substring(5).replace('-', '/') : "";
+                            const checkOutDisplay = checkOut ? checkOut.substring(5).replace('-', '/') : "";
+                            
+                            const dayLogicDisplay = calculateDisplayDaysLogic(checkIn, checkOut, date);
+                            const seisanClass = (seisan === "未") ? "seisan-mi" : "seisan-zai";
+                            const roomWithR = room ? `R${room}` : "";
 
-                        let carSegment = "";
-                        if (spotData.status === 'booked' && carNum && carNum.trim() !== "") {
-                            if (carNum.trim() !== name.trim()) {
-                                carSegment = `<span class="display-car">${carNum}</span>`;
-                            }
+                            tr.innerHTML = `
+                                <td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${spotNum}"></td>
+                                <td class="col-stt">${spotNum === 4 ? '♿ 4' : spotNum}</td>
+                                <td class="col-room-number">${roomWithR}</td>
+                                <td class="col-guest-name">${name} ${note ? '<span style="color:#f1c40f;">★</span>' : ''}</td>
+                                <td class="col-car-number">${carNum}</td>
+                                <td>${checkInDisplay}</td>
+                                <td>${checkOutDisplay}</td>
+                                <td style="font-weight:bold; color:#2c3e50;">${dayLogicDisplay}</td>
+                                <td><span class="status-circle ${seisanClass}">${seisan}</span></td>
+                            `;
                         }
-
-                        let listStarSegment = "";
-                        if (note && note.trim() !== "") {
-                            listStarSegment = `<span class="list-note-star">★</span>`;
-                        }
-
-                        item.innerHTML = `
-                            <div class="info-box">
-                                <div class="left-content">
-                                    <span class="display-meta">${spotNumStr} ${roomSegment}</span>
-                                    <span class="display-name">${name || "—"}</span>
-                                    ${listStarSegment}
-                                </div>
-                                <div class="right-content">
-                                    ${carSegment}
-                                </div>
-                            </div>
-                        `;
                     }
                 }
             });
+        }
+
+        for(let i=1; i<=21; i++) {
+            const cb = document.getElementById(`row-check-${i}`);
+            if(cb && checkStates[i]) cb.checked = true;
         }
     }
 
     if (!navigator.onLine || isOffline) {
         document.getElementById('offlineNotice').style.display = 'block';
         const backupDataStr = localStorage.getItem('backup_parking_' + date);
-        const backupData = backupDataStr ? JSON.parse(backupDataStr) : null;
-        renderViewWithData(backupData);
+        renderViewWithData(backupDataStr ? JSON.parse(backupDataStr) : null);
         return;
     }
 
     db.ref('parking/' + date).on('value', (snapshot) => {
         document.getElementById('offlineNotice').style.display = 'none';
         const data = snapshot.val();
-        
-        if (data) {
-            localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
-        }
+        if (data) localStorage.setItem('backup_parking_' + date, JSON.stringify(data));
         renderViewWithData(data);
     }, (error) => {
         document.getElementById('offlineNotice').style.display = 'block';
         const backupDataStr = localStorage.getItem('backup_parking_' + date);
-        const backupData = backupDataStr ? JSON.parse(backupDataStr) : null;
-        renderViewWithData(backupData);
+        renderViewWithData(backupDataStr ? JSON.parse(backupDataStr) : null);
     });
 }
 
-/* ================= CHUYỂN NGÀY ================= */
+/* ================= DATE MANAGEMENT ================= */
 function changeDate(offset){
     const dateInput = document.getElementById('parkingDate');
     const current = new Date(dateInput.value);
     current.setDate(current.getDate() + offset);
-    const newDate = formatDateLocal(current);
-    dateInput.value = newDate;
+    dateInput.value = formatDateLocal(current);
     handleDateChange();
 }
-
-/* ================= TOAST ================= */
+function handleDateChange(){
+    const newDate = document.getElementById('parkingDate').value;
+    localStorage.setItem('parking_last_visited_date', newDate);
+    loadParkingData();
+}
 function showToast(msg){
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.classList.add('show');
-    setTimeout(()=>{
-        t.classList.remove('show');
-    },2000);
+    const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
+    setTimeout(()=>{ t.classList.remove('show'); },2000);
 }
 
-/* ================= TỰ ĐỘNG TÍNH SỐ ĐÊM ================= */
 function updateCheckOutFromStay() {
     const checkInVal = document.getElementById('checkIn').value;
     const stayDays = parseInt(document.getElementById('stayDays').value);
-    const checkOutInput = document.getElementById('checkOut');
-
     if (checkInVal && stayDays) {
         const startDate = new Date(checkInVal);
         startDate.setDate(startDate.getDate() + stayDays);
-        checkOutInput.value = formatDateLocal(startDate);
+        document.getElementById('checkOut').value = formatDateLocal(startDate);
     }
 }
-
 function calculateStayDays() {
     const checkInVal = document.getElementById('checkIn').value;
     const checkOutVal = document.getElementById('checkOut').value;
-    const stayDaysSelect = document.getElementById('stayDays');
-
     if (checkInVal && checkOutVal) {
-        const start = new Date(checkInVal);
-        const end = new Date(checkOutVal);
-        const diffTime = end - start;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays > 0) {
-            stayDaysSelect.value = diffDays;
-        } else {
-            stayDaysSelect.value = 1;
-        }
+        const start = new Date(checkInVal); const end = new Date(checkOutVal);
+        const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        document.getElementById('stayDays').value = diffDays > 0 ? diffDays : 1;
     }
 }
 
-/* ================= STAFF MODAL LOGIC ================= */
+/* ================= MODAL LOGIC ================= */
 function openStaffModal(el) {
     currentSpot = el;
     const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
     document.getElementById('staffName').value = data.carNumber || "";
     document.getElementById('staffModal').style.display = 'flex';
 }
-
-function closeStaffModal() {
-    document.getElementById('staffModal').style.display = 'none';
-}
+function closeStaffModal() { document.getElementById('staffModal').style.display = 'none'; }
 
 async function saveStaffInfo() {
     if(!currentSpot) return;
     const name = document.getElementById('staffName').value || "スタッフ";
     const spotNum = currentSpot.dataset.num;
     const date = document.getElementById('parkingDate').value;
-
-    const info = {
-        roomNumber: "STAFF",
-        carNumber: name,
-        isStaff: true
-    };
-
-    if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを保存できません");
-        return;
-    }
-
-    await db.ref(`parking/${date}/${spotNum}`).set({
-        status:'staff',
-        info:info
-    });
-
-    showToast("スタッフ用として保存しました");
-    closeStaffModal();
-    loadParkingData();
+    if(!navigator.onLine || isOffline) { alert("オフライン時はデータを保存できません"); return; }
+    await db.ref(`parking/${date}/${spotNum}`).set({ status:'staff', info:{ roomNumber: "STAFF", carNumber: name, isStaff: true, seisanStatus: "済" } });
+    showToast("スタッフ用として保存しました"); closeStaffModal(); loadParkingData();
 }
 
-/* ================= OPEN GUEST MODAL ================= */
 function openGuestModal(el){
     currentSpot = el;
     const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
@@ -1317,39 +884,32 @@ function openGuestModal(el){
     document.getElementById('guestName').value = data.guestName || "";
     document.getElementById('carNumber').value = data.carNumber || "";
     document.getElementById('guestNote').value = data.guestNote || ""; 
-
     document.getElementById('checkIn').value = data.checkIn || todayStr;
     document.getElementById('stayDays').value = data.stayDays || "1"; 
     
-    if(data.checkOut) {
-        document.getElementById('checkOut').value = data.checkOut;
-    } else {
-        updateCheckOutFromStay();
-    }
+    if(data.checkOut) document.getElementById('checkOut').value = data.checkOut;
+    else updateCheckOutFromStay();
+
+    modalSeisanStatus = data.seisanStatus ? data.seisanStatus : "済";
+    const btn = document.getElementById('seisanToggle');
+    btn.innerText = modalSeisanStatus;
+    if(modalSeisanStatus === "未") btn.classList.add('unpaid');
+    else btn.classList.remove('unpaid');
 
     document.getElementById('guestModalTitle').innerText = `駐車番号 ${el.dataset.num}`;
     document.getElementById('guestModal').style.display = 'flex';
 }
+function closeGuestModal(){ document.getElementById('guestModal').style.display = 'none'; }
 
-function closeGuestModal(){
-    document.getElementById('guestModal').style.display = 'none';
-}
-
-/* ================= SAVE INFO ================= */
 async function saveGuestInfo(){
     if(!currentSpot) return;
-
-    if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを保存できません");
-        return;
-    }
+    if(!navigator.onLine || isOffline) { alert("オフライン時はデータを保存できません"); return; }
 
     const roomNumber = document.getElementById('roomNumber').value;
     const guestName = document.getElementById('guestName').value;
     const stayDays = parseInt(document.getElementById('stayDays').value) || 1;
     const carNumber = document.getElementById('carNumber').value;
     const guestNote = document.getElementById('guestNote').value;
-
     const originalCheckIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
     const spotNum = currentSpot.getAttribute('data-num');
@@ -1360,180 +920,88 @@ async function saveGuestInfo(){
         const dateKey = formatDateLocal(targetDate);
 
         const info = {
-            roomNumber,
-            guestName,
-            checkIn: originalCheckIn,
-            checkOut,
-            stayDays: stayDays, 
-            carNumber,
-            guestNote
+            roomNumber, guestName, carNumber, guestNote,
+            checkIn: originalCheckIn, checkOut, stayDays: stayDays,
+            seisanStatus: modalSeisanStatus 
         };
 
-        await db.ref(`parking/${dateKey}/${spotNum}`).set({
-            status:'booked',
-            info:info
-        });
+        await db.ref(`parking/${dateKey}/${spotNum}`).set({ status:'booked', info: info });
     }
-
-    currentSpot.dataset.info = JSON.stringify({
-        roomNumber, guestName, checkIn: originalCheckIn, checkOut, stayDays, carNumber, guestNote
-    });
-
-    currentSpot.classList.add('booked');
-    currentSpot.querySelector('.name-display').innerText = carNumber || "";
 
     closeGuestModal();
     showToast("宿泊データを保存しました");
     loadParkingData();
 }
 
-/* ================= DELETE PROCEDURES ================= */
-function deleteGuestInfo() {
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-function deleteStaffInfo() {
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-function closeConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-}
+function deleteGuestInfo() { document.getElementById('confirmModal').style.display = 'flex'; }
+function deleteStaffInfo() { document.getElementById('confirmModal').style.display = 'flex'; }
+function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
 async function executeDelete() {
     if (!currentSpot) return;
-
-    if(!navigator.onLine || isOffline) {
-        alert("オフライン時はデータを削除できません");
-        return;
-    }
-
+    if(!navigator.onLine || isOffline) { alert("オフライン時はデータを削除できません"); return; }
     const spotNum = currentSpot.getAttribute('data-num'); 
     const dataInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
-
     try {
         if (dataInfo && dataInfo.checkIn && dataInfo.checkOut) {
-            const start = new Date(dataInfo.checkIn);
-            const end = new Date(dataInfo.checkOut);
+            const start = new Date(dataInfo.checkIn); const end = new Date(dataInfo.checkOut);
             let currentDate = new Date(start);
-            
             while (currentDate < end) {
-                const dateKey =  formatDateLocal(currentDate);
-                await db.ref(`parking/${dateKey}/${spotNum}`).remove();
+                await db.ref(`parking/${formatDateLocal(currentDate)}/${spotNum}`).remove();
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         } else {
-            const date = document.getElementById('parkingDate').value;
-            await db.ref(`parking/${date}/${spotNum}`).remove();
+            await db.ref(`parking/${document.getElementById('parkingDate').value}/${spotNum}`).remove();
         }
-
-        closeConfirmModal();
-        closeGuestModal();
-        closeStaffModal();
-        
-        showToast("連泊分を含めて削除完了");
-        loadParkingData();
-    } catch (error) {
-        console.error("Delete Error:", error);
-        showToast("削除 lỗi");
-    }
+        closeConfirmModal(); closeGuestModal(); closeStaffModal();
+        showToast("連泊分を含めて削除完了"); loadParkingData();
+    } catch (error) { showToast("削除 lỗi"); }
 }
 
-/* ================= RESET ================= */
-function handleReset(){
-    if(!confirm("すべてリセットしますか？")) return;
-    document.querySelectorAll('.parking-spot').forEach(el=>{
-        el.classList.remove('booked');
-        el.dataset.info = "";
-        el.querySelector('.name-display').innerText = "";
-    });
-    saveParkingData();
-    showToast("リセット完了");
-}
-
-/* ================= DATE CHANGE ================= */
-function handleDateChange(){
-    const newDate = document.getElementById('parkingDate').value;
-    localStorage.setItem('parking_last_visited_date', newDate);
-    loadParkingData();
-}
-
-/* ================= SAVE FIREBASE (BACKUP) ================= */
-function saveParkingData(){
-    const date = document.getElementById('parkingDate').value;
-    const data = {};
-
-    document.querySelectorAll('.parking-spot').forEach(spot=>{
-        const num = spot.dataset.num;
-        data[num] = {
-           status: spot.classList.contains('booked') ? 'booked' : spot.classList.contains('staff') ? 'staff' : 'empty',
-           info: spot.dataset.info ? JSON.parse(spot.dataset.info) : {}
-        };
-    });
-    db.ref('parking/' + date).set(data);
-}   
-
-/* ================= EXPORT EXCEL ================= */
+/* ================= EXPORT EXCEL SYSTEM ================= */
 async function exportToExcel() {
     try {
         const date = document.getElementById('parkingDate').value;
         let data = null;
-
         if (!navigator.onLine || isOffline) {
             const backupDataStr = localStorage.getItem('backup_parking_' + date);
             data = backupDataStr ? JSON.parse(backupDataStr) : null;
         } else {
-            const snapshot = await db.ref('parking/' + date).once('value');
-            data = snapshot.val();
+            const snapshot = await db.ref('parking/' + date).once('value'); data = snapshot.val();
         }
+        if (!data) { showToast("データがありません"); return; }
 
-        if (!data) {
-            showToast("データがありません");
-            return;
-        }
-
-        const fileInput = document.getElementById('excelTemplate');
-        fileInput.click();
-
+        const fileInput = document.getElementById('excelTemplate'); fileInput.click();
         fileInput.onchange = async function(e){
-            const file = e.target.files[0];
-            if(!file){
-                showToast("テンプレート未選択");
-                return;
-            }
+            const file = e.target.files[0]; if(!file){ showToast("テンプレート未選択"); return; }
             const arrayBuffer = await file.arrayBuffer();
-            const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(arrayBuffer);
+            const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(arrayBuffer);
             const worksheet = workbook.getWorksheet(1);
 
             worksheet.getCell("E1").value = date;
             let row = 3;
-
             const sortedKeys = Object.keys(data).sort((a,b)=>parseInt(a)-parseInt(b));
 
             sortedKeys.forEach(num => {
                 const item = data[num];
                 if(item.status === 'booked' && item.info){
-                    let totalDays = 0;
-                    if(item.info.checkIn && item.info.checkOut){
-                        const start = new Date(item.info.checkIn);
-                        const end = new Date(item.info.checkOut);
-                        totalDays = Math.ceil((end-start)/(1000*60*60*24));
-                    }
+                    const checkIn = item.info.checkIn || "";
+                    const checkOut = item.info.checkOut || "";
+                    
+                    const excelDayString = calculateDisplayDaysLogic(checkIn, checkOut, date);
+                    const seisanValue = item.info.seisanStatus ? item.info.seisanStatus : "済";
+                    const roomNumberExcel = item.info.roomNumber ? `R${item.info.roomNumber}` : "";
 
-                    worksheet.getCell(`A${row}`).value = num;
-                    worksheet.getCell(`B${row}`).value = item.info.roomNumber || "";
+                    worksheet.getCell(`A${row}`).value = parseInt(num);
+                    worksheet.getCell(`B${row}`).value = roomNumberExcel;
                     worksheet.getCell(`C${row}`).value = item.info.guestName || "";
                     worksheet.getCell(`D${row}`).value = item.info.carNumber || "";
+                    worksheet.getCell(`E${row}`).value = checkIn ? checkIn.substring(5).replace('-', '/') : "";
+                    worksheet.getCell(`F${row}`).value = checkOut ? checkOut.substring(5).replace('-', '/') : "";
+                    worksheet.getCell(`G${row}`).value = excelDayString;
+                    worksheet.getCell(`H${row}`).value = seisanValue === "未" ? "未" : "済";
                     
-                    const checkInDate = item.info.checkIn ? item.info.checkIn.substring(5) : "";
-                    const checkOutDate = item.info.checkOut ? item.info.checkOut.substring(5) : "";
-
-                    worksheet.getCell(`E${row}`).value = checkInDate;
-                    worksheet.getCell(`F${row}`).value = checkOutDate;
-                    worksheet.getCell(`G${row}`).value = totalDays + "泊";
-                    
-                    for(let col = 1; col <= 7; col++){
+                    for(let col = 1; col <= 8; col++){
                         worksheet.getCell(row, col).alignment = { vertical: 'middle', horizontal: 'center' };
                     }
                     row++;
@@ -1542,50 +1010,30 @@ async function exportToExcel() {
 
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            const link = document.createElement("a");
-            link.href = window.URL.createObjectURL(blob);
-            link.download = `駐車場_${date}.xlsx`;
-            link.click();
-            showToast("Excel出力完了");
+            const link = document.createElement("a"); link.href = window.URL.createObjectURL(blob);
+            link.download = `駐車場_${date}.xlsx`; link.click(); showToast("Excel出力完了");
         };
-    } catch(error){
-        console.error(error);
-        showToast(error.message);
-    }
+    } catch(error){ showToast(error.message); }
 }
   
-/* ================= REFRESH DATA ================= */
 async function refreshParkingData(){
     showToast("更新中...");
     const today = formatDateLocal(new Date());
-    const dateInput = document.getElementById('parkingDate');
-    dateInput.value = today;
+    document.getElementById('parkingDate').value = today;
     localStorage.setItem('parking_last_visited_date', today);
     loadParkingData();
-
-    setTimeout(()=>{
-        showToast("最新データ更新完了");
-    }, 500);
+    setTimeout(()=>{ showToast("最新データ更新完了"); }, 500);
 }
 
 window.addEventListener('keydown', function(e){
-    if(e.key === 'F5' || (e.ctrlKey && e.key === 'r')){
-        e.preventDefault();
-        refreshParkingData();
-    }
+    if(e.key === 'F5' || (e.ctrlKey && e.key === 'r')){ e.preventDefault(); refreshParkingData(); }
 });
 
 let touchStartY = 0;
-window.addEventListener('touchstart', function(e){
-    touchStartY = e.touches[0].clientY;
-});
+window.addEventListener('touchstart', function(e){ touchStartY = e.touches[0].clientY; });
 window.addEventListener('touchend', function(e){
-    const touchEndY = e.changedTouches[0].clientY;
-    if(touchEndY - touchStartY > 120){
-        refreshParkingData();
-    }
+    if(e.changedTouches[0].clientY - touchStartY > 120) refreshParkingData();
 });
 </script>
-
 </body>
 </html>
