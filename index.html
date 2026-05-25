@@ -456,13 +456,12 @@
         .btn-close { background: #95a5a6; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
 
-        /* 1. Đổi số ô của ô đỏ và ô cam thành màu đen */
-.parking-spot.booked,
-.parking-spot.staff {
-    color: #000000 !important;
+      /* 1. Giữ nguyên số thứ tự ô (1-21) là màu trắng cho tất cả các ô */
+.parking-spot {
+    color: #ffffff !important;
 }
 
-/* 2. Đổi toàn bộ tên khách hàng, biển số hoặc chữ "予備" bên trong ô đỏ và ô cam thành màu đen */
+/* 2. Chỉ ép riêng phần tên khách/biển số/chữ "予備" trong ô đỏ và ô cam thành màu đen */
 .parking-spot.booked .name-display,
 .parking-spot.staff .name-display {
     color: #000000 !important;
