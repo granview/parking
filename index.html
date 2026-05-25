@@ -455,6 +455,18 @@
         .btn-save { background: #2ecc71; color: white; }
         .btn-close { background: #95a5a6; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
+
+        /* 1. Đổi số ô của ô đỏ và ô cam thành màu đen */
+.parking-spot.booked,
+.parking-spot.staff {
+    color: #000000 !important;
+}
+
+/* 2. Đổi toàn bộ tên khách hàng, biển số hoặc chữ "予備" bên trong ô đỏ và ô cam thành màu đen */
+.parking-spot.booked .name-display,
+.parking-spot.staff .name-display {
+    color: #000000 !important;
+}
     </style>
 </head>
 
