@@ -4,11 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="駐車場">
+    <meta name="theme-color" content="#f0f2f5">
     <title>駐車場管理システム</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     <link class="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="apple-mobile-web-app-title" content="駐車場">
@@ -20,6 +24,7 @@
             background: #f0f2f5;
             margin: 0;
             padding: 10px;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,6 +33,7 @@
             -webkit-user-select: none;
             user-select: none;
             box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* ===== macOS 26 Liquid Glass style ===== */
@@ -927,11 +933,11 @@
             projectId: "test-f20cf",
             storageBucket: "test-f20cf.firebasestorage.app",
             messagingSenderId: "985197427209",
-            appId: "1:985197427209:web:0c6f69a8c9b62cb67bd6d8",
-            measurementId: "G-1TG9CNC3Y1"
+            appId: "1:985197427209:web:0c6f69a8c9b62cb67bd6d8"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        db.goOnline();
 
         const spotConfig = [
             { id: 1, type: 'short-rect' }, { id: 2, type: 'short-rect' }, { id: 3, type: 'short-rect' }, { id: 4, type: 'handicapped' },
@@ -967,7 +973,13 @@
         }
 
         async function localApiFetch(url, options = {}) {
-            try { return await fetch(url, options); } catch (e) { return null; }
+            // Chỉ gọi khi chạy trên localhost, bỏ qua khi chạy trên web
+            if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return null;
+            try {
+                return await fetch(url, options);
+            } catch (e) {
+                return null;
+            }
         }
 
         function renderMap() {
@@ -1145,7 +1157,8 @@
 
             if (!fromStatus && !fromInfo) return;
 
-            db.ref('parking/' + date).off();
+            // Tạm tắt listener để tránh re-render khi đang thao tác
+            if (_currentListenerRef) { _currentListenerRef.off('value'); _currentListenerRef = null; _currentListenerDate = null; }
 
             // Danh sách ngày từ hôm nay → checkOut
             function getRemainingDates(info) {
@@ -1221,9 +1234,35 @@
             }
         }
 
+        let _currentListenerDate = null;
+        let _currentListenerRef = null;
+
+        // Hiển thị trạng thái kết nối realtime
+        db.ref('.info/connected').on('value', (snap) => {
+            const connected = snap.val();
+            const toast = document.getElementById('toast');
+            if (!connected) {
+                if (toast) { toast.textContent = '🔴 オフライン'; toast.style.display = 'block'; toast.style.background = '#e74c3c'; }
+            } else {
+                if (toast && toast.textContent === '🔴 オフライン') {
+                    toast.textContent = '🟢 接続済み';
+                    setTimeout(() => { toast.style.display = 'none'; }, 1500);
+                }
+            }
+        });
+
         function loadParkingData() {
             const date = document.getElementById('parkingDate').value;
-            db.ref('parking/' + date).off();
+
+            // Nếu đang listen đúng ngày này rồi thì không attach lại
+            if (_currentListenerDate === date && _currentListenerRef) return;
+
+            // Tắt listener ngày cũ
+            if (_currentListenerRef) {
+                _currentListenerRef.off('value');
+                _currentListenerRef = null;
+            }
+            _currentListenerDate = date;
 
             function renderViewWithData(data) {
                 const checkStates = {};
@@ -1320,15 +1359,21 @@
                 }
             }
 
-            if (!navigator.onLine) {
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+            if (isLocalhost && !navigator.onLine) {
                 localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
                 return;
             }
 
-            db.ref('parking/' + date).once('value', (snapshot) => {
+            // Attach realtime listener — tự động cập nhật khi data thay đổi
+            _currentListenerRef = db.ref('parking/' + date);
+            _currentListenerRef.on('value', (snapshot) => {
                 const cloudData = snapshot.val();
+                console.log('✅ Firebase data:', date, cloudData);
                 renderViewWithData(cloudData);
-                if (cloudData) {
+                // Sync về local SQLite (chỉ khi chạy localhost)
+                if (cloudData && isLocalhost) {
                     Object.keys(cloudData).forEach(async (id) => {
                         const item = cloudData[id];
                         await localApiFetch('/api/parking/save', {
@@ -1338,7 +1383,11 @@
                     });
                 }
             }, (error) => {
-                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
+                console.error('❌ Firebase lỗi:', error.code, error.message);
+                showToast('Firebase: ' + error.message);
+                if (isLocalhost) {
+                    localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
+                }
             });
         }
 
@@ -1365,7 +1414,15 @@
             const current = new Date(dateInput.value); current.setDate(current.getDate() + offset);
             dateInput.value = formatDateLocal(current); handleDateChange();
         }
-        function handleDateChange() { loadParkingData(); }
+        function handleDateChange() {
+            // Tắt listener ngày cũ khi đổi ngày
+            if (_currentListenerRef) {
+                _currentListenerRef.off('value');
+                _currentListenerRef = null;
+                _currentListenerDate = null;
+            }
+            loadParkingData();
+        }
 
         function updateCheckOutFromStay() {
             const checkInVal = document.getElementById('checkIn').value;
