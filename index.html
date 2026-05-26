@@ -940,7 +940,7 @@
 
         // iOS: reconnect khi quay lại tab
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') loadParkingData();
+            if (document.visibilityState === 'visible') forceReload();
         });
 
         const spotConfig = [
@@ -1134,7 +1134,6 @@
         function closePassModal() {
             document.getElementById('passModal').style.display = 'none';
             pendingMoveData = null;
-            loadParkingData();
         }
 
         async function verifyAndMove() {
@@ -1313,19 +1312,24 @@
             }
         }
 
-        // Attach listener — giống file gốc: off rồi on lại mỗi lần
+        let _activeDate = null;
+
+        // Attach listener — chỉ off+on khi đổi ngày, không off khi cùng ngày
         function loadParkingData() {
             const date = document.getElementById('parkingDate').value;
 
-            // Tắt listener cũ
-            db.ref('parking/' + date).off();
+            // Nếu đã có listener cho ngày này rồi → không làm gì, listener đang chạy
+            if (_activeDate === date) return;
+
+            // Đổi ngày → tắt listener cũ, bật listener mới
+            if (_activeDate) db.ref('parking/' + _activeDate).off();
+            _activeDate = date;
 
             if (isLocalhost && !navigator.onLine) {
                 localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(d => { if (d) renderViewWithData(d); });
                 return;
             }
 
-            // Bật listener mới — Firebase tự push khi có thay đổi
             db.ref('parking/' + date).on('value', (snapshot) => {
                 renderViewWithData(snapshot.val());
                 if (snapshot.val() && isLocalhost) {
@@ -1343,11 +1347,19 @@
             });
         }
 
+        // Buộc reload data (dùng cho 更新 button và visibilitychange)
+        function forceReload() {
+            const date = document.getElementById('parkingDate').value;
+            db.ref('parking/' + date).off();
+            _activeDate = null;
+            loadParkingData();
+        }
+
         function refreshData() {
             const dInput = document.getElementById('parkingDate');
             dInput.value = formatDateLocal(new Date());
-            db.ref('parking/' + dInput.value).off();
-            loadParkingData();
+            _activeDate = null;
+            forceReload();
             showToast("更新しました");
         }
 
@@ -1375,6 +1387,7 @@
             dateInput.value = formatDateLocal(current); handleDateChange();
         }
         function handleDateChange() {
+            _activeDate = null;
             loadParkingData();
         }
 
