@@ -1326,7 +1326,7 @@
         // Attach listener 1 lần duy nhất — chỉ thay khi đổi ngày
         function loadParkingData() {
             const date = document.getElementById('parkingDate').value;
-            if (_currentListenerDate === date && _currentListenerRef) return; // Đã có listener cho ngày này
+            if (_currentListenerDate === date && _currentListenerRef) return;
             if (_currentListenerRef) { _currentListenerRef.off('value'); _currentListenerRef = null; }
             _currentListenerDate = date;
 
@@ -1337,11 +1337,10 @@
 
             _currentListenerRef = db.ref('parking/' + date);
             _currentListenerRef.on('value', (snapshot) => {
-                const cloudData = snapshot.val();
-                renderViewWithData(cloudData);
-                if (cloudData && isLocalhost) {
-                    Object.keys(cloudData).forEach(async (id) => {
-                        const item = cloudData[id];
+                renderViewWithData(snapshot.val());
+                if (snapshot.val() && isLocalhost) {
+                    Object.keys(snapshot.val()).forEach(async (id) => {
+                        const item = snapshot.val()[id];
                         await localApiFetch('/api/parking/save', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ date_key: date, spot_id: parseInt(id), status: item.status, info: item.info || {} })
