@@ -150,7 +150,7 @@
             max-width: 1500px;
             padding: 25px;
             box-sizing: border-box;
-            min-height: 82vh;
+            min-height: unset;
             display: flex;
             flex-direction: column;
             margin-bottom: 20px;
@@ -159,7 +159,7 @@
         .grid-container {
             display: grid;
             gap: 5px;
-            grid-template-rows: 140px 0px 90px 1fr 200px;
+            grid-template-rows: 140px 0px 80px 80px 200px;
             grid-template-columns: repeat(3, 1fr) 0.5fr repeat(15, 1fr);
             width: 100%;
             flex: 1;
@@ -1194,7 +1194,6 @@
             }
 
             showToast("位置を移動しました");
-            setTimeout(() => loadParkingData(), 400);
         }
 
         function formatVerticalHtmlString(str) {
@@ -1236,6 +1235,7 @@
 
         let _currentListenerDate = null;
         let _currentListenerRef = null;
+        const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
         // Hiển thị trạng thái kết nối realtime
         db.ref('.info/connected').on('value', (snap) => {
@@ -1251,128 +1251,94 @@
             }
         });
 
-        function loadParkingData() {
+        // renderViewWithData ở ngoài — dùng chung cho mọi nơi
+        function renderViewWithData(data) {
             const date = document.getElementById('parkingDate').value;
-
-            // Nếu đang listen đúng ngày này rồi thì không attach lại
-            if (_currentListenerDate === date && _currentListenerRef) return;
-
-            // Tắt listener ngày cũ
-            if (_currentListenerRef) {
-                _currentListenerRef.off('value');
-                _currentListenerRef = null;
+            const checkStates = {};
+            for (let i = 1; i <= 21; i++) {
+                const cb = document.getElementById(`row-check-${i}`); if (cb) checkStates[i] = cb.checked;
             }
-            _currentListenerDate = date;
-
-            function renderViewWithData(data) {
-                const checkStates = {};
-                for (let i = 1; i <= 21; i++) {
-                    const cb = document.getElementById(`row-check-${i}`); if (cb) checkStates[i] = cb.checked;
+            document.querySelectorAll('.parking-spot').forEach(el => {
+                const sNum = el.dataset.num;
+                el.classList.remove('booked', 'staff');
+                const textContainer = document.getElementById(`html-text-${sNum}`);
+                if (textContainer) textContainer.innerHTML = "";
+                el.querySelector('.note-star').style.display = 'none'; el.dataset.info = "";
+                if (data && data[sNum]) {
+                    const spotData = data[sNum];
+                    if (spotData.status === 'booked') el.classList.add('booked');
+                    else if (spotData.status === 'staff') el.classList.add('staff');
+                    if (spotData.info) {
+                        el.dataset.info = JSON.stringify(spotData.info);
+                        if (spotData.info.carNumber) adjustSingleSpotTextFontSize(sNum, spotData.info.carNumber);
+                        if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") el.querySelector('.note-star').style.display = 'block';
+                    }
                 }
-                document.querySelectorAll('.parking-spot').forEach(el => {
-                    const sNum = el.dataset.num;
-                    el.classList.remove('booked', 'staff');
-
-                    const textContainer = document.getElementById(`html-text-${sNum}`);
-                    if (textContainer) textContainer.innerHTML = "";
-
-                    el.querySelector('.note-star').style.display = 'none'; el.dataset.info = "";
-
-                    if (data && data[sNum]) {
-                        const spotData = data[sNum];
-                        if (spotData.status === 'booked') el.classList.add('booked');
-                        else if (spotData.status === 'staff') el.classList.add('staff');
-                        if (spotData.info) {
-                            el.dataset.info = JSON.stringify(spotData.info);
-
-                            if (spotData.info.carNumber) {
-                                adjustSingleSpotTextFontSize(sNum, spotData.info.carNumber);
+            });
+            for (let i = 1; i <= 21; i++) {
+                const tr = document.getElementById(`table-row-${i}`);
+                if (tr) {
+                    const isRowChecked = checkStates[i] ? "row-checked" : ""; tr.className = isRowChecked;
+                    tr.innerHTML = `<td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${i}" onchange="toggleRowColor(this)" ${checkStates[i] ? 'checked' : ''}></td>
+                        <td class="col-stt" style="font-weight:bold !important;">${i === 4 ? '♿ 4' : i}</td>
+                        <td class="col-room-number"></td><td class="col-guest-name"></td><td class="col-car-number"></td>
+                        <td></td><td></td><td></td><td></td>`;
+                }
+            }
+            if (data) {
+                Object.keys(data).forEach(spotNumStr => {
+                    const spotNum = parseInt(spotNumStr);
+                    if (spotNum >= 1 && spotNum <= 21) {
+                        const tr = document.getElementById(`table-row-${spotNum}`); const spotData = data[spotNumStr];
+                        if (tr && spotData && (spotData.status === 'booked' || spotData.status === 'staff') && spotData.info) {
+                            let room = spotData.info.roomNumber || ""; const note = spotData.info.guestNote || "";
+                            let carNum = spotData.info.carNumber || ""; const checkIn = spotData.info.checkIn || "";
+                            const checkOut = spotData.info.checkOut || ""; const seisan = spotData.info.seisanStatus || "済";
+                            let name = spotData.info.guestName || "";
+                            let roomDisplay = "", checkInDisplay = "", checkOutDisplay = "", dayLogicDisplay = "", seisanDisplay = "";
+                            if (spotData.status === 'staff') {
+                                if (room === "STAFF") room = "スタッフ";
+                                roomDisplay = room;
+                            } else {
+                                roomDisplay = room ? `R${room}` : "";
+                                checkInDisplay = checkIn ? checkIn.substring(5).replace('-', '/') : "";
+                                checkOutDisplay = checkOut ? checkOut.substring(5).replace('-', '/') : "";
+                                dayLogicDisplay = calculateDisplayDaysLogic(checkIn, checkOut, date);
+                                const seisanClass = (seisan === "未") ? "seisan-mi" : "seisan-zai";
+                                seisanDisplay = `<span class="status-circle ${seisanClass}">${seisan}</span>`;
                             }
-
-                            if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") el.querySelector('.note-star').style.display = 'block';
+                            const isRowChecked = checkStates[spotNum] ? "row-checked" : ""; tr.className = isRowChecked;
+                            tr.innerHTML = `<td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${spotNum}" onchange="toggleRowColor(this)" ${checkStates[spotNum] ? 'checked' : ''}></td>
+                                <td class="col-stt" style="font-weight:bold !important;">${spotNum === 4 ? '♿ 4' : spotNum}</td>
+                                <td class="col-room-number">${roomDisplay}</td>
+                                <td class="col-guest-name">${name} ${note ? '<span style="color:#e74c3c; font-size:26px;">★</span>' : ''}</td>
+                                <td class="col-car-number" style="font-weight:bold !important; color:#1a6ddb !important;">${carNum}</td>
+                                <td>${checkInDisplay}</td><td>${checkOutDisplay}</td>
+                                <td style="font-weight:bold; color:#2c3e50;">${dayLogicDisplay}</td><td>${seisanDisplay}</td>`;
+                            tr.style.cursor = 'pointer';
+                            tr.ondblclick = () => { const spotEl = document.getElementById(`spot-${spotNum}`); if (spotEl) openGuestModal(spotEl); };
                         }
                     }
                 });
-                for (let i = 1; i <= 21; i++) {
-                    const tr = document.getElementById(`table-row-${i}`);
-                    if (tr) {
-                        const isRowChecked = checkStates[i] ? "row-checked" : ""; tr.className = isRowChecked;
-                        tr.innerHTML = `
-                            <td class="check-col">
-                                <input type="checkbox" class="custom-checkbox" id="row-check-${i}" onchange="toggleRowColor(this)" ${checkStates[i] ? 'checked' : ''}>
-                            </td>
-                            <td class="col-stt" style="font-weight:bold !important;">${i === 4 ? '♿ 4' : i}</td>
-                            <td class="col-room-number"></td><td class="col-guest-name"></td><td class="col-car-number"></td>
-                            <td></td><td></td><td></td><td></td>
-                        `;
-                    }
-                }
-                if (data) {
-                    Object.keys(data).forEach(spotNumStr => {
-                        const spotNum = parseInt(spotNumStr);
-                        if (spotNum >= 1 && spotNum <= 21) {
-                            const tr = document.getElementById(`table-row-${spotNum}`); const spotData = data[spotNumStr];
-
-                            if (tr && spotData && (spotData.status === 'booked' || spotData.status === 'staff') && spotData.info) {
-                                let room = spotData.info.roomNumber || ""; const note = spotData.info.guestNote || "";
-                                let carNum = spotData.info.carNumber || ""; const checkIn = spotData.info.checkIn || "";
-                                const checkOut = spotData.info.checkOut || ""; const seisan = spotData.info.seisanStatus || "済";
-                                let name = spotData.info.guestName || "";
-
-                                let roomDisplay = ""; let checkInDisplay = ""; let checkOutDisplay = ""; let dayLogicDisplay = ""; let seisanDisplay = "";
-
-                                if (spotData.status === 'staff') {
-                                    if (room === "STAFF") { room = "スタッフ"; }
-                                    roomDisplay = room;
-                                    checkInDisplay = ""; checkOutDisplay = ""; dayLogicDisplay = ""; seisanDisplay = "";
-                                } else {
-                                    roomDisplay = room ? `R${room}` : "";
-                                    checkInDisplay = checkIn ? checkIn.substring(5).replace('-', '/') : "";
-                                    checkOutDisplay = checkOut ? checkOut.substring(5).replace('-', '/') : "";
-                                    dayLogicDisplay = calculateDisplayDaysLogic(checkIn, checkOut, date);
-
-                                    const seisanClass = (seisan === "未") ? "seisan-mi" : "seisan-zai";
-                                    seisanDisplay = `<span class="status-circle ${seisanClass}">${seisan}</span>`;
-                                }
-
-                                const isRowChecked = checkStates[spotNum] ? "row-checked" : ""; tr.className = isRowChecked;
-
-                                tr.innerHTML = `
-                                    <td class="check-col">
-                                        <input type="checkbox" class="custom-checkbox" id="row-check-${spotNum}" onchange="toggleRowColor(this)" ${checkStates[spotNum] ? 'checked' : ''}>
-                                    </td>
-                                    <td class="col-stt" style="font-weight:bold !important;">${spotNum === 4 ? '♿ 4' : spotNum}</td>
-                                    <td class="col-room-number">${roomDisplay}</td>
-                                    <td class="col-guest-name">${name} ${note ? '<span style="color:#e74c3c; font-size:26px;">★</span>' : ''}</td>
-                                    <td class="col-car-number" style="font-weight:bold !important; color:#1a6ddb !important;">${carNum}</td>
-                                    <td>${checkInDisplay}</td><td>${checkOutDisplay}</td>
-                                    <td style="font-weight:bold; color:#2c3e50;">${dayLogicDisplay}</td><td>${seisanDisplay}</td>
-                                `;
-                                tr.style.cursor = 'pointer';
-                                tr.ondblclick = () => {
-                                    const spotEl = document.getElementById(`spot-${spotNum}`);
-                                    if (spotEl) openGuestModal(spotEl);
-                                };
-                            }
-                        }
-                    });
-                }
             }
+        }
 
-            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        // Attach listener 1 lần duy nhất — chỉ thay khi đổi ngày
+        function loadParkingData() {
+            const date = document.getElementById('parkingDate').value;
+            if (_currentListenerDate === date && _currentListenerRef) return; // Đã có listener cho ngày này
+            if (_currentListenerRef) { _currentListenerRef.off('value'); _currentListenerRef = null; }
+            _currentListenerDate = date;
 
             if (isLocalhost && !navigator.onLine) {
-                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
+                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(d => { if (d) renderViewWithData(d); });
                 return;
             }
 
-            // Attach realtime listener — tự động cập nhật khi data thay đổi
             _currentListenerRef = db.ref('parking/' + date);
             _currentListenerRef.on('value', (snapshot) => {
                 const cloudData = snapshot.val();
-                console.log('✅ Firebase data:', date, cloudData);
                 renderViewWithData(cloudData);
-                // Sync về local SQLite (chỉ khi chạy localhost)
                 if (cloudData && isLocalhost) {
                     Object.keys(cloudData).forEach(async (id) => {
                         const item = cloudData[id];
@@ -1383,11 +1349,8 @@
                     });
                 }
             }, (error) => {
-                console.error('❌ Firebase lỗi:', error.code, error.message);
-                showToast('Firebase: ' + error.message);
-                if (isLocalhost) {
-                    localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
-                }
+                console.error('Firebase error:', error.code);
+                if (isLocalhost) localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(d => { if (d) renderViewWithData(d); });
             });
         }
 
@@ -1415,7 +1378,6 @@
             dateInput.value = formatDateLocal(current); handleDateChange();
         }
         function handleDateChange() {
-            // Tắt listener ngày cũ khi đổi ngày
             if (_currentListenerRef) {
                 _currentListenerRef.off('value');
                 _currentListenerRef = null;
@@ -1462,7 +1424,7 @@
 
             await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) });
             if (navigator.onLine) { await db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info }); }
-            showToast("データを保存しました"); closeStaffModal(); loadParkingData();
+            showToast("データを保存しました"); closeStaffModal();
         }
 
         function openGuestModal(el) {
@@ -1516,7 +1478,6 @@
             }
 
             closeConfirmModal(); closeGuestModal(); closeStaffModal(); showToast("削除完了");
-            setTimeout(() => loadParkingData(), 400);
         }
 
         async function saveGuestInfo() {
@@ -1554,7 +1515,7 @@
                 await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (navigator.onLine) { await db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }); }
             }
-            closeGuestModal(); showToast("データを保存しました"); loadParkingData();
+            closeGuestModal(); showToast("データを保存しました");
         }
 
         async function exportToExcel() {
