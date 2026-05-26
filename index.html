@@ -939,6 +939,31 @@
         const db = firebase.database();
         db.goOnline();
 
+        // Khi có kết nối lại (sau khi mất mạng hoặc iOS kill WebSocket) → reload data
+        db.ref('.info/connected').on('value', (snap) => {
+            const connected = snap.val();
+            const toast = document.getElementById('toast');
+            if (!connected) {
+                if (toast) { toast.textContent = '🔴 オフライン'; toast.style.display = 'block'; toast.style.background = '#e74c3c'; }
+            } else {
+                if (toast) { toast.style.display = 'none'; }
+                // Reconnect → reset listener để nhận data mới nhất
+                if (_currentListenerRef) {
+                    _currentListenerRef.off('value');
+                    _currentListenerRef = null;
+                    _currentListenerDate = null;
+                }
+                loadParkingData();
+            }
+        });
+
+        // iOS Safari: reconnect khi quay lại tab/app
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                db.goOnline();
+            }
+        });
+
         const spotConfig = [
             { id: 1, type: 'short-rect' }, { id: 2, type: 'short-rect' }, { id: 3, type: 'short-rect' }, { id: 4, type: 'handicapped' },
             { id: 5, type: 'top-row-spot' }, { id: 6, type: 'top-row-spot' }, { id: 7, type: 'top-row-spot' }, { id: 8, type: 'top-row-spot' }, { id: 9, type: 'top-row-spot' },
@@ -1236,20 +1261,6 @@
         let _currentListenerDate = null;
         let _currentListenerRef = null;
         const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-
-        // Hiển thị trạng thái kết nối realtime
-        db.ref('.info/connected').on('value', (snap) => {
-            const connected = snap.val();
-            const toast = document.getElementById('toast');
-            if (!connected) {
-                if (toast) { toast.textContent = '🔴 オフライン'; toast.style.display = 'block'; toast.style.background = '#e74c3c'; }
-            } else {
-                if (toast && toast.textContent === '🔴 オフライン') {
-                    toast.textContent = '🟢 接続済み';
-                    setTimeout(() => { toast.style.display = 'none'; }, 1500);
-                }
-            }
-        });
 
         // renderViewWithData ở ngoài — dùng chung cho mọi nơi
         function renderViewWithData(data) {
