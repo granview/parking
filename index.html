@@ -787,7 +787,7 @@
         </div>
         <div class="date-side-actions">
             <button onclick="exportToExcel()" class="btn-side">EXCEL</button>
-            <button onclick="jumpToToday()" class="btn-side">🔄 更新</button>
+            <button onclick="refreshData()" class="btn-side">🔄 更新</button>
         </div>
     </div>
 
@@ -937,31 +937,10 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        db.goOnline();
 
-        // Khi có kết nối lại (sau khi mất mạng hoặc iOS kill WebSocket) → reload data
-        db.ref('.info/connected').on('value', (snap) => {
-            const connected = snap.val();
-            const toast = document.getElementById('toast');
-            if (!connected) {
-                if (toast) { toast.textContent = '🔴 オフライン'; toast.style.display = 'block'; toast.style.background = '#e74c3c'; }
-            } else {
-                if (toast) { toast.style.display = 'none'; }
-                // Reconnect → reset listener để nhận data mới nhất
-                if (_currentListenerRef) {
-                    _currentListenerRef.off('value');
-                    _currentListenerRef = null;
-                    _currentListenerDate = null;
-                }
-                loadParkingData();
-            }
-        });
-
-        // iOS Safari: reconnect khi quay lại tab/app
+        // iOS: reconnect khi quay lại tab
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                db.goOnline();
-            }
+            if (document.visibilityState === 'visible') loadParkingData();
         });
 
         const spotConfig = [
@@ -1334,20 +1313,20 @@
             }
         }
 
-        // Attach listener 1 lần duy nhất — chỉ thay khi đổi ngày
+        // Attach listener — giống file gốc: off rồi on lại mỗi lần
         function loadParkingData() {
             const date = document.getElementById('parkingDate').value;
-            if (_currentListenerDate === date && _currentListenerRef) return;
-            if (_currentListenerRef) { _currentListenerRef.off('value'); _currentListenerRef = null; }
-            _currentListenerDate = date;
+
+            // Tắt listener cũ
+            db.ref('parking/' + date).off();
 
             if (isLocalhost && !navigator.onLine) {
                 localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(d => { if (d) renderViewWithData(d); });
                 return;
             }
 
-            _currentListenerRef = db.ref('parking/' + date);
-            _currentListenerRef.on('value', (snapshot) => {
+            // Bật listener mới — Firebase tự push khi có thay đổi
+            db.ref('parking/' + date).on('value', (snapshot) => {
                 renderViewWithData(snapshot.val());
                 if (snapshot.val() && isLocalhost) {
                     Object.keys(snapshot.val()).forEach(async (id) => {
@@ -1362,6 +1341,14 @@
                 console.error('Firebase error:', error.code);
                 if (isLocalhost) localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(d => { if (d) renderViewWithData(d); });
             });
+        }
+
+        function refreshData() {
+            const dInput = document.getElementById('parkingDate');
+            dInput.value = formatDateLocal(new Date());
+            db.ref('parking/' + dInput.value).off();
+            loadParkingData();
+            showToast("更新しました");
         }
 
         function jumpToToday() {
@@ -1388,11 +1375,6 @@
             dateInput.value = formatDateLocal(current); handleDateChange();
         }
         function handleDateChange() {
-            if (_currentListenerRef) {
-                _currentListenerRef.off('value');
-                _currentListenerRef = null;
-                _currentListenerDate = null;
-            }
             loadParkingData();
         }
 
