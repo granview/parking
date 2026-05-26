@@ -16,10 +16,10 @@
 
     <style>
         body {
-            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
-            background: #f4f6f8;
+            font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', sans-serif;
+            background: #f0f2f5;
             margin: 0;
-            padding: 5px 10px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,69 +27,147 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+            box-sizing: border-box;
         }
 
+        /* ===== macOS 26 Liquid Glass style ===== */
         .date-controls {
             width: 98vw;
             max-width: 1500px;
-            display: flex;
-            justify-content: flex-end;
-            padding-right: 10px;
-            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            margin-bottom: 5px;
+            padding: 0 4px;
+            box-sizing: border-box;
+            margin-bottom: 22px;
         }
 
-        .date-controls input[type="date"] {
-            padding: 3px 6px;
-            font-size: 12px;
-            height: 20px;
+        .date-controls-left { display: flex; align-items: center; }
+
+        .date-center-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
         }
 
-        .date-controls button {
-            height: 28px;
-            padding: 0 8px;
-            border: none;
-            border-radius: 4px;
-            color: black;
-            cursor: pointer;
-            font-size: 12px;
+        /* Khung ngày — liquid glass */
+        .date-box {
+            background: #ffffff;
+            border: 0.5px solid rgba(0,0,0,0.12);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .date-box:hover {
+            background: rgba(0,122,255,0.10);
+            border-color: rgba(0,122,255,0.35);
         }
 
-        .main-title {
-            font-size: 30px;
+        .date-box input[type="date"] {
+            font-size: 28px;
             font-weight: 300;
-            color: #2c3e50;
-            letter-spacing: 8px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            color: #1d1d1f;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 0;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
         }
+            cursor: pointer;
+            font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+        }
+
+        .date-box input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0.3;
+            cursor: pointer;
+        }
+
+        /* Nút ◀ ▶ — macOS capsule, hover xanh */
+        .btn-nav {
+            height: 44px;
+            width: 44px;
+            border: 0.5px solid rgba(0,0,0,0.12);
+            border-radius: 10px;
+            background: #ffffff;
+            color: #1d1d1f;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s, color 0.12s;
+            box-shadow: none;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-nav:hover  { background: rgba(0,122,255,0.12); border-color: rgba(0,122,255,0.35); color: #007aff; }
+        .btn-nav:active { background: rgba(0,122,255,0.22); }
+
+        /* EXCEL + 更新 */
+        .date-side-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .btn-side {
+            height: 26px;
+            padding: 0 11px;
+            border: 0.5px solid rgba(0,0,0,0.12);
+            border-radius: 7px;
+            background: #ffffff;
+            color: #1d1d1f;
+            font-size: 12px;
+            font-weight: 400;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: none;
+            font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        }
+        .btn-side:hover  { background: rgba(0,0,0,0.06); }
+        .btn-side:active { background: rgba(0,0,0,0.11); }
 
         .parking-lot-map {
             position: relative;
-            background: #fff;
+            background: #ffffff;
             border: 2px solid #34495e;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            box-shadow: none;
             width: 98vw;
             max-width: 1500px;
-            padding: 30px;
+            padding: 25px;
             box-sizing: border-box;
+            min-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
         }
 
         .grid-container {
             display: grid;
-            gap: 10px;
-            grid-template-rows: 140px 0px 40px 70px 140px;
-            grid-template-columns: repeat(19, 1fr);
+            gap: 5px;
+            grid-template-rows: 140px 0px 90px 1fr 200px;
+            grid-template-columns: repeat(3, 1fr) 0.5fr repeat(15, 1fr);
             width: 100%;
+            flex: 1;
+            align-content: space-between;
         }
 
         .top-row-spot {
             grid-row: 1;
             height: 100%;
+        }
+
+        #spot-5, #spot-6, #spot-7, #spot-8, #spot-9 {
+            height: 200px !important;
+            align-self: start;
         }
 
         #spot-19,
@@ -101,100 +179,212 @@
 
         .short-rect {
             grid-row: 1 / span 3;
+            height: 100%;
+        }
+
+        #spot-5,
+        #spot-6,
+        #spot-7,
+        #spot-8,
+        #spot-9 {
+            grid-row: 1;
+            height: 100%;
+        }
+
+        .parking-spot {
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.1s ease, background-color 0.2s;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #bdc3c7 !important;
         }
 
         .parking-spot {
             background: #2ecc71;
-            border: 1.5px solid #27ae60;
-            border-radius: 4px;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s;
-            padding: 6px 2px;
-            position: relative;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        .parking-spot.dragging {
-            opacity: 0.4;
-            transform: scale(0.95);
-            border: 2px dashed #34495e !important;
-        }
-
-        .parking-spot.drag-over {
-            border: 2px dashed #1d4ed8 !important;
-            background-color: #dbeafe !important;
-            color: #1d4ed8 !important;
+            border: 1.5px solid #27ae60 !important;
         }
 
         .parking-spot.booked {
             background: #e74c3c !important;
-            border-color: #c0392b !important;
+            border: 1.5px solid #c0392b !important;
         }
 
         .parking-spot.staff {
             background: #f39c12 !important;
-            border-color: #e67e22 !important;
+            border: 1.5px solid #d35400 !important;
         }
 
         .parking-spot.handicapped {
-            background: #3498db;
-            border-color: #2980b9;
+            background: #2980b9 !important;
+            border: 1.5px solid #1f618d !important;
         }
 
+        /* Ô số 4 (handicapped) khi có khách → đỏ */
+        .parking-spot.handicapped.booked {
+            background: #e74c3c !important;
+            border: 1.5px solid #c0392b !important;
+        }
+
+        .parking-spot.dragging {
+            opacity: 0.3;
+            transform: scale(0.95);
+            border: 1.5px dashed #2c3e50 !important;
+        }
+
+        .parking-spot.drag-over {
+            border: 1.5px dashed #1d4ed8 !important;
+            background-color: #dbeafe !important;
+        }
+
+        /* Khung chữ trắng — chiều cao = toàn ô trừ header 28px cố định */
         .name-display {
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-            font-size: clamp(14px, 1.8vh, 14px);
-            margin-top: 5px;
-            height: 70%;
-            width: 90%;
-            background: rgba(255, 255, 255, .2);
-            border-radius: 3px;
-            padding: 2px;
-            font-weight: bold;
-            color: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 42px);
+            background: rgba(255, 255, 255, 0.76) !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 1;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: clip;
+            padding: 2px 2px;
+        }
+
+        .spot-content-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             box-sizing: border-box;
+            z-index: 2;
             pointer-events: none;
         }
 
+        /* Số ô — chiều cao cố định 28px, không phụ thuộc % */
+        .spot-num-header {
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            height: 42px !important;
+            min-height: 42px !important;
+            max-height: 42px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            line-height: 1;
+            box-sizing: border-box;
+            text-shadow: none;
+            flex-shrink: 0;
+        }
+
+        /* ================= KHUNG CHỮ DỌC TỰ CO ================= */
+        .text-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            padding: 3px 2px;
+            font-weight: 400 !important;
+            color: #111111 !important;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .text-content-wrapper .text-inner {
+            display: block;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.1;
+            width: 100%;
+        }
+
+        .text-content-wrapper .char-dash {
+            display: inline-block;
+            color: #111111;
+            line-height: 1.1;
+            margin: 3px 0;
+            transform: rotate(90deg);
+            font-size: 0.5em;
+        }
+
         .note-star {
-            font-size: 24px;
-            color: #f1c40f;
+            font-size: 18px;
+            color: #e74c3c;
             position: absolute;
-            bottom: 2px;
+            bottom: 3px;
+            right: 3px;
+            left: auto;
+            transform: none;
             display: none;
+            z-index: 10;
         }
 
         .hatched-zone {
-            grid-column: 4;
+            grid-column: 4 / span 1;
             grid-row: 1 / span 3;
-            background-image: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 5px, #eee 5px, #eee 10px);
-            border: 1px solid #eee;
+            background-image: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 6px, #e0e0e0 6px, #e0e0e0 12px);
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
         }
 
-        #spot-1 { grid-column: 1; }
-        #spot-2 { grid-column: 2; }
-        #spot-3 { grid-column: 3; }
-        #spot-4 { grid-column: 5 / span 1; grid-row: 1 / span 3; }
-        #spot-5 { grid-column: 6; }
-        #spot-6 { grid-column: 7; }
-        #spot-7 { grid-column: 8; }
-        #spot-8 { grid-column: 9; }
-        #spot-9 { grid-column: 10; }
+        #spot-1 {
+            grid-column: 1;
+        }
+
+        #spot-2 {
+            grid-column: 2;
+        }
+
+        #spot-3 {
+            grid-column: 3;
+        }
+
+        #spot-4 {
+            grid-column: 5 / span 1;
+            grid-row: 1 / span 3;
+        }
+
+        #spot-5 {
+            grid-column: 6;
+        }
+
+        #spot-6 {
+            grid-column: 7;
+        }
+
+        #spot-7 {
+            grid-column: 8;
+        }
+
+        #spot-8 {
+            grid-column: 9;
+        }
+
+        #spot-9 {
+            grid-column: 10;
+        }
 
         .main-road {
             grid-row: 4;
@@ -202,47 +392,67 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ccc;
+            color: #7f8c8d;
             font-size: 11px;
-            letter-spacing: 5px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            height: 100%;
         }
 
-        #spot-21 { grid-row: 5; grid-column: 17; }
-        #spot-20 { grid-row: 5; grid-column: 18; }
-        #spot-19 { grid-row: 5; grid-column: 19; }
+        #spot-21 {
+            grid-row: 5;
+            grid-column: 17;
+        }
+
+        #spot-20 {
+            grid-row: 5;
+            grid-column: 18;
+        }
+
+        #spot-19 {
+            grid-row: 5;
+            grid-column: 19;
+        }
 
         .legend {
-            margin-top: 25px;
+            margin-top: 20px;
             display: flex;
-            gap: 40px;
-            padding: 15px 40px;
-            background: #fff;
-            border-radius: 10px;
-            border: 1px solid #eee;
+            gap: 35px;
+            padding: 15px 35px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            flex-shrink: 0;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
             gap: 12px;
+            font-size: 16px;
+            font-weight: 400;
+            color: #2c3e50;
         }
 
         .color-box {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
         }
 
-        /* ================= CUSTOMER LIST TABLE STYLES ================= */
+        /* Định dạng bảng danh sách gốc ban đầu */
         .customer-list-container {
             width: 98vw;
             max-width: 1500px;
             margin-top: 25px;
-            background: #fff;
+            background: #ffffff;
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            box-shadow: none;
             box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         .list-title-center {
@@ -264,31 +474,71 @@
             background-color: #3498db !important;
             color: #ffffff !important;
             font-weight: bold;
-            font-size: 15px;
-            padding: 12px 10px;
+            font-size: 17px;
+            padding: 14px 10px;
             border: 1px solid #2980b9;
         }
 
         .excel-table td {
             border: 1px solid #ddd;
-            padding: 12px 10px;
+            padding: 14px 10px;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: normal;
+            color: initial;
             transition: background-color 0.2s, color 0.2s;
         }
 
-        .excel-table tbody tr:nth-child(even) { background-color: #ffffff; }
-        .excel-table tbody tr:nth-child(odd) { background-color: #f1f5f9; }
+        .excel-table tbody tr:nth-child(even) {
+            background-color: #ffffff;
+        }
 
-        .excel-table tbody tr.row-checked { background-color: #fca5a5 !important; }
-        .excel-table tbody tr.row-checked td { color: #991b1b !important; font-weight: bold; }
-        .excel-table tbody tr.row-checked .col-car-number { color: #7f1d1d !important; }
+        .excel-table tbody tr:nth-child(odd) {
+            background-color: #f1f5f9;
+        }
 
-        .col-stt { font-weight: bold; color: #475569; }
-        .col-room-number { font-weight: normal; color: #333333; }
-        .col-guest-name { width: 180px; white-space: nowrap; text-align: left !important; padding-left: 15px !important; }
-        .col-car-number { font-weight: bold; color: #1d4ed8; font-size: 18px !important; }
-        .check-col { width: 45px; }
+        .excel-table tbody tr.row-checked {
+            background-color: #fca5a5 !important;
+        }
+
+        .excel-table tbody tr.row-checked td {
+            color: #991b1b !important;
+            font-weight: bold;
+        }
+
+        .excel-table tbody tr.row-checked .col-car-number {
+            color: #7f1d1d !important;
+        }
+
+        /* 台数 — đậm to hơn */
+        .col-stt {
+            font-weight: bold !important;
+            font-size: 20px !important;
+            color: #1a1a1a !important;
+        }
+
+        .col-room-number {
+            font-weight: normal;
+            color: #333333;
+        }
+
+        .col-guest-name {
+            width: 180px;
+            white-space: nowrap;
+            text-align: left !important;
+            padding-left: 15px !important;
+        }
+
+        /* 車番号 — đậm to, màu xanh dương */
+        .col-car-number {
+            font-weight: bold !important;
+            color: #1a6ddb !important;
+            font-size: 22px !important;
+        }
+
+        .check-col {
+            width: 45px;
+        }
 
         .custom-checkbox {
             width: 20px;
@@ -306,7 +556,7 @@
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             transition: all 0.2s ease;
         }
 
@@ -364,8 +614,10 @@
             background: #fdedec;
         }
 
-        /* ================= MODAL STYLES ================= */
-        #guestModal, #staffModal, #passModal, #confirmModal {
+        #guestModal,
+        #staffModal,
+        #passModal,
+        #confirmModal {
             position: fixed;
             top: 0;
             left: 0;
@@ -378,18 +630,14 @@
             z-index: 5000;
         }
 
-        #staffModal { z-index: 5001; }
-        #confirmModal { z-index: 6000; }
-        #passModal { z-index: 7000; }
-
         .modal-box {
-            background: #fff;
-            width: 350px;
+            background: #ffffff;
+            width: 450px;
             max-width: 90vw;
             border-radius: 12px;
             padding: 30px;
             box-sizing: border-box;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: none;
         }
 
         .modal-title {
@@ -397,6 +645,7 @@
             font-weight: bold;
             margin-bottom: 20px;
             text-align: center;
+            color: #2c3e50;
         }
 
         .form-row {
@@ -433,9 +682,41 @@
             color: #333;
         }
 
-        .room-small { flex: 0 0 100px !important; }
-        .stay-small { flex: 0 0 90px !important; }
-        .check-large { flex: 1; }
+        /* 部屋番号 — nhỏ lại, cùng chiều cao */
+        .form-group.room-small {
+            flex: 0 0 80px;
+        }
+        .form-group.room-small input {
+            font-size: 15px;
+            padding: 0 8px;
+            text-align: center;
+            height: 48px;
+            box-sizing: border-box;
+        }
+
+        /* お客様名 — cùng chiều cao */
+        #guestName {
+            font-size: 18px !important;
+            font-weight: 500 !important;
+            height: 48px !important;
+            padding: 0 12px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* 泊数 select — ẩn mũi tên, chỉ hiện khi click */
+        .form-group.stay-small {
+            flex: 0 0 64px;
+        }
+        .form-group.stay-small select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            text-align: center;
+            padding: 12px 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background-image: none;
+        }
 
         .modal-buttons {
             display: flex;
@@ -452,38 +733,56 @@
             font-size: 15px;
         }
 
-        .btn-save { background: #2ecc71; color: white; }
-        .btn-close { background: #95a5a6; color: white; }
-        .btn-delete { background: #e74c3c; color: white; }
+        .btn-save {
+            background: #2ecc71;
+            color: white;
+        }
 
-     /* 1. Giữ nguyên số thứ tự ô (1-21) là màu trắng cho tất cả các ô */
-.parking-spot {
-    color: #ffffff !important;
-}
+        .btn-close {
+            background: #95a5a6;
+            color: white;
+        }
 
-/* 2. Chuyển riêng phần tên khách/biển số/chữ "予備" trong ô đỏ và ô cam thành màu XÁM HƠI ĐẬM */
-.parking-spot.booked .name-display,
-.parking-spot.staff .name-display {
-    color: #333333 !important; /* Mã màu xám hơi đậm rất sang và dễ nhìn */
-}
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .parking-lot-map {
+                min-height: auto;
+                padding: 15px;
+            }
+
+            .grid-container {
+                grid-template-columns: repeat(10, 1fr);
+                grid-template-rows: auto;
+                gap: 6px;
+                align-content: start;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <div id="toast" style="position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #34495e; color: white; padding: 12px 30px; border-radius: 50px; transition: top .5s ease; z-index: 2000; display: none;"></div>
-
-    <div style="display:flex;align-items:center;gap:8px;">
-        <div class="main-title">駐車場</div>
+    <div id="toast"
+        style="position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: white; padding: 14px 35px; border-radius: 50px; transition: top .5s ease; z-index: 2000; font-size: 16px; font-weight: bold; display: none;">
     </div>
 
     <div class="date-controls">
-        <button onclick="changeDate(-1)">◀</button>
-        <input type="date" id="parkingDate" onchange="handleDateChange()">
-        <button onclick="changeDate(1)">▶</button>
-        <button onclick="exportToExcel()" style="background:#2980b9 !important; color: #fff;">EXCEL</button>
-        <input type="file" id="excelTemplate" accept=".xlsx" style="display:none">
-        <button onclick="jumpToToday()" style="background:#2980b9;color:white;">🔄 更新</button>
+        <div class="date-controls-left"></div>
+        <div class="date-center-group">
+            <button class="btn-nav" onclick="changeDate(-1)">◀</button>
+            <div class="date-box">
+                <input type="date" id="parkingDate" onchange="handleDateChange()">
+            </div>
+            <button class="btn-nav" onclick="changeDate(1)">▶</button>
+        </div>
+        <div class="date-side-actions">
+            <button onclick="exportToExcel()" class="btn-side">EXCEL</button>
+            <button onclick="jumpToToday()" class="btn-side">🔄 更新</button>
+        </div>
     </div>
 
     <div class="parking-lot-map">
@@ -491,10 +790,18 @@
     </div>
 
     <div class="legend">
-        <div class="legend-item"><div class="color-box" style="background:#2ecc71;"></div>空き</div>
-        <div class="legend-item"><div class="color-box" style="background:#e74c3c;"></div>予約済</div>
-        <div class="legend-item"><div class="color-box" style="background:#f39c12;"></div>スタッフ用&予備</div>
-        <div class="legend-item"><div class="color-box" style="background:#3498db;"></div>身障者用</div>
+        <div class="legend-item">
+            <div class="color-box" style="background:#2ecc71;"></div>空き
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background:#e74c3c;"></div>予約済
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background:#f39c12;"></div>スタッフ用&予備
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background:#3498db;"></div>身障者用
+        </div>
     </div>
 
     <div class="customer-list-container">
@@ -502,17 +809,17 @@
         <table class="excel-table">
             <thead>
                 <tr>
-                    <th style="width: 85px; background-color: #2980b9 !important;">
+                    <th style="width: 95px; background-color: #2980b9 !important;">
                         <button class="btn-header-clear" onclick="clearAllRowChecks()">❌ 解除</button>
                     </th>
-                    <th style="width: 60px;">台数</th>
-                    <th style="width: 90px;">部屋番号</th>
+                    <th style="width: 70px;">台数</th>
+                    <th style="width: 100px;">部屋番号</th>
                     <th class="col-guest-name">お客様名</th>
-                    <th style="width: 120px;">車番</th>
-                    <th style="width: 110px;">利用開始日</th>
-                    <th style="width: 110px;">利用最終日</th>
-                    <th style="width: 90px;">利用日数</th>
-                    <th style="width: 80px;">精算</th>
+                    <th style="width: 130px;">車番</th>
+                    <th style="width: 120px;">利用開始日</th>
+                    <th style="width: 120px;">利用最終日</th>
+                    <th style="width: 100px;">利用日数</th>
+                    <th style="width: 90px;">精算</th>
                 </tr>
             </thead>
             <tbody id="excelTableBody"></tbody>
@@ -520,7 +827,7 @@
     </div>
 
     <div id="guestModal">
-        <div class="modal-box" style="width:450px;">
+        <div class="modal-box">
             <div class="modal-title" id="guestModalTitle">駐車情報</div>
             <div class="form-row">
                 <div class="form-group room-small">
@@ -529,7 +836,7 @@
                 </div>
                 <div class="form-group">
                     <label>お客様名</label>
-                    <input type="text" id="guestName">
+                    <input type="text" id="guestName" style="font-size:18px; font-weight:500;">
                 </div>
             </div>
             <div class="form-row">
@@ -551,7 +858,7 @@
                     <label>車両番号</label>
                     <input type="text" id="carNumber" inputmode="numeric">
                 </div>
-                <div class="form-group" style="flex: 0 0 100px; text-align: center; margin-bottom:0;">
+                <div class="form-group" style="flex: 0 0 110px; text-align: center; margin-bottom:0;">
                     <label style="display:block; text-align:center;">精算状態</label>
                     <div id="seisanToggle" class="seisan-toggle-btn" onclick="toggleSeisanModalStatus()">済</div>
                 </div>
@@ -590,19 +897,19 @@
     </div>
 
     <div id="passModal">
-        <div class="modal-box" style="width: 320px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 10px;">🔐</div>
-            <div class="modal-title" style="margin-bottom: 15px;">移動パスコード</div>
-            <input type="password" id="movePassCode" placeholder="0000" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; text-align: center; font-size: 20px; letter-spacing: 5px;" maxlength="4" inputmode="numeric">
+        <div class="modal-box" style="width: 360px; text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 10px;">🚗</div>
+            <div class="modal-title" style="margin-bottom: 8px;">駐車位置の移動確認</div>
+            <p id="passMoveDesc" style="font-size:15px; color:#555; margin: 0 0 24px; line-height:1.6;"></p>
             <div class="modal-buttons">
-                <button class="btn-save" onclick="verifyAndMove()">確認</button>
-                <button class="btn-close" onclick="closePassModal()">閉じる</button>
+                <button class="btn-save" onclick="verifyAndMove()">はい、移動する</button>
+                <button class="btn-close" onclick="closePassModal()">キャンセル</button>
             </div>
         </div>
     </div>
 
     <div id="confirmModal">
-        <div class="modal-box" style="width: 320px; text-align: center;">
+        <div class="modal-box" style="width: 340px; text-align: center;">
             <div style="font-size: 50px; color: #e74c3c; margin-bottom: 10px;">⚠️</div>
             <div class="modal-title" style="margin-bottom: 20px;">本当に削除しますか？</div>
             <div class="modal-buttons">
@@ -613,7 +920,6 @@
     </div>
 
     <script>
-        /* ================= COOKING DUAL SYNC CORE ================= */
         const firebaseConfig = {
             apiKey: "AIzaSyCWV0CdSSDznxXKdlTbJc4-AMrjVr51Hlo",
             authDomain: "test-f20cf.firebaseapp.com",
@@ -637,7 +943,7 @@
 
         let modalSeisanStatus = "済";
         let currentSpot = null;
-        let pendingMoveData = null; 
+        let pendingMoveData = null;
 
         window.onload = function () {
             const staySelect = document.getElementById('stayDays');
@@ -661,12 +967,7 @@
         }
 
         async function localApiFetch(url, options = {}) {
-            try {
-                return await fetch(url, options);
-            } catch (e) {
-                console.warn("API Local bị chặn (CORS file:///) hoặc chưa cấu hình Server. Tự động bỏ qua:", url);
-                return null;
-            }
+            try { return await fetch(url, options); } catch (e) { return null; }
         }
 
         function renderMap() {
@@ -678,8 +979,17 @@
                 const div = document.createElement('div');
                 div.className = `parking-spot ${spot.type}`; div.id = `spot-${spot.id}`; div.setAttribute('data-num', spot.id);
                 div.draggable = true;
+
                 const displayNum = spot.id === 4 ? '♿ 4' : spot.id;
-                div.innerHTML = `<div>${displayNum}</div><div class="name-display"></div><div class="note-star">★</div>`;
+                div.innerHTML = `
+                    <div class="name-display">
+                        <div class="text-content-wrapper" id="html-text-${spot.id}"></div>
+                    </div>
+                    <div class="spot-content-overlay">
+                        <span class="spot-num-header">${displayNum}</span>
+                    </div>
+                    <div class="note-star">★</div>
+                `;
 
                 let clickTimer = null;
                 div.onclick = (e) => {
@@ -709,7 +1019,7 @@
                 const tr = document.createElement('tr'); tr.id = `table-row-${i}`;
                 tr.innerHTML = `
                     <td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${i}" onchange="toggleRowColor(this)"></td>
-                    <td class="col-stt">${i === 4 ? '♿ 4' : i}</td>
+                    <td class="col-stt" style="font-weight:bold !important;">${i === 4 ? '♿ 4' : i}</td>
                     <td class="col-room-number"></td>
                     <td class="col-guest-name"></td>
                     <td class="col-car-number"></td>
@@ -722,7 +1032,7 @@
         function toggleRowColor(checkbox) {
             const row = checkbox.closest('tr');
             if (checkbox.checked) row.classList.add('row-checked');
-            else row.classList.remove('row-checked');
+            else row.closest('tr').classList.remove('row-checked');
         }
 
         function clearAllRowChecks() {
@@ -753,7 +1063,6 @@
             return `${totalN}N-${currentDayIndex + 1}`;
         }
 
-        /* ================= MOUSE DRAG (PC) ================= */
         let draggedSpotNum = null;
         function handleDragStart(e) {
             if (!this.classList.contains('booked') && !this.classList.contains('staff')) { e.preventDefault(); return; }
@@ -773,7 +1082,6 @@
             openPassModal(fromSpotNum, toSpotNum);
         }
 
-        /* ================= TOUCH DRAG (IPAD / MOBILE) ================= */
         let touchStartElement = null; let touchDragNum = null;
         function handleTouchStart(e) {
             if (!this.classList.contains('booked') && !this.classList.contains('staff')) return;
@@ -800,12 +1108,11 @@
             touchStartElement = null; touchDragNum = null;
         }
 
-        /* ================= PASSCODE MODAL CONTROLS ================= */
         function openPassModal(fromNum, toNum) {
             pendingMoveData = { fromNum: fromNum, toNum: toNum };
-            document.getElementById('movePassCode').value = "";
+            const desc = document.getElementById('passMoveDesc');
+            if (desc) desc.textContent = `駐車番号 ${fromNum} を 駐車番号 ${toNum} に移動しますか？`;
             document.getElementById('passModal').style.display = 'flex';
-            setTimeout(() => { document.getElementById('movePassCode').focus(); }, 100);
         }
 
         function closePassModal() {
@@ -816,62 +1123,104 @@
 
         async function verifyAndMove() {
             if (!pendingMoveData) return;
-            const codeInput = document.getElementById('movePassCode').value;
-            if (codeInput === "0000") {
-                const runFrom = pendingMoveData.fromNum;
-                const runTo = pendingMoveData.toNum;
-                document.getElementById('passModal').style.display = 'none';
-                pendingMoveData = null;
-                await executeMoveDualSync(runFrom, runTo);
-            } else {
-                alert("パスコードが違います。移動をキャンセルしました。");
-                closePassModal();
-            }
+            const runFrom = pendingMoveData.fromNum;
+            const runTo = pendingMoveData.toNum;
+            document.getElementById('passModal').style.display = 'none';
+            pendingMoveData = null;
+            await executeMoveDualSync(runFrom, runTo);
         }
 
         async function executeMoveDualSync(fromNum, toNum) {
             const date = document.getElementById('parkingDate').value;
             const fromEl = document.getElementById(`spot-${fromNum}`);
             const toEl = document.getElementById(`spot-${toNum}`);
-
             if (!fromEl || !toEl) return;
 
             const fromStatus = fromEl.classList.contains('staff') ? 'staff' : (fromEl.classList.contains('booked') ? 'booked' : '');
-            const toStatus = toEl.classList.contains('staff') ? 'staff' : (toEl.classList.contains('booked') ? 'booked' : '');
+            const toStatus   = toEl.classList.contains('staff')   ? 'staff' : (toEl.classList.contains('booked')   ? 'booked' : '');
 
-            let fromInfo = null;
-            let toInfo = null;
-
-            try { if (fromEl.dataset.info) fromInfo = JSON.parse(fromEl.dataset.info); } catch(e) { fromInfo = null; }
-            try { if (toEl.dataset.info) toInfo = JSON.parse(toEl.dataset.info); } catch(e) { toInfo = null; }
+            let fromInfo = null, toInfo = null;
+            try { if (fromEl.dataset.info) fromInfo = JSON.parse(fromEl.dataset.info); } catch(e) {}
+            try { if (toEl.dataset.info)   toInfo   = JSON.parse(toEl.dataset.info);   } catch(e) {}
 
             if (!fromStatus && !fromInfo) return;
 
-            if (toStatus) {
-                await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo || {} }) });
-                await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(fromNum), status: toStatus, info: toInfo || {} }) });
-            } else {
-                await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo || {} }) });
-                await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(fromNum) }) });
+            db.ref('parking/' + date).off();
+
+            // Danh sách ngày từ hôm nay → checkOut
+            function getRemainingDates(info) {
+                if (!info?.checkOut) return [date];
+                const list = [], cur = new Date(date), end = new Date(info.checkOut);
+                while (cur < end) { list.push(formatDateLocal(new Date(cur))); cur.setDate(cur.getDate()+1); }
+                return list.length ? list : [date];
             }
 
-            if (navigator.onLine) {
-                try {
-                    if (toStatus) {
-                        await db.ref(`parking/${date}/${toNum}`).set({ status: fromStatus, info: fromInfo || {} });
-                        await db.ref(`parking/${date}/${fromNum}`).set({ status: toStatus, info: toInfo || {} });
-                    } else {
-                        await db.ref(`parking/${date}/${toNum}`).set({ status: fromStatus, info: fromInfo || {} });
-                        await db.ref(`parking/${date}/${fromNum}`).remove();
-                    }
-                } catch (e) { console.log("Firebase sync bypass."); }
+            const fromDates = getRemainingDates(fromInfo);
+
+            // Bước 1: Xóa ô nguồn từ hôm nay → checkOut
+            for (const d of fromDates) {
+                await localApiFetch('/api/parking/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(fromNum) }) });
+                if (navigator.onLine) try { await db.ref(`parking/${d}/${fromNum}`).remove(); } catch(e) {}
+            }
+
+            // Bước 2: Nếu ô đích có booking → xóa ô đích từ hôm nay → checkOut, lưu về ô nguồn chỉ ngày hôm nay
+            if (toStatus) {
+                const toDates = getRemainingDates(toInfo);
+                for (const d of toDates) {
+                    await localApiFetch('/api/parking/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum) }) });
+                    if (navigator.onLine) try { await db.ref(`parking/${d}/${toNum}`).remove(); } catch(e) {}
+                }
+                await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: date, spot_id: parseInt(fromNum), status: toStatus, info: toInfo }) });
+                if (navigator.onLine) try { await db.ref(`parking/${date}/${fromNum}`).set({ status: toStatus, info: toInfo }); } catch(e) {}
+            }
+
+            // Bước 3: Lưu ô nguồn → ô đích cho TẤT CẢ ngày còn lại
+            for (const d of fromDates) {
+                await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo }) });
+                if (navigator.onLine) try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {}
             }
 
             showToast("位置を移動しました");
-            loadParkingData();
+            setTimeout(() => loadParkingData(), 400);
         }
 
-        /* Đã tối ưu hóa thuật toán render bảng: Ẩn hoàn toàn thông tin ngày đến/đi, số ngày ở và nút thanh toán nếu dòng đó là STAFF */
+        function formatVerticalHtmlString(str) {
+            if (!str) return "";
+            return str.split('').map(ch => {
+                if (ch === '-' || ch === 'ー' || ch === '―' || ch === '‐') {
+                    return `<span class="text-inner char-dash">─</span>`;
+                }
+                return `<span class="text-inner">${ch}</span>`;
+            }).join('');
+        }
+
+        /* Font cố định, chỉ thu nhỏ khi tràn — không tự dãn to */
+        function adjustSingleSpotTextFontSize(spotNum, textString) {
+            const container = document.getElementById(`html-text-${spotNum}`);
+            if (!container) return;
+
+            container.innerHTML = formatVerticalHtmlString(textString);
+            if (!textString) return;
+
+            container.style.fontWeight = "400";
+            const parent = container.parentElement;
+
+            const safeW = parent.clientWidth - 4;
+            const safeH = parent.clientHeight - 4;
+
+            // Kích thước cố định ban đầu — không tự to hơn mức này
+            const BASE_SIZE = 28;
+            let currentSize = BASE_SIZE;
+            container.style.fontSize = currentSize + "px";
+
+            // Chỉ thu nhỏ nếu tràn, không bao giờ tăng lên
+            while (currentSize > 7) {
+                if (container.scrollWidth <= safeW && container.scrollHeight <= safeH) break;
+                currentSize -= 1;
+                container.style.fontSize = currentSize + "px";
+            }
+        }
+
         function loadParkingData() {
             const date = document.getElementById('parkingDate').value;
             db.ref('parking/' + date).off();
@@ -882,15 +1231,25 @@
                     const cb = document.getElementById(`row-check-${i}`); if (cb) checkStates[i] = cb.checked;
                 }
                 document.querySelectorAll('.parking-spot').forEach(el => {
-                    el.classList.remove('booked', 'staff'); el.querySelector('.name-display').innerText = "";
+                    const sNum = el.dataset.num;
+                    el.classList.remove('booked', 'staff');
+
+                    const textContainer = document.getElementById(`html-text-${sNum}`);
+                    if (textContainer) textContainer.innerHTML = "";
+
                     el.querySelector('.note-star').style.display = 'none'; el.dataset.info = "";
-                    if (data && data[el.dataset.num]) {
-                        const spotData = data[el.dataset.num];
+
+                    if (data && data[sNum]) {
+                        const spotData = data[sNum];
                         if (spotData.status === 'booked') el.classList.add('booked');
                         else if (spotData.status === 'staff') el.classList.add('staff');
                         if (spotData.info) {
                             el.dataset.info = JSON.stringify(spotData.info);
-                            el.querySelector('.name-display').innerText = spotData.info.carNumber || "";
+
+                            if (spotData.info.carNumber) {
+                                adjustSingleSpotTextFontSize(sNum, spotData.info.carNumber);
+                            }
+
                             if (spotData.info.guestNote && spotData.info.guestNote.trim() !== "") el.querySelector('.note-star').style.display = 'block';
                         }
                     }
@@ -900,8 +1259,10 @@
                     if (tr) {
                         const isRowChecked = checkStates[i] ? "row-checked" : ""; tr.className = isRowChecked;
                         tr.innerHTML = `
-                            <td class="check-col"><input type="checkbox" class="custom-checkbox" id="row-check-${i}" onchange="toggleRowColor(this)" ${checkStates[i] ? 'checked' : ''}></td>
-                            <td class="col-stt">${i === 4 ? '♿ 4' : i}</td>
+                            <td class="check-col">
+                                <input type="checkbox" class="custom-checkbox" id="row-check-${i}" onchange="toggleRowColor(this)" ${checkStates[i] ? 'checked' : ''}>
+                            </td>
+                            <td class="col-stt" style="font-weight:bold !important;">${i === 4 ? '♿ 4' : i}</td>
                             <td class="col-room-number"></td><td class="col-guest-name"></td><td class="col-car-number"></td>
                             <td></td><td></td><td></td><td></td>
                         `;
@@ -912,59 +1273,47 @@
                         const spotNum = parseInt(spotNumStr);
                         if (spotNum >= 1 && spotNum <= 21) {
                             const tr = document.getElementById(`table-row-${spotNum}`); const spotData = data[spotNumStr];
-                            
+
                             if (tr && spotData && (spotData.status === 'booked' || spotData.status === 'staff') && spotData.info) {
-                                let room = spotData.info.roomNumber || ""; 
-                                const note = spotData.info.guestNote || "";
-                                let carNum = spotData.info.carNumber || ""; 
-                                const checkIn = spotData.info.checkIn || "";
-                                const checkOut = spotData.info.checkOut || ""; 
-                                const seisan = spotData.info.seisanStatus || "済";
+                                let room = spotData.info.roomNumber || ""; const note = spotData.info.guestNote || "";
+                                let carNum = spotData.info.carNumber || ""; const checkIn = spotData.info.checkIn || "";
+                                const checkOut = spotData.info.checkOut || ""; const seisan = spotData.info.seisanStatus || "済";
                                 let name = spotData.info.guestName || "";
 
-                                let roomDisplay = "";
-                                let checkInDisplay = "";
-                                let checkOutDisplay = "";
-                                let dayLogicDisplay = "";
-                                let seisanDisplay = "";
+                                let roomDisplay = ""; let checkInDisplay = ""; let checkOutDisplay = ""; let dayLogicDisplay = ""; let seisanDisplay = "";
 
                                 if (spotData.status === 'staff') {
-                                    // Giao diện xử lý cấu trúc ô Staff nhân viên
                                     if (room === "STAFF") { room = "スタッフ"; }
-                                    roomDisplay = room; 
-                                    
-                                    // Ẩn hoàn toàn thông tin theo yêu cầu
-                                    checkInDisplay = "";
-                                    checkOutDisplay = "";
-                                    dayLogicDisplay = "";
-                                    seisanDisplay = "";
+                                    roomDisplay = room;
+                                    checkInDisplay = ""; checkOutDisplay = ""; dayLogicDisplay = ""; seisanDisplay = "";
                                 } else {
-                                    // Giao diện đặt phòng thông thường của khách
                                     roomDisplay = room ? `R${room}` : "";
                                     checkInDisplay = checkIn ? checkIn.substring(5).replace('-', '/') : "";
                                     checkOutDisplay = checkOut ? checkOut.substring(5).replace('-', '/') : "";
                                     dayLogicDisplay = calculateDisplayDaysLogic(checkIn, checkOut, date);
-                                    
+
                                     const seisanClass = (seisan === "未") ? "seisan-mi" : "seisan-zai";
                                     seisanDisplay = `<span class="status-circle ${seisanClass}">${seisan}</span>`;
                                 }
 
-                                const isRowChecked = checkStates[spotNum] ? "row-checked" : ""; 
-                                tr.className = isRowChecked;
+                                const isRowChecked = checkStates[spotNum] ? "row-checked" : ""; tr.className = isRowChecked;
 
                                 tr.innerHTML = `
                                     <td class="check-col">
                                         <input type="checkbox" class="custom-checkbox" id="row-check-${spotNum}" onchange="toggleRowColor(this)" ${checkStates[spotNum] ? 'checked' : ''}>
                                     </td>
-                                    <td class="col-stt">${spotNum === 4 ? '♿ 4' : spotNum}</td>
+                                    <td class="col-stt" style="font-weight:bold !important;">${spotNum === 4 ? '♿ 4' : spotNum}</td>
                                     <td class="col-room-number">${roomDisplay}</td>
-                                    <td class="col-guest-name">${name} ${note ? '<span style="color:#f1c40f;">★</span>' : ''}</td>
-                                    <td class="col-car-number">${carNum}</td>
-                                    <td>${checkInDisplay}</td>
-                                    <td>${checkOutDisplay}</td>
-                                    <td style="font-weight:bold; color:#2c3e50;">${dayLogicDisplay}</td>
-                                    <td>${seisanDisplay}</td>
+                                    <td class="col-guest-name">${name} ${note ? '<span style="color:#e74c3c; font-size:26px;">★</span>' : ''}</td>
+                                    <td class="col-car-number" style="font-weight:bold !important; color:#1a6ddb !important;">${carNum}</td>
+                                    <td>${checkInDisplay}</td><td>${checkOutDisplay}</td>
+                                    <td style="font-weight:bold; color:#2c3e50;">${dayLogicDisplay}</td><td>${seisanDisplay}</td>
                                 `;
+                                tr.style.cursor = 'pointer';
+                                tr.ondblclick = () => {
+                                    const spotEl = document.getElementById(`spot-${spotNum}`);
+                                    if (spotEl) openGuestModal(spotEl);
+                                };
                             }
                         }
                     });
@@ -972,11 +1321,11 @@
             }
 
             if (!navigator.onLine) {
-                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if(localData) renderViewWithData(localData); });
+                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
                 return;
             }
 
-            db.ref('parking/' + date).on('value', (snapshot) => {
+            db.ref('parking/' + date).once('value', (snapshot) => {
                 const cloudData = snapshot.val();
                 renderViewWithData(cloudData);
                 if (cloudData) {
@@ -989,7 +1338,7 @@
                     });
                 }
             }, (error) => {
-                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if(localData) renderViewWithData(localData); });
+                localApiFetch(`/api/parking/${date}`).then(res => res ? res.json() : null).then(localData => { if (localData) renderViewWithData(localData); });
             });
         }
 
@@ -1007,16 +1356,10 @@
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            t.style.top = '20px';
-            setTimeout(() => {
-                t.style.top = '-100px';
-                t.style.display = 'none';
-            }, 2000);
+            t.innerText = msg; t.style.display = 'block'; t.style.top = '20px';
+            setTimeout(() => { t.style.top = '-100px'; t.style.display = 'none'; }, 2000);
         }
 
-        /* ================= DATE MANAGEMENT ================= */
         function changeDate(offset) {
             const dateInput = document.getElementById('parkingDate');
             const current = new Date(dateInput.value); current.setDate(current.getDate() + offset);
@@ -1042,14 +1385,13 @@
             }
         }
 
-        /* ================= MODAL SAVE LOGIC ================= */
         function openStaffModal(el) {
-            currentSpot = el; 
+            currentSpot = el;
             const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
             document.getElementById('staffName').value = data.carNumber || "";
             document.getElementById('staffModal').style.display = 'flex';
         }
-        let closeStaffModal = () => { document.getElementById('staffModal').style.display = 'none'; }
+        function closeStaffModal() { document.getElementById('staffModal').style.display = 'none'; }
 
         async function saveStaffInfo() {
             if (!currentSpot) return;
@@ -1062,14 +1404,12 @@
             };
 
             await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) });
-            if (navigator.onLine) {
-                await db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info });
-            }
+            if (navigator.onLine) { await db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info }); }
             showToast("データを保存しました"); closeStaffModal(); loadParkingData();
         }
 
         function openGuestModal(el) {
-            currentSpot = el; 
+            currentSpot = el;
             const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
             const todayStr = formatDateLocal(new Date());
 
@@ -1098,28 +1438,28 @@
 
         async function executeDelete() {
             if (!currentSpot) return;
-            const spotNum = currentSpot.getAttribute('data-num'); 
+            const spotNum = currentSpot.getAttribute('data-num');
             const date = document.getElementById('parkingDate').value;
             const dataInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
-
             const isStaffCell = currentSpot.classList.contains('staff');
 
-            if (!isStaffCell && dataInfo && dataInfo.checkIn && dataInfo.checkOut) {
-                const start = new Date(dataInfo.checkIn); 
+            if (!isStaffCell && dataInfo && dataInfo.checkOut) {
+                // Xóa từ ngày đang xem → checkOut, không đụng ngày trước
+                const cur = new Date(date);
                 const end = new Date(dataInfo.checkOut);
-                let currentDate = new Date(start);
-                while (currentDate < end) {
-                    const dateKey = formatDateLocal(currentDate);
+                while (cur < end) {
+                    const dateKey = formatDateLocal(new Date(cur));
                     await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: dateKey, spot_id: parseInt(spotNum) }) });
-                    if (navigator.onLine) await db.ref(`parking/${dateKey}/${spotNum}`).remove();
-                    currentDate.setDate(currentDate.getDate() + 1);
+                    if (navigator.onLine) try { await db.ref(`parking/${dateKey}/${spotNum}`).remove(); } catch(e) {}
+                    cur.setDate(cur.getDate() + 1);
                 }
             } else {
                 await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(spotNum) }) });
-                if (navigator.onLine) await db.ref(`parking/${date}/${spotNum}`).remove();
+                if (navigator.onLine) try { await db.ref(`parking/${date}/${spotNum}`).remove(); } catch(e) {}
             }
-            
-            closeConfirmModal(); closeGuestModal(); closeStaffModal(); showToast("削除完了"); loadParkingData();
+
+            closeConfirmModal(); closeGuestModal(); closeStaffModal(); showToast("削除完了");
+            setTimeout(() => loadParkingData(), 400);
         }
 
         async function saveGuestInfo() {
@@ -1129,6 +1469,24 @@
             const guestNote = document.getElementById('guestNote').value; const originalCheckIn = document.getElementById('checkIn').value;
             const checkOut = document.getElementById('checkOut').value; const spotNum = currentSpot.getAttribute('data-num');
 
+            // Cảnh báo nếu trùng số xe với ô khác trong cùng ngày
+            if (carNumber) {
+                const date = document.getElementById('parkingDate').value;
+                try {
+                    const res = await localApiFetch(`/api/parking/${date}`);
+                    const dayData = res ? await res.json() : null;
+                    if (dayData) {
+                        for (const sid of Object.keys(dayData)) {
+                            if (parseInt(sid) !== parseInt(spotNum) && dayData[sid]?.info?.carNumber === carNumber) {
+                                const confirm = window.confirm(`⚠️ 車番号「${carNumber}」はすでに駐車番号 ${sid} に登録されています。\nこのまま保存しますか？`);
+                                if (!confirm) return;
+                                break;
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+
             for (let i = 0; i < stayDays; i++) {
                 const targetDate = new Date(originalCheckIn); targetDate.setDate(targetDate.getDate() + i);
                 const dateKey = formatDateLocal(targetDate);
@@ -1137,76 +1495,126 @@
                     info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus }
                 };
                 await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (navigator.onLine) {
-                    await db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info });
-                }
+                if (navigator.onLine) { await db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }); }
             }
             closeGuestModal(); showToast("データを保存しました"); loadParkingData();
         }
 
-        /* ================= EXPORT EXCEL ================= */
         async function exportToExcel() {
             try {
                 const date = document.getElementById('parkingDate').value;
                 let data = null;
-                const res = await localApiFetch(`/api/parking/${date}`); 
+                const res = await localApiFetch(`/api/parking/${date}`);
                 data = res ? await res.json() : null;
 
-                if (!data || Object.keys(data).length === 0) { showToast("データがありません"); return; }
+                // Firebase fallback
+                if (!data || Object.keys(data).length === 0) {
+                    if (navigator.onLine) {
+                        const snap = await db.ref(`parking/${date}`).once('value');
+                        data = snap.val();
+                    }
+                }
 
-                const fileInput = document.getElementById('excelTemplate'); fileInput.click();
-                fileInput.onchange = async function (e) {
-                    const file = e.target.files[0]; if (!file) { showToast("テンプレート未選択"); return; }
-                    const arrayBuffer = await file.arrayBuffer();
-                    const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(arrayBuffer);
-                    const worksheet = workbook.getWorksheet(1);
+                const workbook = new ExcelJS.Workbook();
+                const ws = workbook.addWorksheet('駐車場（A5）');
 
-                    worksheet.getCell("E1").value = date; let row = 3;
-                    const sortedKeys = Object.keys(data).sort((a, b) => parseInt(a) - parseInt(b));
+                // Column widths
+                ws.getColumn(1).width = 6.75;
+                ws.getColumn(2).width = 11.0;
+                ws.getColumn(3).width = 30.625;
+                ws.getColumn(4).width = 25.375;
+                ws.getColumn(5).width = 11.125;
+                ws.getColumn(6).width = 11.0;
+                ws.getColumn(7).width = 11.875;
+                ws.getColumn(8).width = 11.25;
 
-                    sortedKeys.forEach(num => {
-                        const item = data[num];
-                        if ((item.status === 'booked' || item.status === 'staff') && item.info) {
-                            const checkIn = item.info.checkIn || ""; const checkOut = item.info.checkOut || "";
-                            
-                            let excelDayString = "";
-                            let seisanValue = "";
-                            let roomNumberExcel = item.info.roomNumber || "";
+                // Row 1 — title + date
+                ws.getRow(1).height = 50.25;
+                ws.mergeCells('A1:D1');
+                ws.mergeCells('E1:H1');
+                const titleCell = ws.getCell('A1');
+                titleCell.value = '　　      　駐車場管理表';
+                titleCell.font = { name: '游ゴシック', size: 28, bold: true };
+                titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-                            if (item.status === 'staff') {
-                                excelDayString = "";
-                                seisanValue = "";
-                            } else {
-                                excelDayString = calculateDisplayDaysLogic(checkIn, checkOut, date);
-                                seisanValue = item.info.seisanStatus || "済";
-                                if (roomNumberExcel) { roomNumberExcel = `R${roomNumberExcel}`; }
-                            }
+                // Format date as 年月日
+                const [y, m, d] = date.split('-');
+                const dateCell = ws.getCell('E1');
+                dateCell.value = `${y}年 ${parseInt(m)}月 ${parseInt(d)}日`;
+                dateCell.font = { name: '游ゴシック', size: 28, bold: true };
+                dateCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-                            worksheet.getCell(`A${row}`).value = parseInt(num); worksheet.getCell(`B${row}`).value = roomNumberExcel;
-                            worksheet.getCell(`C${row}`).value = item.info.guestName || ""; worksheet.getCell(`D${row}`).value = item.info.carNumber || "";
-                            worksheet.getCell(`E${row}`).value = item.status === 'staff' ? "" : (checkIn ? checkIn.substring(5).replace('-', '/') : "");
-                            worksheet.getCell(`F${row}`).value = item.status === 'staff' ? "" : (checkOut ? checkOut.substring(5).replace('-', '/') : "");
-                            worksheet.getCell(`G${row}`).value = excelDayString; worksheet.getCell(`H${row}`).value = seisanValue;
+                // Row 2 — headers
+                ws.getRow(2).height = 24;
+                const headers = ['台数','部屋番号','お客様名','  車番(または車種・色）','利用開始日','利用最終日','利用日数','精算'];
+                const headerSizes = [16, 14, 16, 16, 16, 16, 16, 16];
+                headers.forEach((h, i) => {
+                    const cell = ws.getCell(2, i+1);
+                    cell.value = h;
+                    cell.font = { name: '游ゴシック', size: headerSizes[i], bold: true };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = {
+                        top: { style: 'medium' }, bottom: { style: 'medium' },
+                        left: { style: i === 0 ? 'medium' : 'thin' },
+                        right: { style: i === 7 ? 'medium' : 'thin' }
+                    };
+                });
 
-                            for (let col = 1; col <= 8; col++) { worksheet.getCell(row, col).alignment = { vertical: 'middle', horizontal: 'center' }; }
-                            row++;
+                // Rows 3-22 (spot 1-20)
+                for (let i = 1; i <= 21; i++) {
+                    const rowNum = i + 2;
+                    ws.getRow(rowNum).height = 24;
+                    const item = data && data[i] ? data[i] : null;
+                    const info = item?.info || {};
+
+                    let roomNum = '', guestName = '', carNum = '', checkIn = '', checkOut = '', days = '', seisan = '未・済';
+
+                    if (item && (item.status === 'booked' || item.status === 'staff') && info) {
+                        roomNum = item.status === 'staff' ? (info.roomNumber || '') : (info.roomNumber ? `R${info.roomNumber}` : '');
+                        guestName = info.guestName || '';
+                        carNum = info.carNumber || '';
+                        if (item.status === 'booked') {
+                            if (info.checkIn) checkIn = info.checkIn.substring(5).replace('-', '/');
+                            if (info.checkOut) checkOut = info.checkOut.substring(5).replace('-', '/');
+                            days = calculateDisplayDaysLogic(info.checkIn, info.checkOut, date) || '';
+                            seisan = info.seisanStatus || '済';
                         }
+                    }
+
+                    const vals = [i, roomNum, guestName, carNum, checkIn || '/', checkOut || '/', days, seisan];
+                    vals.forEach((v, ci) => {
+                        const cell = ws.getCell(rowNum, ci + 1);
+                        cell.value = v;
+                        cell.font = { name: '游ゴシック', size: 16 };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        const isLast = i === 21;
+                        cell.border = {
+                            top: { style: 'thin' },
+                            bottom: { style: isLast ? 'medium' : 'thin' },
+                            left: { style: ci === 0 ? 'medium' : 'thin' },
+                            right: { style: ci === 7 ? 'medium' : 'thin' }
+                        };
                     });
-                    const buffer = await workbook.xlsx.writeBuffer();
-                    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                    const link = document.createElement("a"); link.href = window.URL.createObjectURL(blob);
-                    link.download = `駐車場_${date}.xlsx`; link.click(); showToast("Excel出力完了");
-                };
-            } catch (error) { showToast(error.message); }
+                }
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `駐車場_${date}.xlsx`;
+                link.click();
+                showToast('Excel出力完了');
+            } catch (error) {
+                showToast('Excel出力エラー: ' + error.message);
+                console.error(error);
+            }
         }
 
         window.addEventListener('keydown', function (e) { if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) { e.preventDefault(); jumpToToday(); } });
 
         let touchStartY = 0;
         window.addEventListener('touchstart', function (e) { touchStartY = e.touches[0].clientY; });
-        window.addEventListener('touchend', function (e) {
-            if (e.changedTouches[0].clientY - touchStartY > 120) jumpToToday();
-        });
+        window.addEventListener('touchend', function (e) { if (e.changedTouches[0].clientY - touchStartY > 120) jumpToToday(); });
     </script>
 </body>
 
