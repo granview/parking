@@ -1442,10 +1442,12 @@
             if (!currentSpot) return;
             const name = document.getElementById('staffName').value || "スタッフ";
             const spotNum = currentSpot.dataset.num; const date = document.getElementById('parkingDate').value;
+            const now = new Date();
+            const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
             const staffPayload = {
                 date_key: date, spot_id: parseInt(spotNum), status: 'staff',
-                info: { roomNumber: "スタッフ", guestName: "", carNumber: name, guestNote: "", checkIn: date, checkOut: date, stayDays: 1, seisanStatus: "済" }
+                info: { roomNumber: "スタッフ", guestName: "", carNumber: name, guestNote: "", checkIn: date, checkOut: date, stayDays: 1, seisanStatus: "済", createdTime: hhmm }
             };
 
             await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) });
@@ -1534,9 +1536,11 @@
             for (let i = 0; i < stayDays; i++) {
                 const targetDate = new Date(originalCheckIn); targetDate.setDate(targetDate.getDate() + i);
                 const dateKey = formatDateLocal(targetDate);
+                const now = new Date();
+                const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
                 const payload = {
                     date_key: dateKey, spot_id: parseInt(spotNum), status: 'booked',
-                    info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus }
+                    info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus, createdTime: hhmm }
                 };
                 await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (navigator.onLine) { await db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }); }
