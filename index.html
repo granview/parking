@@ -926,10 +926,10 @@
     <div id="passModal">
         <div class="modal-box" style="width: 360px; text-align: center;">
             <div style="font-size: 40px; margin-bottom: 10px;">🚗</div>
-            <div class="modal-title" style="margin-bottom: 8px;">駐車位置の移動確認</div>
+            <div class="modal-title" style="margin-bottom: 8px;">移動確認</div>
             <p id="passMoveDesc" style="font-size:15px; color:#555; margin: 0 0 24px; line-height:1.6;"></p>
             <div class="modal-buttons">
-                <button class="btn-save" onclick="verifyAndMove()">はい、移動する</button>
+                <button class="btn-save" onclick="verifyAndMove()">はい</button>
                 <button class="btn-close" onclick="closePassModal()">キャンセル</button>
             </div>
         </div>
@@ -1148,7 +1148,7 @@
         function openPassModal(fromNum, toNum) {
             pendingMoveData = { fromNum: fromNum, toNum: toNum };
             const desc = document.getElementById('passMoveDesc');
-            if (desc) desc.textContent = `駐車番号 ${fromNum} を 駐車番号 ${toNum} に移動しますか？`;
+            if (desc) desc.textContent = `番号 ${fromNum} を 番号 ${toNum} に移動しますか？`;
             document.getElementById('passModal').style.display = 'flex';
         }
 
