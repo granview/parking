@@ -862,18 +862,22 @@
                     <input type="text" id="guestName" style="font-size:18px; font-weight:500;">
                 </div>
             </div>
-            <div class="form-row" style="gap:16px; flex-wrap:wrap;">
-                <div class="form-group check-large" style="flex:1; min-width:160px;">
-                    <label>チェックイン</label>
-                    <input type="date" id="checkIn" onchange="calculateStayDays()">
+            <div style="display:flex; gap:16px; margin-bottom:16px; flex-wrap:nowrap;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:14px; color:#888; font-weight:bold;">チェックイン</label>
+                    <input type="date" id="checkIn" onchange="calculateStayDays()"
+                        style="padding:14px 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:17px; background:#fcfcfc; box-sizing:border-box; width:100%; height:54px;">
                 </div>
-                <div class="form-group check-large" style="flex:1; min-width:160px;">
-                    <label>チェックアウト</label>
-                    <input type="date" id="checkOut" onchange="calculateStayDays()">
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:14px; color:#888; font-weight:bold;">チェックアウト</label>
+                    <input type="date" id="checkOut" onchange="calculateStayDays()"
+                        style="padding:14px 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:17px; background:#fcfcfc; box-sizing:border-box; width:100%; height:54px;">
                 </div>
-                <div class="form-group stay-small" style="flex:0 0 90px;">
-                    <label>泊数</label>
-                    <select id="stayDays" onchange="updateCheckOutFromStay()"></select>
+                <div style="flex:0 0 90px; display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:14px; color:#888; font-weight:bold;">泊数</label>
+                    <select id="stayDays" onchange="updateCheckOutFromStay()"
+                        style="padding:14px 4px; border:1px solid #e0e0e0; border-radius:8px; font-size:17px; background:#fcfcfc; box-sizing:border-box; height:54px; text-align:center; appearance:none; -webkit-appearance:none;">
+                    </select>
                 </div>
             </div>
             <div class="form-row" style="align-items: center;">
@@ -922,10 +926,10 @@
     <div id="passModal">
         <div class="modal-box" style="width: 360px; text-align: center;">
             <div style="font-size: 40px; margin-bottom: 10px;">🚗</div>
-            <div class="modal-title" style="margin-bottom: 8px;">移動確認</div>
+            <div class="modal-title" style="margin-bottom: 8px;">駐車位置の移動確認</div>
             <p id="passMoveDesc" style="font-size:15px; color:#555; margin: 0 0 24px; line-height:1.6;"></p>
             <div class="modal-buttons">
-                <button class="btn-save" onclick="verifyAndMove()">はい</button>
+                <button class="btn-save" onclick="verifyAndMove()">はい、移動する</button>
                 <button class="btn-close" onclick="closePassModal()">キャンセル</button>
             </div>
         </div>
@@ -1144,7 +1148,7 @@
         function openPassModal(fromNum, toNum) {
             pendingMoveData = { fromNum: fromNum, toNum: toNum };
             const desc = document.getElementById('passMoveDesc');
-            if (desc) desc.textContent = `番号 ${fromNum} を 番号 ${toNum} に移動しますか？`;
+            if (desc) desc.textContent = `駐車番号 ${fromNum} を 駐車番号 ${toNum} に移動しますか？`;
             document.getElementById('passModal').style.display = 'flex';
         }
 
