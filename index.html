@@ -948,16 +948,42 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCWV0CdSSDznxXKdlTbJc4-AMrjVr51Hlo",
-            authDomain: "test-f20cf.firebaseapp.com",
-            databaseURL: "https://test-f20cf-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "test-f20cf",
-            storageBucket: "test-f20cf.firebasestorage.app",
-            messagingSenderId: "985197427209",
-            appId: "1:985197427209:web:0c6f69a8c9b62cb67bd6d8"
+            apiKey: "AIzaSyDL0GgloeyF5ppR9bPsiyvh_WHmmPbqML0",
+            authDomain: "parking-system-v2-8bc2e.firebaseapp.com",
+            databaseURL: "https://parking-system-v2-8bc2e-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "parking-system-v2-8bc2e",
+            storageBucket: "parking-system-v2-8bc2e.firebasestorage.app",
+            messagingSenderId: "681657167696",
+            appId: "1:681657167696:web:1b2869770e32b14133c655"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // ===== Tự động chuyển ひらがな → カタカナ khi nhập tên khách =====
+        function hiraganaToKatakana(str) {
+            return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+        }
+        (function setupGuestNameAutoKatakana() {
+            const guestNameInput = document.getElementById('guestName');
+            if (!guestNameInput) return;
+
+            function convert() {
+                const pos = guestNameInput.selectionStart;
+                const converted = hiraganaToKatakana(guestNameInput.value);
+                if (converted !== guestNameInput.value) {
+                    guestNameInput.value = converted;
+                    try { guestNameInput.setSelectionRange(pos, pos); } catch (e) {}
+                }
+            }
+
+            // Không chuyển khi đang gõ qua IME (giữa lúc chọn kanji),
+            // chỉ chuyển khi đã gõ xong 1 đoạn (compositionend) hoặc nhập không qua IME.
+            guestNameInput.addEventListener('input', (e) => {
+                if (e.isComposing) return;
+                convert();
+            });
+            guestNameInput.addEventListener('compositionend', convert);
+        })();
 
         // iOS: reconnect khi quay lại tab
         document.addEventListener('visibilitychange', () => {
@@ -1194,28 +1220,30 @@
 
             const fromDates = getRemainingDates(fromInfo);
 
-            // Bước 1: Xóa ô nguồn từ hôm nay → checkOut
-            for (const d of fromDates) {
+            // Bước 1: Xóa ô nguồn từ hôm nay → checkOut (song song theo từng ngày)
+            await Promise.all(fromDates.map(async (d) => {
                 await localApiFetch('/api/parking/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(fromNum) }) });
-                if (navigator.onLine) try { await db.ref(`parking/${d}/${fromNum}`).remove(); } catch(e) {}
-            }
+                if (navigator.onLine) { try { await db.ref(`parking/${d}/${fromNum}`).remove(); } catch(e) {} }
+            }));
 
             // Bước 2: Nếu ô đích có booking → xóa ô đích từ hôm nay → checkOut, lưu về ô nguồn chỉ ngày hôm nay
             if (toStatus) {
                 const toDates = getRemainingDates(toInfo);
-                for (const d of toDates) {
+                await Promise.all(toDates.map(async (d) => {
                     await localApiFetch('/api/parking/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum) }) });
-                    if (navigator.onLine) try { await db.ref(`parking/${d}/${toNum}`).remove(); } catch(e) {}
-                }
-                await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: date, spot_id: parseInt(fromNum), status: toStatus, info: toInfo }) });
-                if (navigator.onLine) try { await db.ref(`parking/${date}/${fromNum}`).set({ status: toStatus, info: toInfo }); } catch(e) {}
+                    if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).remove(); } catch(e) {} }
+                }));
+                await Promise.all([
+                    localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: date, spot_id: parseInt(fromNum), status: toStatus, info: toInfo }) }),
+                    navigator.onLine ? db.ref(`parking/${date}/${fromNum}`).set({ status: toStatus, info: toInfo }).catch(e => {}) : Promise.resolve()
+                ]);
             }
 
-            // Bước 3: Lưu ô nguồn → ô đích cho TẤT CẢ ngày còn lại
-            for (const d of fromDates) {
+            // Bước 3: Lưu ô nguồn → ô đích cho TẤT CẢ ngày còn lại (song song theo từng ngày)
+            await Promise.all(fromDates.map(async (d) => {
                 await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo }) });
-                if (navigator.onLine) try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {}
-            }
+                if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {} }
+            }));
 
             showToast("位置を移動しました");
         }
@@ -1450,8 +1478,10 @@
                 info: { roomNumber: "スタッフ", guestName: "", carNumber: name, guestNote: "", checkIn: date, checkOut: date, stayDays: 1, seisanStatus: "済", createdTime: hhmm }
             };
 
-            await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) });
-            if (navigator.onLine) { await db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info }); }
+            await Promise.all([
+                localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) }),
+                navigator.onLine ? db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info }).catch(e => {}) : Promise.resolve()
+            ]);
             showToast("データを保存しました"); closeStaffModal();
         }
 
@@ -1491,18 +1521,24 @@
             const isStaffCell = currentSpot.classList.contains('staff');
 
             if (!isStaffCell && dataInfo && dataInfo.checkOut) {
-                // Xóa từ ngày đang xem → checkOut, không đụng ngày trước
+                // Xóa từ ngày đang xem → checkOut, không đụng ngày trước (chạy song song cho nhanh)
                 const cur = new Date(date);
                 const end = new Date(dataInfo.checkOut);
+                const deletePromises = [];
                 while (cur < end) {
                     const dateKey = formatDateLocal(new Date(cur));
-                    await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: dateKey, spot_id: parseInt(spotNum) }) });
-                    if (navigator.onLine) try { await db.ref(`parking/${dateKey}/${spotNum}`).remove(); } catch(e) {}
+                    deletePromises.push((async () => {
+                        await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: dateKey, spot_id: parseInt(spotNum) }) });
+                        if (navigator.onLine) { try { await db.ref(`parking/${dateKey}/${spotNum}`).remove(); } catch(e) {} }
+                    })());
                     cur.setDate(cur.getDate() + 1);
                 }
+                await Promise.all(deletePromises);
             } else {
-                await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(spotNum) }) });
-                if (navigator.onLine) try { await db.ref(`parking/${date}/${spotNum}`).remove(); } catch(e) {}
+                await Promise.all([
+                    localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(spotNum) }) }),
+                    navigator.onLine ? (async () => { try { await db.ref(`parking/${date}/${spotNum}`).remove(); } catch(e) {} })() : Promise.resolve()
+                ]);
             }
 
             closeConfirmModal(); closeGuestModal(); closeStaffModal(); showToast("削除完了");
@@ -1533,6 +1569,7 @@
                 } catch(e) {}
             }
 
+            const savePromises = [];
             for (let i = 0; i < stayDays; i++) {
                 const targetDate = new Date(originalCheckIn); targetDate.setDate(targetDate.getDate() + i);
                 const dateKey = formatDateLocal(targetDate);
@@ -1542,9 +1579,10 @@
                     date_key: dateKey, spot_id: parseInt(spotNum), status: 'booked',
                     info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus, createdTime: hhmm }
                 };
-                await localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (navigator.onLine) { await db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }); }
+                savePromises.push(localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }));
+                if (navigator.onLine) { savePromises.push(db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }).catch(e => {})); }
             }
+            await Promise.all(savePromises);
             closeGuestModal(); showToast("データを保存しました");
         }
 
