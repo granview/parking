@@ -1783,11 +1783,13 @@
             try {
                 const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const pad = n => String(n).padStart(2, '0');
-                const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
+                // Lưu theo NGÀY THAO TÁC (không phải ngày đỗ xe)
+                const actionDate = `${nowJST.getFullYear()}-${pad(nowJST.getMonth()+1)}-${pad(nowJST.getDate())}`;
+                const logKey = `${actionDate.replace(/-/g,'')}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
                 const editedAt = `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`;
-                db.ref(`edit_log/${dateKey}/${logKey}`).set({
+                db.ref(`edit_log/${actionDate}/${logKey}`).set({
                     edited_at: editedAt,
-                    date_key: dateKey,
+                    date_key: dateKey,       // vẫn lưu ngày đỗ xe để tham khảo
                     spot_id: parseInt(spotNum),
                     before: oldInfo || null,
                     after: newData
@@ -1881,29 +1883,27 @@
         // Ghi log xóa lên Firebase
         function writeDeleteLog(dateKey, spotNum, spotInfo) {
             if (!navigator.onLine) return;
-            // spotInfo có thể là {status, info} hoặc chỉ là info object
-            // Normalize về đúng cấu trúc {status, info}
             let logData;
             if (spotInfo && spotInfo.status) {
                 logData = { status: spotInfo.status, info: spotInfo.info || {} };
             } else if (spotInfo && (spotInfo.guestName || spotInfo.carNumber || spotInfo.roomNumber)) {
-                // dataset.info chỉ chứa phần info, không có status
-                // Lấy status từ DOM của spot hiện tại
                 const spotEl = document.getElementById(`spot-${spotNum}`);
                 const status = spotEl?.classList.contains('booked') ? 'booked'
                              : spotEl?.classList.contains('staff')  ? 'staff' : 'booked';
                 logData = { status, info: spotInfo };
             } else {
-                return; // ô trống, không ghi log
+                return;
             }
             try {
                 const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const pad = n => String(n).padStart(2, '0');
-                const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
+                // Lưu theo NGÀY THAO TÁC (không phải ngày đỗ xe)
+                const actionDate = `${nowJST.getFullYear()}-${pad(nowJST.getMonth()+1)}-${pad(nowJST.getDate())}`;
+                const logKey = `${actionDate.replace(/-/g,'')}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
                 const deletedAt = `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`;
-                db.ref(`delete_log/${dateKey}/${logKey}`).set({
+                db.ref(`delete_log/${actionDate}/${logKey}`).set({
                     deleted_at: deletedAt,
-                    date_key: dateKey,
+                    date_key: dateKey,       // vẫn lưu ngày đỗ xe để tham khảo
                     spot_id: parseInt(spotNum),
                     data: logData
                 }).catch(e => console.warn('⚠️ delete_log:', e.message));
@@ -2241,14 +2241,15 @@
             const sel = document.getElementById('logDateFilter');
             sel.innerHTML = '';
             const today = new Date();
-            // Hiển thị 3 ngày gần nhất trong dropdown
             for (let i = 0; i < 3; i++) {
                 const d = new Date(today);
                 d.setDate(today.getDate() - i);
                 const val = toDateStr(d);
                 const opt = document.createElement('option');
                 opt.value = val;
-                opt.textContent = val;
+                opt.textContent = i === 0 ? `${val}（今日）`
+                                : i === 1 ? `${val}（昨日）`
+                                : val;
                 if (i === 0) opt.selected = true;
                 sel.appendChild(opt);
             }
@@ -2330,6 +2331,7 @@
 
                     const timeStr = entry.edited_at || entry.deleted_at || '';
                     const spotId  = entry.spot_id || '';
+                    const parkingDate = entry.date_key || '';
                     const isDelete = _currentLogTab === 'delete';
 
                     // Lấy thông tin hiển thị
@@ -2375,6 +2377,7 @@
                                         padding:2px 9px; border-radius:6px;">🅿️ ${spotId}</span>
                                     <span style="font-size:12px; color:#aaa;">${timeStr}</span>
                                 </div>
+                                ${parkingDate ? `<div style="font-size:11px; color:#aaa; margin-bottom:3px;">🗓 駐車日：${parkingDate}</div>` : ''}
                                 <div style="font-size:15px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
                                 <div style="font-size:13px; color:#666; margin-top:2px;">${room}　${car}</div>
                                 ${diffHtml}
