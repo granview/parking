@@ -140,6 +140,124 @@
         .btn-side:hover  { background: rgba(0,0,0,0.06); }
         .btn-side:active { background: rgba(0,0,0,0.11); }
 
+        .quick-search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #f5f5f7;
+            border: 0.5px solid rgba(0,0,0,0.15);
+            border-radius: 7px;
+            padding: 0 8px;
+            height: 26px;
+        }
+        .quick-search-wrap input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 12px;
+            color: #1d1d1f;
+            width: 130px;
+            font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        }
+        .quick-search-wrap input::placeholder { color: #aaa; }
+        .quick-search-wrap .ico { color: #888; font-size: 11px; }
+
+        /* Highlight ô được tìm thấy */
+        .search-highlight {
+            outline: 3px solid #f39c12 !important;
+            outline-offset: -3px;
+            animation: pulseHighlight 0.6s ease;
+        }
+        @keyframes pulseHighlight {
+            0%   { outline-color: #f39c12; }
+            50%  { outline-color: #e74c3c; }
+            100% { outline-color: #f39c12; }
+        }
+
+        /* Popup kết quả tìm kiếm */
+        #searchResultPopup {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+            padding: 16px 18px;
+            min-width: 300px;
+            max-width: 360px;
+            z-index: 9999;
+            font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+        }
+        #searchResultPopup .popup-title {
+            font-weight: 700;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #searchResultPopup .result-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid #f0f0f0;
+        }
+        #searchResultPopup .result-item:hover { background: #f5f5f7; }
+        #searchResultPopup .result-item:last-child { margin-bottom: 0; }
+        #searchResultPopup .spot-badge {
+            background: #1a6ddb;
+            color: #fff;
+            font-weight: 800;
+            font-size: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #searchResultPopup .result-info { flex: 1; }
+        #searchResultPopup .result-room {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        #searchResultPopup .result-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1d1d1f;
+            line-height: 1.2;
+        }
+        #searchResultPopup .result-car {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a6ddb;
+            margin-top: 3px;
+        }
+        #searchResultPopup .no-result {
+            color: #999;
+            text-align: center;
+            padding: 16px 0;
+            font-size: 15px;
+        }
+        #searchResultPopup .popup-close {
+            position: absolute;
+            top: 10px; right: 14px;
+            cursor: pointer;
+            color: #bbb;
+            font-size: 18px;
+            line-height: 1;
+        }
+        #searchResultPopup .popup-close:hover { color: #333; }
+
         .parking-lot-map {
             position: relative;
             background: #ffffff;
@@ -803,9 +921,60 @@
             <button class="btn-nav" onclick="changeDate(1)">▶</button>
         </div>
         <div class="date-side-actions">
+            <div class="quick-search-wrap">
+                <span class="ico">🔍</span>
+                <input type="text" id="quickSearchInput"
+                    placeholder="部屋・車番を検索"
+                    oninput="onQuickSearch(this.value)"
+                    onkeydown="if(event.key==='Escape'){clearQuickSearch()}"
+                    autocomplete="off">
+            </div>
             <button onclick="exportToExcel()" class="btn-side">EXCEL</button>
+            <button onclick="openLogPopup()" class="btn-side">📋 履歴</button>
             <button onclick="refreshData()" class="btn-side">🔄 更新</button>
         </div>
+    </div>
+
+    <!-- Popup lịch sử sửa/xóa -->
+    <div id="logPopupOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:10000;" onclick="closeLogPopup()"></div>
+    <div id="logPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        width:min(95vw,640px); max-height:80vh; z-index:10001; overflow:hidden;
+        font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif; display:flex; flex-direction:column;">
+
+        <!-- Header -->
+        <div style="padding:18px 20px 14px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+            <div style="font-size:17px; font-weight:700; color:#1d1d1f;">📋 変更・削除 履歴</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <select id="logDateFilter" onchange="loadLogData()" style="font-size:13px; border:1px solid #ddd; border-radius:7px; padding:5px 8px; background:#f5f5f7; color:#333;">
+                </select>
+                <span onclick="closeLogPopup()" style="cursor:pointer; color:#aaa; font-size:22px; line-height:1; padding:0 4px;">✕</span>
+            </div>
+        </div>
+
+        <!-- Tab -->
+        <div style="display:flex; border-bottom:1px solid #f0f0f0; flex-shrink:0;">
+            <button id="logTabEdit" onclick="switchLogTab('edit')"
+                style="flex:1; padding:10px; font-size:13px; font-weight:600; border:none; background:#fff; color:#1a6ddb; border-bottom:2px solid #1a6ddb; cursor:pointer;">
+                ✏️ 修正履歴
+            </button>
+            <button id="logTabDelete" onclick="switchLogTab('delete')"
+                style="flex:1; padding:10px; font-size:13px; font-weight:600; border:none; background:#fff; color:#aaa; border-bottom:2px solid transparent; cursor:pointer;">
+                🗑️ 削除履歴
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div id="logContent" style="overflow-y:auto; flex:1; padding:12px 16px;">
+            <div style="text-align:center; color:#aaa; padding:30px; font-size:14px;">読み込み中...</div>
+        </div>
+    </div>
+
+    <!-- Popup kết quả tìm kiếm -->
+    <div id="searchResultPopup">
+        <span class="popup-close" onclick="clearQuickSearch()">✕</span>
+        <div class="popup-title">検索結果</div>
+        <div id="searchResultList"></div>
     </div>
 
     <div class="parking-lot-map">
@@ -946,6 +1115,37 @@
         </div>
     </div>
 
+    <!-- Popup cảnh báo ghi đè -->
+    <div id="overwriteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45);
+        z-index:10000; display:none; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+            width:min(92vw,420px); overflow:hidden;
+            font-family:-apple-system,'Helvetica Neue',sans-serif;">
+            <!-- Header đỏ -->
+            <div style="background:#e74c3c; padding:20px 22px 16px; color:#fff;">
+                <div style="font-size:28px; margin-bottom:6px;">⚠️</div>
+                <div style="font-size:17px; font-weight:700;" id="overwriteTitle">既存データに上書きします</div>
+                <div style="font-size:13px; opacity:0.85; margin-top:4px;" id="overwriteSubtitle"></div>
+            </div>
+            <!-- List các ngày bị ghi đè -->
+            <div id="overwriteList" style="padding:14px 20px; max-height:220px; overflow-y:auto;
+                border-bottom:1px solid #f0f0f0;"></div>
+            <!-- Buttons -->
+            <div style="padding:14px 20px; display:flex; gap:10px; justify-content:flex-end;">
+                <button id="overwriteCancelBtn"
+                    style="padding:9px 20px; border-radius:9px; border:1px solid #ddd;
+                    background:#f5f5f7; color:#333; font-size:14px; font-weight:600; cursor:pointer;">
+                    キャンセル
+                </button>
+                <button id="overwriteOkBtn"
+                    style="padding:9px 20px; border-radius:9px; border:none;
+                    background:#e74c3c; color:#fff; font-size:14px; font-weight:700; cursor:pointer;">
+                    上書きする
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDL0GgloeyF5ppR9bPsiyvh_WHmmPbqML0",
@@ -959,10 +1159,117 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Dọn log cũ ngầm mỗi khi app load
+        setTimeout(silentCleanupLogs, 5000);
+
         // ===== Tự động chuyển ひらがな → カタカナ khi nhập tên khách =====
         function hiraganaToKatakana(str) {
             return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
         }
+
+        // ===== QUICK SEARCH =====
+        let _searchTimer = null;
+
+        function normalizeCarNumber(str) {
+            // Bỏ dấu gạch ngang và khoảng trắng để so sánh số xe: "12-45" == "1245"
+            return str.replace(/[-\s]/g, '').toLowerCase();
+        }
+
+        function onQuickSearch(query) {
+            clearTimeout(_searchTimer);
+            // Xóa highlight cũ
+            document.querySelectorAll('.search-highlight').forEach(el => el.classList.remove('search-highlight'));
+            const popup = document.getElementById('searchResultPopup');
+            if (!query || query.trim() === '') { popup.style.display = 'none'; return; }
+            _searchTimer = setTimeout(() => runQuickSearch(query.trim()), 200);
+        }
+
+        function runQuickSearch(query) {
+            const popup = document.getElementById('searchResultPopup');
+            const list  = document.getElementById('searchResultList');
+            const normQuery = normalizeCarNumber(query).toLowerCase();
+            const results = [];
+
+            document.querySelectorAll('.parking-spot').forEach(el => {
+                const spotNum = el.dataset.num;
+                const raw = el.dataset.info;
+                if (!raw) return;
+                let info;
+                try { info = JSON.parse(raw); } catch(e) { return; }
+
+                const roomNum = (info.roomNumber || '').toLowerCase();
+                const carRaw  = info.carNumber || '';
+                const normCar = normalizeCarNumber(carRaw);
+                const status  = el.classList.contains('booked') ? 'booked' : el.classList.contains('staff') ? 'staff' : '';
+
+                if (roomNum.includes(normQuery) || normCar.includes(normQuery)) {
+                    results.push({ spotNum, info, carRaw, status });
+                }
+            });
+
+            list.innerHTML = '';
+            if (results.length === 0) {
+                list.innerHTML = `<div class="no-result">見つかりませんでした</div>`;
+            } else {
+                results.forEach(r => {
+                    const { spotNum, info, carRaw, status } = r;
+                    const room = status === 'staff'
+                        ? (info.roomNumber === 'STAFF' ? 'スタッフ' : info.roomNumber || '')
+                        : (info.roomNumber ? `R${info.roomNumber}` : '');
+                    const name  = info.guestName || '';
+                    const label = spotNum === '4' ? '♿4' : spotNum;
+
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.innerHTML = `
+                        <div class="spot-badge">${label}</div>
+                        <div class="result-info">
+                            <div class="result-room">${room || 'ー'}</div>
+                            <div class="result-name">${name || 'ー'}</div>
+                            ${carRaw ? `<div class="result-car">車両番号：${carRaw}</div>` : ''}
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        popup.style.display = 'none';
+                        document.getElementById('quickSearchInput').value = '';
+                        document.querySelectorAll('.search-highlight').forEach(el => el.classList.remove('search-highlight'));
+
+                        const spotEl = document.getElementById(`spot-${spotNum}`);
+                        if (!spotEl) return;
+                        spotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Chờ scroll xong rồi mở modal
+                        setTimeout(() => {
+                            if (status === 'staff') openStaffModal(spotEl);
+                            else openGuestModal(spotEl);
+                        }, 350);
+                    };
+                    list.appendChild(div);
+                });
+            }
+
+            results.forEach(r => {
+                const spotEl = document.getElementById(`spot-${r.spotNum}`);
+                if (spotEl) spotEl.classList.add('search-highlight');
+            });
+
+            popup.style.display = 'block';
+        }
+
+        function clearQuickSearch() {
+            document.getElementById('quickSearchInput').value = '';
+            document.getElementById('searchResultPopup').style.display = 'none';
+            document.querySelectorAll('.search-highlight').forEach(el => el.classList.remove('search-highlight'));
+        }
+
+        // Bấm ra ngoài popup thì đóng
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('searchResultPopup');
+            const input = document.getElementById('quickSearchInput');
+            if (popup && !popup.contains(e.target) && e.target !== input) {
+                popup.style.display = 'none';
+            }
+        });
+
         (function setupGuestNameAutoKatakana() {
             const guestNameInput = document.getElementById('guestName');
             if (!guestNameInput) return;
@@ -1116,7 +1423,11 @@
 
         function calculateDisplayDaysLogic(checkInStr, checkOutStr, targetDateStr) {
             if (!checkInStr || !checkOutStr) return "";
-            const start = new Date(checkInStr); const end = new Date(checkOutStr); const current = new Date(targetDateStr);
+            // Parse dạng YYYY-MM-DD theo local time, tránh lệch timezone UTC vs JST
+            const parseLocal = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+            const start   = parseLocal(checkInStr);
+            const end     = parseLocal(checkOutStr);
+            const current = parseLocal(targetDateStr);
             const diffTime = end - start;
             const totalN = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             if (totalN <= 0) return "";
@@ -1466,10 +1777,29 @@
         }
         function closeStaffModal() { document.getElementById('staffModal').style.display = 'none'; }
 
+        // Ghi log sửa thông tin lên Firebase
+        function writeEditLog(dateKey, spotNum, oldInfo, newData) {
+            if (!navigator.onLine) return;
+            try {
+                const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+                const pad = n => String(n).padStart(2, '0');
+                const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
+                const editedAt = `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`;
+                db.ref(`edit_log/${dateKey}/${logKey}`).set({
+                    edited_at: editedAt,
+                    date_key: dateKey,
+                    spot_id: parseInt(spotNum),
+                    before: oldInfo || null,
+                    after: newData
+                }).catch(e => console.warn('⚠️ edit_log:', e.message));
+            } catch(e) {}
+        }
+
         async function saveStaffInfo() {
             if (!currentSpot) return;
             const name = document.getElementById('staffName').value || "スタッフ";
             const spotNum = currentSpot.dataset.num; const date = document.getElementById('parkingDate').value;
+            const oldInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
             const now = new Date();
             const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
@@ -1482,19 +1812,20 @@
                 localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(staffPayload) }),
                 navigator.onLine ? db.ref(`parking/${date}/${spotNum}`).set({ status: 'staff', info: staffPayload.info }).catch(e => {}) : Promise.resolve()
             ]);
+            writeEditLog(date, spotNum, oldInfo, { status: 'staff', info: staffPayload.info });
             showToast("データを保存しました"); closeStaffModal();
         }
 
         function openGuestModal(el) {
             currentSpot = el;
             const data = el.dataset.info ? JSON.parse(el.dataset.info) : {};
-            const todayStr = formatDateLocal(new Date());
+            const viewingDate = document.getElementById('parkingDate').value || formatDateLocal(new Date());
 
             document.getElementById('roomNumber').value = data.roomNumber || "";
             document.getElementById('guestName').value = data.guestName || "";
             document.getElementById('carNumber').value = data.carNumber || "";
             document.getElementById('guestNote').value = data.guestNote || "";
-            document.getElementById('checkIn').value = data.checkIn || todayStr;
+            document.getElementById('checkIn').value = data.checkIn || viewingDate;
             document.getElementById('stayDays').value = data.stayDays || "1";
             if (data.checkOut) document.getElementById('checkOut').value = data.checkOut;
             else updateCheckOutFromStay();
@@ -1513,6 +1844,57 @@
         function deleteStaffInfo() { document.getElementById('confirmModal').style.display = 'flex'; }
         function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
+        // Popup cảnh báo ghi đè — trả về Promise<boolean>
+        function showOverwriteConfirm(spotNum, overwriteDates) {
+            return new Promise(resolve => {
+                const modal   = document.getElementById('overwriteModal');
+                const list    = document.getElementById('overwriteList');
+                const subtitle = document.getElementById('overwriteSubtitle');
+                const okBtn   = document.getElementById('overwriteOkBtn');
+                const cancelBtn = document.getElementById('overwriteCancelBtn');
+
+                subtitle.textContent = `駐車番号 ${spotNum} に ${overwriteDates.length}件 の既存データがあります`;
+
+                list.innerHTML = overwriteDates.map(d => {
+                    const label = d.status === 'staff'
+                        ? `<span style="color:#e67e22; font-weight:700;">スタッフ</span>`
+                        : `<span style="font-weight:700; color:#1a6ddb;">R${d.roomNumber}</span>　${d.guestName}`;
+                    return `
+                        <div style="display:flex; align-items:center; gap:12px;
+                            padding:9px 0; border-bottom:1px solid #f5f5f5;">
+                            <div style="background:#f5f5f7; border-radius:7px; padding:3px 9px;
+                                font-size:12px; font-weight:600; color:#555; white-space:nowrap;">
+                                ${d.date}
+                            </div>
+                            <div style="font-size:14px;">${label}</div>
+                        </div>`;
+                }).join('');
+
+                modal.style.display = 'flex';
+
+                const cleanup = () => { modal.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; };
+                okBtn.onclick     = () => { cleanup(); resolve(true);  };
+                cancelBtn.onclick = () => { cleanup(); resolve(false); };
+            });
+        }
+
+        // Ghi log xóa lên Firebase
+        function writeDeleteLog(dateKey, spotNum, spotInfo) {
+            if (!navigator.onLine) return;
+            try {
+                const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+                const pad = n => String(n).padStart(2, '0');
+                const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
+                const deletedAt = `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`;
+                db.ref(`delete_log/${dateKey}/${logKey}`).set({
+                    deleted_at: deletedAt,
+                    date_key: dateKey,
+                    spot_id: parseInt(spotNum),
+                    data: spotInfo || null
+                }).catch(e => console.warn('⚠️ delete_log:', e.message));
+            } catch(e) {}
+        }
+
         async function executeDelete() {
             if (!currentSpot) return;
             const spotNum = currentSpot.getAttribute('data-num');
@@ -1521,24 +1903,91 @@
             const isStaffCell = currentSpot.classList.contains('staff');
 
             if (!isStaffCell && dataInfo && dataInfo.checkOut) {
-                // Xóa từ ngày đang xem → checkOut, không đụng ngày trước (chạy song song cho nhanh)
-                const cur = new Date(date);
-                const end = new Date(dataInfo.checkOut);
+                const parseLocal = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+                const cancelDate  = parseLocal(date);
+                const checkInDate = parseLocal(dataInfo.checkIn);
+                const origEnd     = parseLocal(dataInfo.checkOut);
+                const newStayDays = Math.round((cancelDate - checkInDate) / (1000*60*60*24));
+                const newCheckOut = date;
+
+                // Bước 1: Xóa từ ngày hủy → checkOut cũ
+                // Quét TẤT CẢ ô trên mỗi ngày, xóa bất kỳ ô nào có cùng booking
+                // (xử lý cả trường hợp di chuyển ô trước đó để lại data cũ ở ô khác)
                 const deletePromises = [];
-                while (cur < end) {
+                const cur = new Date(cancelDate);
+                while (cur < origEnd) {
                     const dateKey = formatDateLocal(new Date(cur));
-                    deletePromises.push((async () => {
-                        await localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: dateKey, spot_id: parseInt(spotNum) }) });
-                        if (navigator.onLine) { try { await db.ref(`parking/${dateKey}/${spotNum}`).remove(); } catch(e) {} }
-                    })());
+                    deletePromises.push((async (dk) => {
+                        try {
+                            if (navigator.onLine) {
+                                const snap = await db.ref(`parking/${dk}`).once('value');
+                                const dayData = snap.val();
+                                if (dayData) {
+                                    const fbUpdates = {};
+                                    for (const [sid, entry] of Object.entries(dayData)) {
+                                        if (!entry?.info) continue;
+                                        const inf = entry.info;
+                                        // Khớp booking: cùng checkIn + (cùng số xe hoặc cùng tên khách)
+                                        if (inf.checkIn === dataInfo.checkIn &&
+                                            (inf.carNumber === dataInfo.carNumber || inf.guestName === dataInfo.guestName)) {
+                                            fbUpdates[`parking/${dk}/${sid}`] = null;
+                                            // Xóa local API (không chờ kết quả)
+                                            localApiFetch('/api/parking/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ date_key: dk, spot_id: parseInt(sid) }) });
+                                        }
+                                    }
+                                    if (Object.keys(fbUpdates).length > 0) {
+                                        await db.ref('/').update(fbUpdates);
+                                    }
+                                }
+                            } else {
+                                // Offline: chỉ xóa spot hiện tại qua local API
+                                await localApiFetch('/api/parking/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ date_key: dk, spot_id: parseInt(spotNum) }) });
+                            }
+                        } catch(e) {}
+                    })(dateKey));
                     cur.setDate(cur.getDate() + 1);
                 }
                 await Promise.all(deletePromises);
+                writeDeleteLog(date, spotNum, dataInfo);
+
+                // Bước 2: Cập nhật stayDays + checkOut cho các ngày còn lại (checkIn → ngày hủy)
+                if (newStayDays > 0 && navigator.onLine) {
+                    const updatePromises = [];
+                    const upCur = new Date(checkInDate);
+                    while (upCur < cancelDate) {
+                        const dateKey = formatDateLocal(new Date(upCur));
+                        updatePromises.push((async (dk) => {
+                            try {
+                                const snap = await db.ref(`parking/${dk}`).once('value');
+                                const dayData = snap.val();
+                                if (!dayData) return;
+                                const fbUpdates = {};
+                                for (const [sid, entry] of Object.entries(dayData)) {
+                                    if (!entry?.info) continue;
+                                    const inf = entry.info;
+                                    if (inf.checkIn === dataInfo.checkIn &&
+                                        (inf.carNumber === dataInfo.carNumber || inf.guestName === dataInfo.guestName)) {
+                                        fbUpdates[`parking/${dk}/${sid}/info/stayDays`] = newStayDays;
+                                        fbUpdates[`parking/${dk}/${sid}/info/checkOut`]  = newCheckOut;
+                                    }
+                                }
+                                if (Object.keys(fbUpdates).length > 0) {
+                                    await db.ref('/').update(fbUpdates);
+                                }
+                            } catch(e) {}
+                        })(dateKey));
+                        upCur.setDate(upCur.getDate() + 1);
+                    }
+                    await Promise.all(updatePromises);
+                }
+
             } else {
+                // Xóa đơn (staff hoặc không có checkOut)
                 await Promise.all([
-                    localApiFetch('/api/parking/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date_key: date, spot_id: parseInt(spotNum) }) }),
+                    localApiFetch('/api/parking/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ date_key: date, spot_id: parseInt(spotNum) }) }),
                     navigator.onLine ? (async () => { try { await db.ref(`parking/${date}/${spotNum}`).remove(); } catch(e) {} })() : Promise.resolve()
                 ]);
+                writeDeleteLog(date, spotNum, dataInfo);
             }
 
             closeConfirmModal(); closeGuestModal(); closeStaffModal(); showToast("削除完了");
@@ -1550,6 +1999,7 @@
             const stayDays = parseInt(document.getElementById('stayDays').value) || 1; const carNumber = document.getElementById('carNumber').value;
             const guestNote = document.getElementById('guestNote').value; const originalCheckIn = document.getElementById('checkIn').value;
             const checkOut = document.getElementById('checkOut').value; const spotNum = currentSpot.getAttribute('data-num');
+            const oldInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
 
             // Cảnh báo nếu trùng số xe với ô khác trong cùng ngày
             if (carNumber) {
@@ -1560,11 +2010,57 @@
                     if (dayData) {
                         for (const sid of Object.keys(dayData)) {
                             if (parseInt(sid) !== parseInt(spotNum) && dayData[sid]?.info?.carNumber === carNumber) {
-                                const confirm = window.confirm(`⚠️ 車番号「${carNumber}」はすでに駐車番号 ${sid} に登録されています。\nこのまま保存しますか？`);
-                                if (!confirm) return;
+                                const confirmed = await showOverwriteConfirm(
+                                    sid,
+                                    [{ date, status: dayData[sid].status, roomNumber: dayData[sid].info?.roomNumber || '', guestName: `車番「${carNumber}」が駐車番号 ${sid} に登録済み` }]
+                                );
+                                if (!confirmed) return;
                                 break;
                             }
                         }
+                    }
+                } catch(e) {}
+            }
+
+            // Kiểm tra ghi đè: tìm ngày nào trong phạm vi booking đã có data khác ở ô này
+            if (navigator.onLine) {
+                try {
+                    const overwriteDates = [];
+                    const checkPromises = [];
+                    for (let i = 0; i < stayDays; i++) {
+                        const targetDate = new Date(originalCheckIn);
+                        targetDate.setDate(targetDate.getDate() + i);
+                        const dateKey = formatDateLocal(targetDate);
+                        checkPromises.push((async (dk) => {
+                            const snap = await db.ref(`parking/${dk}/${spotNum}`).once('value');
+                            const existing = snap.val();
+                            if (existing && existing.info) {
+                                // Không cảnh báo nếu đang sửa chính booking này
+                                // (cùng checkIn + cùng tên khách = cùng 1 booking)
+                                const isSameBooking = existing.info.checkIn === originalCheckIn &&
+                                    existing.info.guestName === guestName;
+                                if (!isSameBooking) {
+                                    overwriteDates.push({
+                                        date: dk,
+                                        guestName: existing.info.guestName || '',
+                                        roomNumber: existing.info.roomNumber || '',
+                                        status: existing.status
+                                    });
+                                }
+                            }
+                        })(dateKey));
+                    }
+                    await Promise.all(checkPromises);
+
+                    if (overwriteDates.length > 0) {
+                        // Sắp xếp theo ngày để hiển thị rõ ràng
+                        overwriteDates.sort((a, b) => a.date.localeCompare(b.date));
+                        const lines = overwriteDates.map(d => {
+                            const label = d.status === 'staff' ? 'スタッフ' : `R${d.roomNumber} ${d.guestName}`;
+                            return `  • ${d.date}：${label}`;
+                        }).join('\n');
+                        const confirmOverwrite = await showOverwriteConfirm(spotNum, overwriteDates);
+                        if (!confirmOverwrite) return;
                     }
                 } catch(e) {}
             }
@@ -1583,6 +2079,27 @@
                 if (navigator.onLine) { savePromises.push(db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }).catch(e => {})); }
             }
             await Promise.all(savePromises);
+
+            // Cập nhật ngay sao đỏ trong bảng danh sách (không chờ Firebase snapshot)
+            const currentDate = document.getElementById('parkingDate').value;
+            const tr = document.getElementById(`table-row-${spotNum}`);
+            if (tr) {
+                const tdName = tr.querySelector('.col-guest-name');
+                if (tdName) {
+                    const starSpan = tdName.querySelector('span');
+                    if (guestNote && guestNote.trim() !== '') {
+                        if (!starSpan) tdName.innerHTML = guestName + ' <span style="color:#e74c3c; font-size:26px;">★</span>';
+                        else starSpan.style.display = '';
+                    } else {
+                        if (starSpan) starSpan.remove();
+                    }
+                }
+            }
+
+            // Ghi log sửa thông tin (chỉ ghi cho ngày đang xem)
+            const newInfo = { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus };
+            writeEditLog(originalCheckIn, spotNum, oldInfo, { status: 'booked', info: newInfo });
+
             closeGuestModal(); showToast("データを保存しました");
         }
 
@@ -1696,7 +2213,193 @@
         let touchStartY = 0;
         window.addEventListener('touchstart', function (e) { touchStartY = e.touches[0].clientY; });
         window.addEventListener('touchend', function (e) { if (e.changedTouches[0].clientY - touchStartY > 120) jumpToToday(); });
+
+        // ===== POPUP LỊCH SỬ SỬA / XÓA =====
+        let _currentLogTab = 'edit';
+
+        function openLogPopup() {
+            document.getElementById('logPopupOverlay').style.display = 'block';
+            document.getElementById('logPopup').style.display = 'flex';
+
+            const pad = n => String(n).padStart(2, '0');
+            const toDateStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+            const sel = document.getElementById('logDateFilter');
+            sel.innerHTML = '';
+            const today = new Date();
+            // Hiển thị 3 ngày gần nhất trong dropdown
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const val = toDateStr(d);
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                if (i === 0) opt.selected = true;
+                sel.appendChild(opt);
+            }
+            loadLogData();
+        }
+
+        // Dọn log cũ hơn 3 ngày ngầm khi app load (không cần mở popup)
+        function silentCleanupLogs() {
+            if (!navigator.onLine) return;
+            const cutoff = Date.now() - 3 * 24 * 60 * 60 * 1000;
+            ['edit_log', 'delete_log'].forEach(node => {
+                db.ref(node).once('value').then(snap => {
+                    const data = snap.val();
+                    if (!data) return;
+                    const updates = {};
+                    Object.entries(data).forEach(([dateKey, entries]) => {
+                        if (!entries) return;
+                        Object.entries(entries).forEach(([logKey]) => {
+                            const m = logKey.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+                            if (m) {
+                                const t = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
+                                if (t < cutoff) updates[`${dateKey}/${logKey}`] = null;
+                            }
+                        });
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        db.ref(node).update(updates).catch(() => {});
+                    }
+                }).catch(() => {});
+            });
+        }
+
+        function closeLogPopup() {
+            document.getElementById('logPopupOverlay').style.display = 'none';
+            document.getElementById('logPopup').style.display = 'none';
+        }
+
+        function switchLogTab(tab) {
+            _currentLogTab = tab;
+            const editBtn   = document.getElementById('logTabEdit');
+            const deleteBtn = document.getElementById('logTabDelete');
+            if (tab === 'edit') {
+                editBtn.style.color = '#1a6ddb'; editBtn.style.borderBottom = '2px solid #1a6ddb';
+                deleteBtn.style.color = '#aaa';  deleteBtn.style.borderBottom = '2px solid transparent';
+            } else {
+                deleteBtn.style.color = '#e74c3c'; deleteBtn.style.borderBottom = '2px solid #e74c3c';
+                editBtn.style.color = '#aaa';      editBtn.style.borderBottom = '2px solid transparent';
+            }
+            loadLogData();
+        }
+
+        async function loadLogData() {
+            const dateKey = document.getElementById('logDateFilter').value;
+            const node = _currentLogTab === 'edit' ? 'edit_log' : 'delete_log';
+            const content = document.getElementById('logContent');
+            content.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px;font-size:14px;">読み込み中...</div>';
+
+            try {
+                const snap = await db.ref(`${node}/${dateKey}`).once('value');
+                const data = snap.val();
+                if (!data) {
+                    content.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px;font-size:14px;">履歴がありません</div>';
+                    return;
+                }
+                // Sắp xếp mới nhất trước, chỉ giữ entries trong vòng 3 ngày
+                const cutoff24h = Date.now() - 3 * 24 * 60 * 60 * 1000;
+                const entries = Object.entries(data)
+                    .filter(([key]) => {
+                        const m = key.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+                        if (!m) return true;
+                        const t = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
+                        return t >= cutoff24h;
+                    })
+                    .sort((a, b) => b[0].localeCompare(a[0]));
+                content.innerHTML = '';
+                entries.forEach(([key, entry]) => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'border:1px solid #f0f0f0; border-radius:10px; padding:12px 14px; margin-bottom:10px; background:#fafafa;';
+
+                    const timeStr = entry.edited_at || entry.deleted_at || '';
+                    const spotId  = entry.spot_id || '';
+                    const isDelete = _currentLogTab === 'delete';
+
+                    // Lấy thông tin hiển thị
+                    const afterInfo  = entry.after?.info  || null;
+                    const beforeInfo = entry.before?.info || null;
+                    const showInfo   = isDelete ? (entry.data?.info || null) : afterInfo;
+                    const room = showInfo?.roomNumber ? `R${showInfo.roomNumber}` : '';
+                    const name = showInfo?.guestName  || '';
+                    const car  = showInfo?.carNumber  || '';
+
+                    let diffHtml = '';
+                    if (!isDelete && beforeInfo && afterInfo) {
+                        const fields = [
+                            { label: '部屋', before: beforeInfo.roomNumber, after: afterInfo.roomNumber },
+                            { label: 'お客様名', before: beforeInfo.guestName, after: afterInfo.guestName },
+                            { label: '車番', before: beforeInfo.carNumber, after: afterInfo.carNumber },
+                            { label: 'チェックイン', before: beforeInfo.checkIn, after: afterInfo.checkIn },
+                            { label: 'チェックアウト', before: beforeInfo.checkOut, after: afterInfo.checkOut },
+                            { label: 'メモ', before: beforeInfo.guestNote, after: afterInfo.guestNote },
+                        ];
+                        const changed = fields.filter(f => (f.before || '') !== (f.after || ''));
+                        if (changed.length > 0) {
+                            diffHtml = '<div style="margin-top:8px; font-size:12px; line-height:1.8;">';
+                            changed.forEach(f => {
+                                diffHtml += `<div><span style="color:#888;">${f.label}：</span>
+                                    <span style="color:#e74c3c; text-decoration:line-through;">${f.before || 'ー'}</span>
+                                    <span style="color:#888; margin:0 4px;">→</span>
+                                    <span style="color:#27ae60; font-weight:600;">${f.after || 'ー'}</span></div>`;
+                            });
+                            diffHtml += '</div>';
+                        }
+                    }
+
+                    const restoreData = isDelete
+                        ? entry.data
+                        : entry.before;
+
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                    <span style="background:${isDelete?'#e74c3c':'#1a6ddb'}; color:#fff; font-weight:800; font-size:14px;
+                                        padding:2px 9px; border-radius:6px;">🅿️ ${spotId}</span>
+                                    <span style="font-size:12px; color:#aaa;">${timeStr}</span>
+                                </div>
+                                <div style="font-size:15px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                                <div style="font-size:13px; color:#666; margin-top:2px;">${room}　${car}</div>
+                                ${diffHtml}
+                            </div>
+                            ${restoreData ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restoreData)})'
+                                style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
+                                padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;">
+                                🔄 復元
+                            </button>` : ''}
+                        </div>
+                    `;
+                    content.appendChild(card);
+                });
+            } catch(e) {
+                content.innerHTML = `<div style="text-align:center;color:#e74c3c;padding:30px;font-size:13px;">読み込みエラー: ${e.message}</div>`;
+            }
+        }
+
+        async function restoreData(dateKey, spotNum, data) {
+            if (!data) return;
+            const confirmMsg = `🅿️ ${spotNum}番 のデータを復元しますか？\n\n${data.info?.guestName || ''} ${data.info?.roomNumber ? 'R'+data.info.roomNumber : ''}`;
+            if (!confirm(confirmMsg)) return;
+            try {
+                await db.ref(`parking/${dateKey}/${spotNum}`).set(data);
+                // Ghi log khôi phục
+                const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+                const pad = n => String(n).padStart(2, '0');
+                const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
+                db.ref(`edit_log/${dateKey}/${logKey}`).set({
+                    edited_at: `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`,
+                    date_key: dateKey, spot_id: parseInt(spotNum),
+                    before: null, after: data, note: '復元'
+                }).catch(()=>{});
+                showToast(`🅿️ ${spotNum}番 復元完了`);
+                closeLogPopup();
+            } catch(e) {
+                alert('復元に失敗しました: ' + e.message);
+            }
+        }
     </script>
 </body>
-
 </html>
