@@ -952,18 +952,6 @@
             </div>
         </div>
 
-        <!-- Tab -->
-        <div style="display:flex; border-bottom:1px solid #f0f0f0; flex-shrink:0;">
-            <button id="logTabEdit" onclick="switchLogTab('edit')"
-                style="flex:1; padding:10px; font-size:13px; font-weight:600; border:none; background:#fff; color:#1a6ddb; border-bottom:2px solid #1a6ddb; cursor:pointer;">
-                ✏️ 修正履歴
-            </button>
-            <button id="logTabDelete" onclick="switchLogTab('delete')"
-                style="flex:1; padding:10px; font-size:13px; font-weight:600; border:none; background:#fff; color:#aaa; border-bottom:2px solid transparent; cursor:pointer;">
-                🗑️ 削除履歴
-            </button>
-        </div>
-
         <!-- Content -->
         <div id="logContent" style="overflow-y:auto; flex:1; padding:12px 16px;">
             <div style="text-align:center; color:#aaa; padding:30px; font-size:14px;">読み込み中...</div>
@@ -1556,7 +1544,29 @@
                 if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {} }
             }));
 
+            // Ghi log di chuyển
+            writeMoveLog(date, fromNum, toNum, fromStatus, fromInfo, toStatus, toInfo);
+
             showToast("位置を移動しました");
+        }
+
+        function writeMoveLog(dateKey, fromNum, toNum, fromStatus, fromInfo, toStatus, toInfo) {
+            if (!navigator.onLine) return;
+            try {
+                const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+                const pad = n => String(n).padStart(2, '0');
+                const actionDate = `${nowJST.getFullYear()}-${pad(nowJST.getMonth()+1)}-${pad(nowJST.getDate())}`;
+                const logKey = `${actionDate.replace(/-/g,'')}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${fromNum}to${toNum}`;
+                const movedAt = `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`;
+                db.ref(`move_log/${actionDate}/${logKey}`).set({
+                    moved_at: movedAt,
+                    date_key: dateKey,
+                    from_spot: parseInt(fromNum),
+                    to_spot:   parseInt(toNum),
+                    from: fromInfo ? { status: fromStatus, info: fromInfo } : null,
+                    to:   toInfo   ? { status: toStatus,   info: toInfo   } : null
+                }).catch(e => console.warn('⚠️ move_log:', e.message));
+            } catch(e) {}
         }
 
         function formatVerticalHtmlString(str) {
@@ -2260,7 +2270,7 @@
         function silentCleanupLogs() {
             if (!navigator.onLine) return;
             const cutoff = Date.now() - 3 * 24 * 60 * 60 * 1000;
-            ['edit_log', 'delete_log'].forEach(node => {
+            ['edit_log', 'delete_log', 'move_log'].forEach(node => {
                 db.ref(node).once('value').then(snap => {
                     const data = snap.val();
                     if (!data) return;
@@ -2287,112 +2297,162 @@
             document.getElementById('logPopup').style.display = 'none';
         }
 
-        function switchLogTab(tab) {
-            _currentLogTab = tab;
-            const editBtn   = document.getElementById('logTabEdit');
-            const deleteBtn = document.getElementById('logTabDelete');
-            if (tab === 'edit') {
-                editBtn.style.color = '#1a6ddb'; editBtn.style.borderBottom = '2px solid #1a6ddb';
-                deleteBtn.style.color = '#aaa';  deleteBtn.style.borderBottom = '2px solid transparent';
-            } else {
-                deleteBtn.style.color = '#e74c3c'; deleteBtn.style.borderBottom = '2px solid #e74c3c';
-                editBtn.style.color = '#aaa';      editBtn.style.borderBottom = '2px solid transparent';
-            }
-            loadLogData();
-        }
-
         async function loadLogData() {
             const dateKey = document.getElementById('logDateFilter').value;
-            const node = _currentLogTab === 'edit' ? 'edit_log' : 'delete_log';
             const content = document.getElementById('logContent');
             content.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px;font-size:14px;">読み込み中...</div>';
-
             try {
-                const snap = await db.ref(`${node}/${dateKey}`).once('value');
-                const data = snap.val();
-                if (!data) {
+                // Fetch song song cả 3 loại log
+                const [editSnap, deleteSnap, moveSnap] = await Promise.all([
+                    db.ref(`edit_log/${dateKey}`).once('value'),
+                    db.ref(`delete_log/${dateKey}`).once('value'),
+                    db.ref(`move_log/${dateKey}`).once('value')
+                ]);
+
+                // Gộp tất cả entries, đánh loại
+                const cutoff = Date.now() - 3 * 24 * 60 * 60 * 1000;
+                const allEntries = [];
+
+                const addEntries = (snap, type) => {
+                    const data = snap.val();
+                    if (!data) return;
+                    Object.entries(data).forEach(([key, entry]) => {
+                        const m = key.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+                        if (m) {
+                            const t = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
+                            if (t >= cutoff) allEntries.push({ key, entry, type, time: t });
+                        }
+                    });
+                };
+                addEntries(editSnap,   'edit');
+                addEntries(deleteSnap, 'delete');
+                addEntries(moveSnap,   'move');
+
+                // Sắp xếp mới nhất trước
+                allEntries.sort((a, b) => b.time - a.time);
+
+                content.innerHTML = '';
+                if (allEntries.length === 0) {
                     content.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px;font-size:14px;">履歴がありません</div>';
                     return;
                 }
-                // Sắp xếp mới nhất trước, chỉ giữ entries trong vòng 3 ngày
-                const cutoff24h = Date.now() - 3 * 24 * 60 * 60 * 1000;
-                const entries = Object.entries(data)
-                    .filter(([key]) => {
-                        const m = key.match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
-                        if (!m) return true;
-                        const t = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime();
-                        return t >= cutoff24h;
-                    })
-                    .sort((a, b) => b[0].localeCompare(a[0]));
-                content.innerHTML = '';
-                entries.forEach(([key, entry]) => {
+
+                allEntries.forEach(({ entry, type }) => {
                     const card = document.createElement('div');
                     card.style.cssText = 'border:1px solid #f0f0f0; border-radius:10px; padding:12px 14px; margin-bottom:10px; background:#fafafa;';
 
-                    const timeStr = entry.edited_at || entry.deleted_at || '';
-                    const spotId  = entry.spot_id || '';
+                    const TYPE_CFG = {
+                        edit:   { label: '✏️ 修正', color: '#1a6ddb' },
+                        delete: { label: '🗑️ 削除', color: '#e74c3c' },
+                        move:   { label: '🔀 移動', color: '#f39c12' }
+                    };
+                    const cfg = TYPE_CFG[type];
+                    const timeStr = entry.edited_at || entry.deleted_at || entry.moved_at || '';
                     const parkingDate = entry.date_key || '';
-                    const isDelete = _currentLogTab === 'delete';
 
-                    // Lấy thông tin hiển thị
-                    const afterInfo  = entry.after?.info  || null;
-                    const beforeInfo = entry.before?.info || null;
-                    const showInfo   = isDelete ? (entry.data?.info || null) : afterInfo;
-                    const room = showInfo?.roomNumber ? `R${showInfo.roomNumber}` : '';
-                    const name = showInfo?.guestName  || '';
-                    const car  = showInfo?.carNumber  || '';
-
-                    let diffHtml = '';
-                    if (!isDelete && beforeInfo && afterInfo) {
+                    if (type === 'move') {
+                        const fromSpot = entry.from_spot || '';
+                        const toSpot   = entry.to_spot   || '';
+                        const fromInfo = entry.from?.info || {};
+                        const toInfo   = entry.to?.info   || {};
+                        const name = fromInfo.guestName || toInfo.guestName || '';
+                        const room = fromInfo.roomNumber ? `R${fromInfo.roomNumber}` : '';
+                        const car  = fromInfo.carNumber  || '';
+                        card.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                                <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
+                                <span style="font-size:12px; color:#aaa;">${timeStr}</span>
+                                ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                <span style="background:#e74c3c; color:#fff; font-weight:800; font-size:15px; padding:2px 10px; border-radius:6px;">🅿️ ${fromSpot}</span>
+                                <span style="font-size:20px; color:#aaa;">→</span>
+                                <span style="background:#27ae60; color:#fff; font-weight:800; font-size:15px; padding:2px 10px; border-radius:6px;">🅿️ ${toSpot}</span>
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                            <div style="font-size:13px; color:#666;">${room}　${car}</div>
+                            ${entry.to?.info?.guestName ? `<div style="font-size:12px; color:#aaa; margin-top:4px;">入れ替え先：R${entry.to.info.roomNumber || ''} ${entry.to.info.guestName}</div>` : ''}
+                        `;
+                    } else if (type === 'delete') {
+                        const info = entry.data?.info || {};
+                        const spotId = entry.spot_id || '';
+                        const name = info.guestName || '';
+                        const room = info.roomNumber ? `R${info.roomNumber}` : '';
+                        const car  = info.carNumber  || '';
+                        const restorePayload = entry.data?.status ? entry.data : null;
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                                        <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
+                                        <span style="background:#555; color:#fff; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">🅿️ ${spotId}</span>
+                                        <span style="font-size:12px; color:#aaa;">${timeStr}</span>
+                                        ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                                    </div>
+                                    <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                                    <div style="font-size:13px; color:#666;">${room}　${car}</div>
+                                </div>
+                                ${restorePayload ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restorePayload)})'
+                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
+                                    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; margin-left:10px;">
+                                    🔄 復元
+                                </button>` : ''}
+                            </div>
+                        `;
+                    } else {
+                        // edit
+                        const spotId    = entry.spot_id || '';
+                        const afterInfo = entry.after?.info  || {};
+                        const beforeInfo= entry.before?.info || {};
+                        const name = afterInfo.guestName || '';
+                        const room = afterInfo.roomNumber ? `R${afterInfo.roomNumber}` : '';
+                        const car  = afterInfo.carNumber  || '';
                         const fields = [
-                            { label: '部屋', before: beforeInfo.roomNumber, after: afterInfo.roomNumber },
-                            { label: 'お客様名', before: beforeInfo.guestName, after: afterInfo.guestName },
-                            { label: '車番', before: beforeInfo.carNumber, after: afterInfo.carNumber },
-                            { label: 'チェックイン', before: beforeInfo.checkIn, after: afterInfo.checkIn },
-                            { label: 'チェックアウト', before: beforeInfo.checkOut, after: afterInfo.checkOut },
-                            { label: 'メモ', before: beforeInfo.guestNote, after: afterInfo.guestNote },
+                            { label: '部屋',         before: beforeInfo.roomNumber, after: afterInfo.roomNumber },
+                            { label: 'お客様名',     before: beforeInfo.guestName,  after: afterInfo.guestName  },
+                            { label: '車番',         before: beforeInfo.carNumber,  after: afterInfo.carNumber  },
+                            { label: 'チェックイン', before: beforeInfo.checkIn,    after: afterInfo.checkIn    },
+                            { label: 'チェックアウト', before: beforeInfo.checkOut, after: afterInfo.checkOut   },
+                            { label: 'メモ',         before: beforeInfo.guestNote,  after: afterInfo.guestNote  },
                         ];
-                        const changed = fields.filter(f => (f.before || '') !== (f.after || ''));
+                        const changed = fields.filter(f => (f.before||'') !== (f.after||''));
+                        let diffHtml = '';
                         if (changed.length > 0) {
-                            diffHtml = '<div style="margin-top:8px; font-size:12px; line-height:1.8;">';
+                            diffHtml = '<div style="margin-top:6px; font-size:12px; line-height:1.9;">';
                             changed.forEach(f => {
                                 diffHtml += `<div><span style="color:#888;">${f.label}：</span>
-                                    <span style="color:#e74c3c; text-decoration:line-through;">${f.before || 'ー'}</span>
+                                    <span style="color:#e74c3c; text-decoration:line-through;">${f.before||'ー'}</span>
                                     <span style="color:#888; margin:0 4px;">→</span>
-                                    <span style="color:#27ae60; font-weight:600;">${f.after || 'ー'}</span></div>`;
+                                    <span style="color:#27ae60; font-weight:600;">${f.after||'ー'}</span></div>`;
                             });
                             diffHtml += '</div>';
                         }
-                    }
-
-                    const restoreData = isDelete
-                        ? entry.data
-                        : entry.before;
-
-                    card.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                            <div style="flex:1;">
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                                    <span style="background:${isDelete?'#e74c3c':'#1a6ddb'}; color:#fff; font-weight:800; font-size:14px;
-                                        padding:2px 9px; border-radius:6px;">🅿️ ${spotId}</span>
-                                    <span style="font-size:12px; color:#aaa;">${timeStr}</span>
+                        const restorePayload = entry.before?.status ? entry.before : null;
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                                        <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
+                                        <span style="background:#555; color:#fff; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">🅿️ ${spotId}</span>
+                                        <span style="font-size:12px; color:#aaa;">${timeStr}</span>
+                                        ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                                    </div>
+                                    <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name||'ー'}</div>
+                                    <div style="font-size:13px; color:#666;">${room}　${car}</div>
+                                    ${diffHtml}
                                 </div>
-                                ${parkingDate ? `<div style="font-size:11px; color:#aaa; margin-bottom:3px;">🗓 駐車日：${parkingDate}</div>` : ''}
-                                <div style="font-size:15px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
-                                <div style="font-size:13px; color:#666; margin-top:2px;">${room}　${car}</div>
-                                ${diffHtml}
+                                ${restorePayload ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restorePayload)})'
+                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
+                                    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; margin-left:10px;">
+                                    🔄 復元
+                                </button>` : ''}
                             </div>
-                            ${restoreData ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restoreData)})'
-                                style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
-                                padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;">
-                                🔄 復元
-                            </button>` : ''}
-                        </div>
-                    `;
+                        `;
+                    }
                     content.appendChild(card);
                 });
             } catch(e) {
-                content.innerHTML = `<div style="text-align:center;color:#e74c3c;padding:30px;font-size:13px;">読み込みエラー: ${e.message}</div>`;
+                document.getElementById('logContent').innerHTML = `<div style="text-align:center;color:#e74c3c;padding:30px;font-size:13px;">読み込みエラー: ${e.message}</div>`;
             }
         }
 
