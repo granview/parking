@@ -940,7 +940,7 @@
     <div id="logPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
         background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
         width:min(95vw,640px); max-height:80vh; z-index:10001; overflow:hidden;
-        font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif; display:flex; flex-direction:column;">
+        font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif; flex-direction:column;">
 
         <!-- Header -->
         <div style="padding:18px 20px 14px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
@@ -2220,7 +2220,6 @@
         function openLogPopup() {
             document.getElementById('logPopupOverlay').style.display = 'block';
             document.getElementById('logPopup').style.display = 'flex';
-
             const pad = n => String(n).padStart(2, '0');
             const toDateStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
