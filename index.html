@@ -1881,6 +1881,21 @@
         // Ghi log xóa lên Firebase
         function writeDeleteLog(dateKey, spotNum, spotInfo) {
             if (!navigator.onLine) return;
+            // spotInfo có thể là {status, info} hoặc chỉ là info object
+            // Normalize về đúng cấu trúc {status, info}
+            let logData;
+            if (spotInfo && spotInfo.status) {
+                logData = { status: spotInfo.status, info: spotInfo.info || {} };
+            } else if (spotInfo && (spotInfo.guestName || spotInfo.carNumber || spotInfo.roomNumber)) {
+                // dataset.info chỉ chứa phần info, không có status
+                // Lấy status từ DOM của spot hiện tại
+                const spotEl = document.getElementById(`spot-${spotNum}`);
+                const status = spotEl?.classList.contains('booked') ? 'booked'
+                             : spotEl?.classList.contains('staff')  ? 'staff' : 'booked';
+                logData = { status, info: spotInfo };
+            } else {
+                return; // ô trống, không ghi log
+            }
             try {
                 const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const pad = n => String(n).padStart(2, '0');
@@ -1890,7 +1905,7 @@
                     deleted_at: deletedAt,
                     date_key: dateKey,
                     spot_id: parseInt(spotNum),
-                    data: spotInfo || null
+                    data: logData
                 }).catch(e => console.warn('⚠️ delete_log:', e.message));
             } catch(e) {}
         }
@@ -2379,19 +2394,23 @@
         }
 
         async function restoreData(dateKey, spotNum, data) {
-            if (!data) return;
-            const confirmMsg = `🅿️ ${spotNum}番 のデータを復元しますか？\n\n${data.info?.guestName || ''} ${data.info?.roomNumber ? 'R'+data.info.roomNumber : ''}`;
-            if (!confirm(confirmMsg)) return;
+            if (!data || !data.status) return;
+            const name = data.info?.guestName || '';
+            const room = data.info?.roomNumber ? `R${data.info.roomNumber}` : '';
+            if (!confirm(`🅿️ ${spotNum}番 のデータを復元しますか？\n\n${room} ${name}`)) return;
             try {
-                await db.ref(`parking/${dateKey}/${spotNum}`).set(data);
-                // Ghi log khôi phục
+                const restorePayload = {
+                    status: data.status,
+                    info: data.info || {}
+                };
+                await db.ref(`parking/${dateKey}/${spotNum}`).set(restorePayload);
                 const nowJST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const pad = n => String(n).padStart(2, '0');
                 const logKey = `${nowJST.getFullYear()}${pad(nowJST.getMonth()+1)}${pad(nowJST.getDate())}_${pad(nowJST.getHours())}${pad(nowJST.getMinutes())}${pad(nowJST.getSeconds())}_spot${spotNum}`;
                 db.ref(`edit_log/${dateKey}/${logKey}`).set({
                     edited_at: `${nowJST.getFullYear()}/${pad(nowJST.getMonth()+1)}/${pad(nowJST.getDate())} ${pad(nowJST.getHours())}:${pad(nowJST.getMinutes())}:${pad(nowJST.getSeconds())}`,
                     date_key: dateKey, spot_id: parseInt(spotNum),
-                    before: null, after: data, note: '復元'
+                    before: null, after: restorePayload, note: '復元'
                 }).catch(()=>{});
                 showToast(`🅿️ ${spotNum}番 復元完了`);
                 closeLogPopup();
