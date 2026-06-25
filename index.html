@@ -936,25 +936,32 @@
     </div>
 
     <!-- Popup lịch sử sửa/xóa -->
-    <div id="logPopupOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:10000;" onclick="closeLogPopup()"></div>
+    <div id="logPopupOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:10000;" onclick="closeLogPopup()"></div>
     <div id="logPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-        background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
-        width:min(95vw,640px); max-height:80vh; z-index:10001; overflow:hidden;
-        font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif; flex-direction:column;">
+        background:#f0f2f5; border-radius:20px; box-shadow:0 24px 80px rgba(0,0,0,0.3);
+        width:min(96vw,560px); max-height:85vh; z-index:10001; overflow:hidden;
+        font-family:-apple-system,'Helvetica Neue',sans-serif; flex-direction:column;">
 
         <!-- Header -->
-        <div style="padding:18px 20px 14px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-            <div style="font-size:17px; font-weight:700; color:#1d1d1f;">📋 変更・削除 履歴</div>
+        <div style="padding:20px 22px 16px; background:#fff; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; border-bottom:1px solid #eee;">
+            <div>
+                <div style="font-size:19px; font-weight:800; color:#1d1d1f;">変更・削除 履歴</div>
+                <div style="font-size:12px; color:#aaa; margin-top:2px;">直近3日間の操作ログ</div>
+            </div>
             <div style="display:flex; align-items:center; gap:10px;">
-                <select id="logDateFilter" onchange="loadLogData()" style="font-size:13px; border:1px solid #ddd; border-radius:7px; padding:5px 8px; background:#f5f5f7; color:#333;">
+                <select id="logDateFilter" onchange="loadLogData()"
+                    style="font-size:14px; font-weight:600; border:1.5px solid #e0e0e0; border-radius:9px;
+                    padding:7px 10px; background:#f5f5f7; color:#333; outline:none; cursor:pointer;">
                 </select>
-                <span onclick="closeLogPopup()" style="cursor:pointer; color:#aaa; font-size:22px; line-height:1; padding:0 4px;">✕</span>
+                <div onclick="closeLogPopup()" style="cursor:pointer; width:32px; height:32px; border-radius:50%;
+                    background:#f0f0f0; display:flex; align-items:center; justify-content:center;
+                    font-size:16px; color:#666; font-weight:700;">✕</div>
             </div>
         </div>
 
         <!-- Content -->
-        <div id="logContent" style="overflow-y:auto; flex:1; padding:12px 16px;">
-            <div style="text-align:center; color:#aaa; padding:30px; font-size:14px;">読み込み中...</div>
+        <div id="logContent" style="overflow-y:auto; flex:1; padding:14px 16px; display:flex; flex-direction:column; gap:10px; user-select:text; -webkit-user-select:text;">
+            <div style="text-align:center; color:#aaa; padding:40px; font-size:15px;">読み込み中...</div>
         </div>
     </div>
 
@@ -1105,7 +1112,7 @@
 
     <!-- Popup cảnh báo ghi đè -->
     <div id="overwriteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45);
-        z-index:10000; display:none; align-items:center; justify-content:center;">
+        z-index:20000; display:none; align-items:center; justify-content:center;">
         <div style="background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.25);
             width:min(92vw,420px); overflow:hidden;
             font-family:-apple-system,'Helvetica Neue',sans-serif;">
@@ -2026,6 +2033,39 @@
             const checkOut = document.getElementById('checkOut').value; const spotNum = currentSpot.getAttribute('data-num');
             const oldInfo = currentSpot.dataset.info ? JSON.parse(currentSpot.dataset.info) : null;
 
+            // Cảnh báo khi sửa dữ liệu ngày quá khứ
+            const viewingDate = document.getElementById('parkingDate').value;
+            const parseLocal = s => { const [y,m,d] = s.replace(/\//g,'-').split('-').map(Number); return new Date(y,m-1,d); };
+            const nowForToday = new Date();
+            const pad2 = n => String(n).padStart(2,'0');
+            // Tính giờ JST bằng offset +9h
+            const jstNow = new Date(nowForToday.getTime() + 9 * 60 * 60 * 1000);
+            const todayStr = `${jstNow.getUTCFullYear()}-${pad2(jstNow.getUTCMonth()+1)}-${pad2(jstNow.getUTCDate())}`;
+            const viewingDateObj = parseLocal(viewingDate);
+            const todayObj = parseLocal(todayStr);
+            console.log('[PastDate check] viewingDate:', viewingDate, 'todayStr:', todayStr, 'isPast:', viewingDateObj < todayObj);
+            if (viewingDateObj < todayObj) {
+                const confirmed = await new Promise(resolve => {
+                    const modal   = document.getElementById('overwriteModal');
+                    const list    = document.getElementById('overwriteList');
+                    const subtitle = document.getElementById('overwriteSubtitle');
+                    const okBtn   = document.getElementById('overwriteOkBtn');
+                    const cancelBtn = document.getElementById('overwriteCancelBtn');
+                    document.getElementById('overwriteTitle').textContent = '過去のデータを変更します';
+                    subtitle.textContent = `${viewingDate} は過去の日付です。本当に変更しますか？`;
+                    list.innerHTML = `<div style="padding:10px 0; font-size:14px; color:#666;">
+                        <div>📅 対象日：<strong>${viewingDate}</strong></div>
+                        <div style="margin-top:6px; color:#e74c3c; font-size:13px;">⚠️ 過去のデータを変更すると履歴に記録されます</div>
+                    </div>`;
+                    okBtn.textContent = '変更する';
+                    modal.style.display = 'flex';
+                    const cleanup = () => { modal.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; okBtn.textContent = '上書きする'; };
+                    okBtn.onclick     = () => { cleanup(); resolve(true);  };
+                    cancelBtn.onclick = () => { cleanup(); resolve(false); };
+                });
+                if (!confirmed) return;
+            }
+
             // Cảnh báo nếu trùng số xe với ô khác trong cùng ngày
             if (carNumber) {
                 const date = document.getElementById('parkingDate').value;
@@ -2061,9 +2101,8 @@
                             const existing = snap.val();
                             if (existing && existing.info) {
                                 // Không cảnh báo nếu đang sửa chính booking này
-                                // (cùng checkIn + cùng tên khách = cùng 1 booking)
-                                const isSameBooking = existing.info.checkIn === originalCheckIn &&
-                                    existing.info.guestName === guestName;
+                                // Chỉ cần checkIn trùng = cùng 1 booking (dù tên/xe chưa điền)
+                                const isSameBooking = existing.info.checkIn === originalCheckIn;
                                 if (!isSameBooking) {
                                     overwriteDates.push({
                                         date: dk,
@@ -2105,6 +2144,25 @@
             }
             await Promise.all(savePromises);
 
+            // Xóa các ngày thừa nếu số đêm bị giảm (checkOut mới < checkOut cũ)
+            // VD: đổi từ 3 đêm → 2 đêm, cần xóa đêm thứ 3 cũ
+            if (oldInfo && oldInfo.checkOut && oldInfo.checkOut > checkOut) {
+                const parseLocal = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+                const newEnd = parseLocal(checkOut);
+                const oldEnd = parseLocal(oldInfo.checkOut);
+                const extraDeletePromises = [];
+                const cur = new Date(newEnd);
+                while (cur < oldEnd) {
+                    const dateKey = formatDateLocal(new Date(cur));
+                    extraDeletePromises.push((async (dk) => {
+                        await localApiFetch('/api/parking/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ date_key: dk, spot_id: parseInt(spotNum) }) });
+                        if (navigator.onLine) { try { await db.ref(`parking/${dk}/${spotNum}`).remove(); } catch(e) {} }
+                    })(dateKey));
+                    cur.setDate(cur.getDate() + 1);
+                }
+                if (extraDeletePromises.length > 0) await Promise.all(extraDeletePromises);
+            }
+
             // Cập nhật ngay sao đỏ trong bảng danh sách (không chờ Firebase snapshot)
             const currentDate = document.getElementById('parkingDate').value;
             const tr = document.getElementById(`table-row-${spotNum}`);
@@ -2123,7 +2181,9 @@
 
             // Ghi log sửa thông tin (chỉ ghi cho ngày đang xem)
             const newInfo = { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus };
-            writeEditLog(originalCheckIn, spotNum, oldInfo, { status: 'booked', info: newInfo });
+            writeEditLog(originalCheckIn, spotNum,
+                oldInfo ? { status: currentSpot.classList.contains('staff') ? 'staff' : 'booked', info: oldInfo } : null,
+                { status: 'booked', info: newInfo });
 
             closeGuestModal(); showToast("データを保存しました");
         }
@@ -2333,119 +2393,119 @@
 
                 content.innerHTML = '';
                 if (allEntries.length === 0) {
-                    content.innerHTML = '<div style="text-align:center;color:#aaa;padding:30px;font-size:14px;">履歴がありません</div>';
+                    content.innerHTML = '<div style="text-align:center;color:#aaa;padding:40px;font-size:16px;">履歴がありません</div>';
                     return;
                 }
 
+                const TYPE_CFG = {
+                    edit:   { label: '✏️ 修正', bg: '#1a6ddb' },
+                    delete: { label: '🗑️ 削除', bg: '#e74c3c' },
+                    move:   { label: '🔀 移動', bg: '#f39c12' }
+                };
+
                 allEntries.forEach(({ entry, type }) => {
                     const card = document.createElement('div');
-                    card.style.cssText = 'border:1px solid #f0f0f0; border-radius:10px; padding:12px 14px; margin-bottom:10px; background:#fafafa;';
+                    card.style.cssText = 'background:#fff; border-radius:14px; padding:16px 18px; box-shadow:0 1px 6px rgba(0,0,0,0.07); user-select:text; -webkit-user-select:text;';
 
-                    const TYPE_CFG = {
-                        edit:   { label: '✏️ 修正', color: '#1a6ddb' },
-                        delete: { label: '🗑️ 削除', color: '#e74c3c' },
-                        move:   { label: '🔀 移動', color: '#f39c12' }
-                    };
                     const cfg = TYPE_CFG[type];
                     const timeStr = entry.edited_at || entry.deleted_at || entry.moved_at || '';
                     const parkingDate = entry.date_key || '';
 
+                    // ── HEADER chung ──
+                    const headerHtml = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                            <span style="background:${cfg.bg}; color:#fff; font-size:12px; font-weight:800;
+                                padding:3px 10px; border-radius:20px;">${cfg.label}</span>
+                            <span style="font-size:13px; color:#aaa;">${timeStr}</span>
+                        </div>`;
+
                     if (type === 'move') {
-                        const fromSpot = entry.from_spot || '';
-                        const toSpot   = entry.to_spot   || '';
-                        const fromInfo = entry.from?.info || {};
-                        const toInfo   = entry.to?.info   || {};
+                        const fromSpot  = entry.from_spot || '';
+                        const toSpot    = entry.to_spot   || '';
+                        const fromInfo  = entry.from?.info || {};
+                        const toInfo    = entry.to?.info   || {};
                         const name = fromInfo.guestName || toInfo.guestName || '';
                         const room = fromInfo.roomNumber ? `R${fromInfo.roomNumber}` : '';
                         const car  = fromInfo.carNumber  || '';
-                        card.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-                                <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
-                                <span style="font-size:12px; color:#aaa;">${timeStr}</span>
-                                ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                        card.innerHTML = headerHtml + `
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                                <div style="background:#fee; border-radius:10px; padding:8px 14px; font-size:22px; font-weight:900; color:#e74c3c;">🅿 ${fromSpot}</div>
+                                <div style="font-size:22px; color:#ccc;">→</div>
+                                <div style="background:#efffef; border-radius:10px; padding:8px 14px; font-size:22px; font-weight:900; color:#27ae60;">🅿 ${toSpot}</div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                                <span style="background:#e74c3c; color:#fff; font-weight:800; font-size:15px; padding:2px 10px; border-radius:6px;">🅿️ ${fromSpot}</span>
-                                <span style="font-size:20px; color:#aaa;">→</span>
-                                <span style="background:#27ae60; color:#fff; font-weight:800; font-size:15px; padding:2px 10px; border-radius:6px;">🅿️ ${toSpot}</span>
-                            </div>
-                            <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
-                            <div style="font-size:13px; color:#666;">${room}　${car}</div>
-                            ${entry.to?.info?.guestName ? `<div style="font-size:12px; color:#aaa; margin-top:4px;">入れ替え先：R${entry.to.info.roomNumber || ''} ${entry.to.info.guestName}</div>` : ''}
+                            <div style="font-size:18px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                            <div style="font-size:15px; color:#666; margin-top:4px;">${room}${room && car ? '　' : ''}${car}</div>
+                            ${entry.to?.info?.guestName ? `<div style="font-size:13px; color:#aaa; margin-top:6px;">入れ替え先：${entry.to.info.roomNumber ? 'R'+entry.to.info.roomNumber : ''} ${entry.to.info.guestName}</div>` : ''}
                         `;
+
                     } else if (type === 'delete') {
-                        const info = entry.data?.info || {};
-                        const spotId = entry.spot_id || '';
-                        const name = info.guestName || '';
-                        const room = info.roomNumber ? `R${info.roomNumber}` : '';
-                        const car  = info.carNumber  || '';
+                        const info    = entry.data?.info || {};
+                        const spotId  = entry.spot_id || '';
+                        const name    = info.guestName  || '';
+                        const room    = info.roomNumber ? `R${info.roomNumber}` : '';
+                        const car     = info.carNumber  || '';
                         const restorePayload = entry.data?.status ? entry.data : null;
-                        card.innerHTML = `
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div style="flex:1;">
-                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-                                        <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
-                                        <span style="background:#555; color:#fff; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">🅿️ ${spotId}</span>
-                                        <span style="font-size:12px; color:#aaa;">${timeStr}</span>
-                                        ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                        card.innerHTML = headerHtml + `
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                        <div style="background:#fee; border-radius:10px; padding:6px 14px; font-size:22px; font-weight:900; color:#e74c3c;">🅿 ${spotId}</div>
                                     </div>
-                                    <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
-                                    <div style="font-size:13px; color:#666;">${room}　${car}</div>
+                                    <div style="font-size:18px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                                    <div style="font-size:15px; color:#666; margin-top:4px;">${room}${room && car ? '　' : ''}${car}</div>
                                 </div>
                                 ${restorePayload ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restorePayload)})'
-                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
-                                    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; margin-left:10px;">
-                                    🔄 復元
-                                </button>` : ''}
+                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:10px;
+                                    padding:10px 16px; font-size:14px; font-weight:800; cursor:pointer;">🔄 復元</button>` : ''}
                             </div>
                         `;
+
                     } else {
                         // edit
-                        const spotId    = entry.spot_id || '';
-                        const afterInfo = entry.after?.info  || {};
-                        const beforeInfo= entry.before?.info || {};
+                        const spotId     = entry.spot_id || '';
+                        const afterInfo  = entry.after?.info  || {};
+                        const beforeInfo = entry.before?.info || {};
                         const name = afterInfo.guestName || '';
                         const room = afterInfo.roomNumber ? `R${afterInfo.roomNumber}` : '';
                         const car  = afterInfo.carNumber  || '';
                         const fields = [
-                            { label: '部屋',         before: beforeInfo.roomNumber, after: afterInfo.roomNumber },
-                            { label: 'お客様名',     before: beforeInfo.guestName,  after: afterInfo.guestName  },
-                            { label: '車番',         before: beforeInfo.carNumber,  after: afterInfo.carNumber  },
-                            { label: 'チェックイン', before: beforeInfo.checkIn,    after: afterInfo.checkIn    },
-                            { label: 'チェックアウト', before: beforeInfo.checkOut, after: afterInfo.checkOut   },
-                            { label: 'メモ',         before: beforeInfo.guestNote,  after: afterInfo.guestNote  },
+                            { label: '部屋',   before: beforeInfo.roomNumber, after: afterInfo.roomNumber },
+                            { label: '氏名',   before: beforeInfo.guestName,  after: afterInfo.guestName  },
+                            { label: '車番',   before: beforeInfo.carNumber,  after: afterInfo.carNumber  },
+                            { label: 'IN',     before: beforeInfo.checkIn,    after: afterInfo.checkIn    },
+                            { label: 'OUT',    before: beforeInfo.checkOut,   after: afterInfo.checkOut   },
+                            { label: 'メモ',   before: beforeInfo.guestNote,  after: afterInfo.guestNote  },
                         ];
                         const changed = fields.filter(f => (f.before||'') !== (f.after||''));
                         let diffHtml = '';
-                        if (changed.length > 0) {
-                            diffHtml = '<div style="margin-top:6px; font-size:12px; line-height:1.9;">';
+                        if (changed.length) {
+                            diffHtml = '<div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">';
                             changed.forEach(f => {
-                                diffHtml += `<div><span style="color:#888;">${f.label}：</span>
+                                diffHtml += `<div style="display:flex; align-items:center; gap:6px; font-size:15px;">
+                                    <span style="color:#aaa; font-size:12px; font-weight:700; width:36px; flex-shrink:0;">${f.label}</span>
                                     <span style="color:#e74c3c; text-decoration:line-through;">${f.before||'ー'}</span>
-                                    <span style="color:#888; margin:0 4px;">→</span>
-                                    <span style="color:#27ae60; font-weight:600;">${f.after||'ー'}</span></div>`;
+                                    <span style="color:#bbb; font-size:12px;">→</span>
+                                    <span style="color:#27ae60; font-weight:700;">${f.after||'ー'}</span>
+                                </div>`;
                             });
                             diffHtml += '</div>';
                         }
                         const restorePayload = entry.before?.status ? entry.before : null;
-                        card.innerHTML = `
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        card.innerHTML = headerHtml + `
+                            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
                                 <div style="flex:1;">
-                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-                                        <span style="background:${cfg.color}; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px;">${cfg.label}</span>
-                                        <span style="background:#555; color:#fff; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">🅿️ ${spotId}</span>
-                                        <span style="font-size:12px; color:#aaa;">${timeStr}</span>
-                                        ${parkingDate ? `<span style="font-size:11px; color:#bbb;">🗓 ${parkingDate}</span>` : ''}
+                                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                        <div style="background:#e8f0fe; border-radius:10px; padding:6px 14px; font-size:22px; font-weight:900; color:#1a6ddb;">🅿 ${spotId}</div>
+                                        <div>
+                                            <div style="font-size:18px; font-weight:700; color:#1d1d1f;">${name || 'ー'}</div>
+                                            <div style="font-size:14px; color:#666;">${room}${room && car ? '　' : ''}${car}</div>
+                                        </div>
                                     </div>
-                                    <div style="font-size:14px; font-weight:700; color:#1d1d1f;">${name||'ー'}</div>
-                                    <div style="font-size:13px; color:#666;">${room}　${car}</div>
                                     ${diffHtml}
                                 </div>
                                 ${restorePayload ? `<button onclick='restoreData(${JSON.stringify(entry.date_key)}, ${JSON.stringify(String(spotId))}, ${JSON.stringify(restorePayload)})'
-                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:8px;
-                                    padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; margin-left:10px;">
-                                    🔄 復元
-                                </button>` : ''}
+                                    style="flex-shrink:0; background:#f39c12; color:#fff; border:none; border-radius:10px;
+                                    padding:10px 16px; font-size:14px; font-weight:800; cursor:pointer;">🔄 復元</button>` : ''}
                             </div>
                         `;
                     }
