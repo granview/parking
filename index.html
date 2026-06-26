@@ -1517,17 +1517,65 @@
             if (_currentListenerRef) { _currentListenerRef.off('value'); _currentListenerRef = null; _currentListenerDate = null; }
 
             // Danh sách ngày từ hôm nay → checkOut
+            // Parse ngày dạng YYYY-MM-DD hoặc YYYY/MM/DD theo local time (tránh lỗi UTC/JST)
+            function parseLocalDate(s) {
+                const [y,m,d] = s.replace(/\//g,'-').split('-').map(Number);
+                return new Date(y, m-1, d);
+            }
+
             function getRemainingDates(info) {
-                if (!info?.checkOut) return [date];
-                const list = [], cur = new Date(date), end = new Date(info.checkOut);
-                while (cur < end) { list.push(formatDateLocal(new Date(cur))); cur.setDate(cur.getDate()+1); }
-                return list.length ? list : [date];
+                if (!info?.checkOut) return [date.replace(/\//g,'-')];
+                const viewDate = parseLocalDate(date);
+                const end      = parseLocalDate(info.checkOut);
+                const list = [];
+                const cur  = new Date(viewDate);
+                while (cur < end) {
+                    const dk = formatDateLocal(new Date(cur));
+                    // Chỉ lấy ngày >= ngày đang xem (không đụng ngày đã qua)
+                    if (parseLocalDate(dk) >= viewDate) list.push(dk);
+                    cur.setDate(cur.getDate() + 1);
+                }
+                return list.length ? list : [formatDateLocal(viewDate)];
             }
 
             const fromDates = getRemainingDates(fromInfo);
 
-            // Bước 1: Xóa ô nguồn từ hôm nay → checkOut (song song theo từng ngày)
+            // Kiểm tra ô đích có bị ghi đè khách khác không
+            if (navigator.onLine && fromDates.length > 0) {
+                try {
+                    const overwriteDates = [];
+                    await Promise.all(fromDates.map(async (d) => {
+                        const snap = await db.ref(`parking/${d}/${toNum}`).once('value');
+                        const existing = snap.val();
+                        if (existing && existing.status && existing.info) {
+                            const isSameGuest = existing.info.checkIn === (fromInfo?.checkIn || '') &&
+                                (existing.info.carNumber === (fromInfo?.carNumber || '') || existing.info.guestName === (fromInfo?.guestName || ''));
+                            if (!isSameGuest) {
+                                overwriteDates.push({
+                                    date: d,
+                                    status: existing.status,
+                                    roomNumber: existing.info.roomNumber || '',
+                                    guestName: existing.info.guestName || ''
+                                });
+                            }
+                        }
+                    }));
+                    if (overwriteDates.length > 0) {
+                        overwriteDates.sort((a, b) => a.date.localeCompare(b.date));
+                        const confirmed = await showOverwriteConfirm(toNum, overwriteDates);
+                        if (!confirmed) {
+                            // Khôi phục listener rồi thoát
+                            loadParking(document.getElementById('parkingDate').value);
+                            return;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            // Bước 1: Xóa ô nguồn từ ngày đang xem → checkOut (không đụng ngày đã qua)
+            const viewDateObj = parseLocalDate(date);
             await Promise.all(fromDates.map(async (d) => {
+                if (parseLocalDate(d) < viewDateObj) return; // bỏ qua ngày đã qua
                 await localApiFetch('/api/parking/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(fromNum) }) });
                 if (navigator.onLine) { try { await db.ref(`parking/${d}/${fromNum}`).remove(); } catch(e) {} }
             }));
@@ -1546,7 +1594,9 @@
             }
 
             // Bước 3: Lưu ô nguồn → ô đích cho TẤT CẢ ngày còn lại (song song theo từng ngày)
+            // Guard: chỉ ghi vào ngày >= ngày đang xem, không bao giờ đụng ngày đã qua
             await Promise.all(fromDates.map(async (d) => {
+                if (parseLocalDate(d) < viewDateObj) return; // bỏ qua ngày đã qua
                 await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo }) });
                 if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {} }
             }));
