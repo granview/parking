@@ -1595,10 +1595,16 @@
 
             // Bước 3: Lưu ô nguồn → ô đích cho TẤT CẢ ngày còn lại (song song theo từng ngày)
             // Guard: chỉ ghi vào ngày >= ngày đang xem, không bao giờ đụng ngày đã qua
+            // Cập nhật createdTime = thời điểm thực hiện move (để history filter theo giờ chính xác)
+            const nowMove = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+            const movePad = n => String(n).padStart(2,'0');
+            const moveHHMM = `${movePad(nowMove.getHours())}:${movePad(nowMove.getMinutes())}`;
+            const fromInfoMoved = { ...fromInfo, createdTime: moveHHMM };
+
             await Promise.all(fromDates.map(async (d) => {
                 if (parseLocalDate(d) < viewDateObj) return; // bỏ qua ngày đã qua
-                await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum), status: fromStatus, info: fromInfo }) });
-                if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfo }); } catch(e) {} }
+                await localApiFetch('/api/parking/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ date_key: d, spot_id: parseInt(toNum), status: fromStatus, info: fromInfoMoved }) });
+                if (navigator.onLine) { try { await db.ref(`parking/${d}/${toNum}`).set({ status: fromStatus, info: fromInfoMoved }); } catch(e) {} }
             }));
 
             // Ghi log di chuyển
@@ -2183,11 +2189,14 @@
             for (let i = 0; i < stayDays; i++) {
                 const targetDate = new Date(originalCheckIn); targetDate.setDate(targetDate.getDate() + i);
                 const dateKey = formatDateLocal(targetDate);
-                const now = new Date();
+                const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                // Ngày đầu (checkIn): giữ createdTime cũ nếu đây là chỉnh sửa (oldInfo tồn tại)
+                // Ngày tiếp theo hoặc lần đầu nhập: dùng giờ hiện tại
+                const createdTime = (i === 0 && oldInfo && oldInfo.createdTime) ? oldInfo.createdTime : hhmm;
                 const payload = {
                     date_key: dateKey, spot_id: parseInt(spotNum), status: 'booked',
-                    info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus, createdTime: hhmm }
+                    info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus, createdTime }
                 };
                 savePromises.push(localApiFetch('/api/parking/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }));
                 if (navigator.onLine) { savePromises.push(db.ref(`parking/${dateKey}/${spotNum}`).set({ status: 'booked', info: payload.info }).catch(e => {})); }
