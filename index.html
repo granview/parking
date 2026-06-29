@@ -2186,14 +2186,19 @@
             }
 
             const savePromises = [];
+            // Ngày đang xem (viewing date) — chỉ lưu từ đây trở đi để không ghi đè ngày đã qua
+            const viewingDateForSave = document.getElementById('parkingDate').value.replace(/\//g, '-');
             for (let i = 0; i < stayDays; i++) {
                 const targetDate = new Date(originalCheckIn); targetDate.setDate(targetDate.getDate() + i);
                 const dateKey = formatDateLocal(targetDate);
+                // Bỏ qua ngày trước ngày đang xem — ngày đó có thể ở ô khác (do đã move)
+                if (dateKey < viewingDateForSave) continue;
                 const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
                 const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-                // Ngày đầu (checkIn): giữ createdTime cũ nếu đây là chỉnh sửa (oldInfo tồn tại)
+                // Ngày đầu trong phạm vi lưu: giữ createdTime cũ nếu đây là chỉnh sửa (oldInfo tồn tại)
                 // Ngày tiếp theo hoặc lần đầu nhập: dùng giờ hiện tại
-                const createdTime = (i === 0 && oldInfo && oldInfo.createdTime) ? oldInfo.createdTime : hhmm;
+                const isFirstSaveDay = (dateKey === viewingDateForSave);
+                const createdTime = (isFirstSaveDay && oldInfo && oldInfo.createdTime) ? oldInfo.createdTime : hhmm;
                 const payload = {
                     date_key: dateKey, spot_id: parseInt(spotNum), status: 'booked',
                     info: { roomNumber, guestName, carNumber, guestNote, checkIn: originalCheckIn, checkOut, stayDays, seisanStatus: modalSeisanStatus, createdTime }
